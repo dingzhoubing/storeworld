@@ -8,10 +8,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.widgets.Text;
 
 public class testWindow2 {
 
 	protected Shell shell;
+	private Text text;
 
 	/**
 	 * Launch the application.
@@ -48,16 +53,27 @@ public class testWindow2 {
 		shell = new Shell();
 		shell.setSize(450, 300);
 		shell.setText("SWT Application");
-		shell.setLayout(new RowLayout(SWT.HORIZONTAL));
-		
-		Button btnNewButton = new Button(shell, SWT.NONE);
-		btnNewButton.setText("New Button");
-		
-		Composite composite = new Composite(shell, SWT.NONE);
-		composite.setLayoutData(new RowData(62, 30));
+		shell.setLayout(null);
 		
 		Menu menu = new Menu(shell, SWT.BAR);
 		shell.setMenuBar(menu);
+		
+		Button btnNewButton = new Button(shell, SWT.NONE);
+		btnNewButton.setBounds(153, 39, 60, 27);
+		btnNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				text.setText("100");
+			}
+		});
+		btnNewButton.setText("½ø»õ");
+		
+		CLabel label = new CLabel(shell, SWT.NONE);
+		label.setBounds(33, 39, 30, 23);
+		label.setText("\u6570\u91CF");
+		
+		text = new Text(shell, SWT.BORDER);
+		text.setBounds(69, 39, 73, 23);
 
 	}
 }

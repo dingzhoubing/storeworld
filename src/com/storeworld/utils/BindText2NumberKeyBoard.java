@@ -1,11 +1,11 @@
-package utils;
+package com.storeworld.utils;
 
 import java.util.ArrayList;
 
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import softwarekeyboard.ShowKeyBoardAdapter;
+import com.storeworld.softwarekeyboard.ShowKeyBoardAdapter;
 
 public class BindText2NumberKeyBoard {
 

@@ -1,4 +1,4 @@
-package softwarekeyboard;
+package com.storeworld.softwarekeyboard;
 
 import java.awt.Toolkit;
 import java.util.ArrayList;
@@ -9,19 +9,21 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import utils.BindText2NumberKeyBoard;
+import com.storeworld.utils.BindText2NumberKeyBoard;
 
 public class TestKeyBoard extends Shell {
 	private Text text;
 	public static TestKeyBoard shell;
 	private Text text_1;
 	private Text text_3;
+	private static int screenH = 0;
+	private static int screenW = 0;
+	
 	private static ArrayList<Text> texts = new ArrayList<Text>();
 
 	public static void center(Shell shell) {
 		
-		int screenH = Toolkit.getDefaultToolkit().getScreenSize().height;
-		int screenW = Toolkit.getDefaultToolkit().getScreenSize().width;
+		
 
 		int shellH = shell.getBounds().height;
 		int shellW = shell.getBounds().width;
@@ -41,9 +43,11 @@ public class TestKeyBoard extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
+			screenH = Toolkit.getDefaultToolkit().getScreenSize().height;
+			screenW = Toolkit.getDefaultToolkit().getScreenSize().width;
 			Display display = Display.getDefault();
 			shell = new TestKeyBoard(display);
-			shell.setSize(800, 600);
+			shell.setSize((int)(screenW*0.85), (int)(screenH*0.85));
 			BindText2NumberKeyBoard.bindTextKeyboard(texts, shell);
 			center(shell);
 //			shell.setFocus();

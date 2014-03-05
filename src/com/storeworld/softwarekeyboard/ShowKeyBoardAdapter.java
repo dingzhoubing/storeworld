@@ -1,4 +1,4 @@
-package softwarekeyboard;
+package com.storeworld.softwarekeyboard;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;

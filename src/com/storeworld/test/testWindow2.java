@@ -1,4 +1,4 @@
-package ui.storeworld;
+package com.storeworld.test;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;

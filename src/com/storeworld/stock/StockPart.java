@@ -1,8 +1,9 @@
 package com.storeworld.stock;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -10,6 +11,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.mainui.MainUITest;
 import com.storeworld.mainui.NorthPart;
 
 public class StockPart extends NorthPart{
@@ -32,6 +34,14 @@ public class StockPart extends NorthPart{
 		label_index.setAlignment(SWT.CENTER);
 		label_index.setBounds(30, 70, 45, 17);
 		label_index.setText("\u9996\u9875");
+		button_index.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				display.dispose();
+				String[] args = null;
+				MainUITest.main(args);
+			}
+		});
 		
 		Button button_in = new Button(this, SWT.NONE);
 		button_in.setBounds(100, 20, 45, 45);

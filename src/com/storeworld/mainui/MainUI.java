@@ -38,11 +38,15 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 
 	// window button
 	private Composite closeButton;
-
+	private Composite minButton;
+	
 	// icon
 	private Image closeImage;
 	private Image closeOverImage;
 	private Image closeDownImage;
+	private Image minImage;
+	private Image minOverImage;
+	private Image minDownImage;
 
 	// color
 //	private Color color1 = new Color(getDisplay(), 255, 255, 254);//254
@@ -70,25 +74,31 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	}
 
 	public void initialClose_Min(HashMap<String, String> close_min){
+		closeButton = new Composite(this, SWT.NONE);
+		minButton = new Composite(this, SWT.NONE);
 		if(close_min == null){//default
 		// close button and min button
-		closeButton = new Composite(this, SWT.NONE);
 		closeImage = new Image(getDisplay(), "icon/close.png");
 		closeOverImage = new Image(getDisplay(), "icon/closeover.png");
 		closeDownImage = new Image(getDisplay(), "icon/closedown.png");
-		closeButton.setBackgroundImage(closeImage);
+		minImage = new Image(getDisplay(), "icon/min.png");
+		minOverImage = new Image(getDisplay(), "icon/minover.png");
+		minDownImage = new Image(getDisplay(), "icon/mindown.png");
 		}else{
-			closeButton = new Composite(this, SWT.NONE);
 			try {
 				closeImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_IMAGE));
 				closeOverImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_OVER_IMAGE));
 				closeDownImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_DOWN_IMAGE));
+				minImage = new Image(getDisplay(), close_min.get(Constants.MIN_IMAGE));
+				minOverImage = new Image(getDisplay(), close_min.get(Constants.MIN_OVER_IMAGE));
+				minDownImage = new Image(getDisplay(), close_min.get(Constants.MIN_DOWN_IMAGE));
 			} catch (Exception e) {
 				System.out.println("hashmap key is null");
 				e.printStackTrace();
 			}
-			closeButton.setBackgroundImage(closeImage);
 		}
+		closeButton.setBackgroundImage(closeImage);
+		minButton.setBackgroundImage(minImage);
 	}
 	public void initial(NorthWestPart northwestpart,
 			NorthEastPart northeastpart, NorthPart northpart,
@@ -157,9 +167,11 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		southeastpart.addMouseListener(this);// resize, disable now
 		southeastpart.addMouseMoveListener(this);// resize, disable now
 
-
+		
 		closeButton.addMouseListener(this);
 		closeButton.addMouseTrackListener(this);
+		minButton.addMouseListener(this);
+		minButton.addMouseTrackListener(this);
 
 	}
 
@@ -180,10 +192,13 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		closeButton.setBounds(w - northeastpart.getImage().getBounds().width
 				- closeImage.getBounds().width, 0,
 				closeImage.getBounds().width, closeImage.getBounds().height);
+		minButton.setBounds(w - northeastpart.getImage().getBounds().width
+				- closeImage.getBounds().width- minImage.getBounds().width, 0,
+				minImage.getBounds().width, minImage.getBounds().height);
 		northpart.setBounds(northwestpart.getImage().getBounds().width, 0,
 				w - northwestpart.getImage().getBounds().width
 						- northeastpart.getImage().getBounds().width
-						- closeImage.getBounds().width, northpart.getImage()
+						- closeImage.getBounds().width- minImage.getBounds().width, northpart.getImage()
 						.getBounds().height);
 		southwestpart.setBounds(0, h
 				- southwestpart.getImage().getBounds().height, southwestpart
@@ -282,6 +297,8 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			// size = new Point(e.x, e.y);
 		} else if (e.getSource() == closeButton) {
 			closeButton.setBackgroundImage(closeDownImage);
+		}else if(e.getSource() == minButton){
+			minButton.setBackgroundImage(minDownImage);
 		}
 	}
 
@@ -303,6 +320,14 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			} else {
 				closeButton.setBackgroundImage(closeImage);
 			}
+		}else if (e.getSource() == minButton) {
+			if (e.x > 0 && e.x < minButton.getSize().x && e.y > 0
+					&& e.y < minButton.getSize().y) {
+				minButton.setBackgroundImage(minOverImage);
+				this.setMinimized(true);
+			} else {
+				minButton.setBackgroundImage(minImage);
+			}
 		}
 	}
 
@@ -318,12 +343,16 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	public void mouseEnter(MouseEvent e) {
 		if (e.getSource() == closeButton) {
 			closeButton.setBackgroundImage(closeOverImage);
+		}else if(e.getSource() == minButton){
+			minButton.setBackgroundImage(minOverImage);
 		}
 	}
 
 	public void mouseExit(MouseEvent e) {
 		if (e.getSource() == closeButton) {
 			closeButton.setBackgroundImage(closeImage);
+		}else if (e.getSource() == minButton) {
+			minButton.setBackgroundImage(minImage);
 		}
 	}
 
@@ -346,6 +375,10 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			
 			closeImage.dispose();
 			closeOverImage.dispose();
+			closeDownImage.dispose();
+			minImage.dispose();
+			minOverImage.dispose();
+			minDownImage.dispose();
 			//color1.dispose();
 			// color2.dispose();
 			// titleColor.dispose();

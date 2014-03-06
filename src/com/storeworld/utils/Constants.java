@@ -17,5 +17,9 @@ public class Constants {
 	public static final String CLOSE_OVER_IMAGE = "closeOverImage";
 	public static final String CLOSE_DOWN_IMAGE = "closeDownImage";
 	
+	public static final String MIN_IMAGE = "minImage";
+	public static final String MIN_OVER_IMAGE = "minOverImage";
+	public static final String MIN_DOWN_IMAGE = "minDownImage";
+	
 
 }

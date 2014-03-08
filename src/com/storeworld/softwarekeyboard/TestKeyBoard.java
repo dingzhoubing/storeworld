@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.storeworld.utils.BindText2NumberKeyBoard;
+import com.storeworld.utils.Utils;
 
 public class TestKeyBoard extends Shell {
 	private Text text;
@@ -48,7 +48,7 @@ public class TestKeyBoard extends Shell {
 			Display display = Display.getDefault();
 			shell = new TestKeyBoard(display);
 			shell.setSize((int)(screenW*0.85), (int)(screenH*0.85));
-			BindText2NumberKeyBoard.bindTextKeyboard(texts, shell);
+			Utils.bindTextKeyboard(texts, shell);
 			center(shell);
 //			shell.setFocus();
 			shell.open();

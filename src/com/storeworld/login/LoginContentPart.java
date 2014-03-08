@@ -92,7 +92,7 @@ public class LoginContentPart extends ContentPart{
 		button_0.setBounds(255, 365, 50, 50);
 		button_0.setText("0");
 		
-		this.setBackgroundColor(SWTResourceManager.getColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+		this.setBackgroundColor(new Color(getDisplay(), 63, 63, 63));
 						
 	}
 	

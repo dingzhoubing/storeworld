@@ -1,8 +1,7 @@
 package com.storeworld.mainui;
 
-import java.util.HashMap;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -11,6 +10,8 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -22,6 +23,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.storeworld.utils.Constants;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.NORTH_TYPE;
+import com.storeworld.utils.Utils;
 
 public class MainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {
@@ -40,6 +44,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	private Composite closeButton;
 	private Composite minButton;
 	
+	private Composite up;//for move
 	// icon
 	private Image closeImage;
 	private Image closeOverImage;
@@ -48,125 +53,272 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	private Image minOverImage;
 	private Image minDownImage;
 
-	// color
-//	private Color color1 = new Color(getDisplay(), 255, 255, 254);//254
-	// private Color color2 = new Color(getDisplay(), 204, 220, 247);
-	// private Color titleColor = new Color(getDisplay(), 128, 128, 128);
-	//
 	private Point location;
+	private StackLayout northLayout;
+	private StackLayout contentLayout;
+	
+	private double ratio = 0.0;//the percent of the northpart
 
-	// private Point size;
-
-	public MainUI(Display display) {
+	//one instance in the system
+	private static MainUI instance = null; 
+	private MainUI(Display display) {
 		super(display, SWT.NO_TRIM);
+		northLayout = new StackLayout();
+		contentLayout = new StackLayout();
+	}
+	
+	public static MainUI getMainUI_Instance(Display display){
+		if (instance == null) {
+			instance = new MainUI(display);
+	       }
+	       return instance;
+	}
+	
+	public void setRatio(double rat){
+		if(rat < 0)
+			rat = 0.0;
+		this.ratio = rat;
+	}
+	public double getRatio(){
+		return this.ratio;
 	}
 
-	public void setup(NorthWestPart northwestpart,
-			NorthEastPart northeastpart, NorthPart northpart,
-			SouthWestPart southwestpart, SouthEastPart southeastpart,
-			SouthPart southpart, WestPart westpart, EastPart eastpart,
-			ContentPart contentpart, HashMap<String, String> close_min){
-		initial(northwestpart, northeastpart, northpart, southwestpart,
-				southeastpart, southpart, westpart, eastpart, contentpart);
-		initialClose_Min(close_min);
+	//we may need to get/set all the nine parts of the UI, but mainly, we need
+	//these two parts(contentpart & northpart)
+	public void setContentPart(ContentPart contentpart, CONTENT_TYPE type){
+//		this.contentpart = contentpart;
+		Utils.setContentPartComposite(contentpart, type);
+	}
+	public Composite getContentPart(CONTENT_TYPE type){
+		return Utils.getContentPartComposites(type);
+	}
+	public void setNorthPart(NorthPart northpart, NORTH_TYPE type){
+//		this.northpart = northpart;
+		Utils.setNorthPartComposite(northpart, type);
+		
+	}
+	public Composite getNorthPart(NORTH_TYPE type){
+		Composite comp = Utils.getNorthPartComposites(type);
+		return comp;
+	}
+	
+	
+	public void show_North_index(){
+		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
+		northpart.layout();
+		
+	} 
+	
+	public void show_Content_main(){
+		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_MAIN);
+		contentpart.layout();
+	}
+	public void show_Content_stock(){
+		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_STOCK);
+		contentpart.layout();
+	}
+	public void show_Content_deliver(){
+		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_DELIVER);
+		contentpart.layout();
+	}
+	public void show_Content_customer(){
+		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_CUSTOMER);
+		contentpart.layout();
+	}
+	public void show_Content_product(){
+		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_PRODUCT);
+		contentpart.layout();
+	}
+		
+	
+	public void setup(){
+		initialClose_Min();
 		createContents();
 		addControlListener(this);
 	}
 
-	public void initialClose_Min(HashMap<String, String> close_min){
+	public void initialClose_Min(){//HashMap<String, String> close_min
 		closeButton = new Composite(this, SWT.NONE);
 		minButton = new Composite(this, SWT.NONE);
-		if(close_min == null){//default
-		// close button and min button
 		closeImage = new Image(getDisplay(), "icon/close.png");
 		closeOverImage = new Image(getDisplay(), "icon/closeover.png");
 		closeDownImage = new Image(getDisplay(), "icon/closedown.png");
 		minImage = new Image(getDisplay(), "icon/min.png");
 		minOverImage = new Image(getDisplay(), "icon/minover.png");
 		minDownImage = new Image(getDisplay(), "icon/mindown.png");
-		}else{
-			try {
-				closeImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_IMAGE));
-				closeOverImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_OVER_IMAGE));
-				closeDownImage = new Image(getDisplay(), close_min.get(Constants.CLOSE_DOWN_IMAGE));
-				minImage = new Image(getDisplay(), close_min.get(Constants.MIN_IMAGE));
-				minOverImage = new Image(getDisplay(), close_min.get(Constants.MIN_OVER_IMAGE));
-				minDownImage = new Image(getDisplay(), close_min.get(Constants.MIN_DOWN_IMAGE));
-			} catch (Exception e) {
-				System.out.println("hashmap key is null");
-				e.printStackTrace();
-			}
-		}
 		closeButton.setBackgroundImage(closeImage);
 		minButton.setBackgroundImage(minImage);
 	}
-	public void initial(NorthWestPart northwestpart,
-			NorthEastPart northeastpart, NorthPart northpart,
-			SouthWestPart southwestpart, SouthEastPart southeastpart,
-			SouthPart southpart, WestPart westpart, EastPart eastpart,
-			ContentPart contentpart) {
-		if (northwestpart != null) {
-			this.northwestpart = northwestpart;
-		}
-		if (northeastpart != null) {
-			this.northeastpart = northeastpart;
-		}
-		if (northpart != null) {
-			this.northpart = northpart;
-		}
-		if (southwestpart != null) {
-			this.southwestpart = southwestpart;
-		}
-		if (southeastpart != null) {
-			this.southeastpart = southeastpart;
-		}
-		if (southpart != null) {
-			this.southpart = southpart;
-		}
-		if (westpart != null) {
-			this.westpart = westpart;
-		}
-		if (eastpart != null) {
-			this.eastpart = eastpart;
-		}
-		if (contentpart != null) {
-			this.contentpart = contentpart;
-		}
-	}
+	//give a way to initial all the parts 
+//	public void initial(NorthWestPart northwestpart,
+//			NorthEastPart northeastpart, NorthPart northpart,
+//			SouthWestPart southwestpart, SouthEastPart southeastpart,
+//			SouthPart southpart, WestPart westpart, EastPart eastpart,
+//			ContentPart contentpart) {
+//		if (northwestpart != null) {
+//			this.northwestpart = northwestpart;
+//		}
+//		if (northeastpart != null) {
+//			this.northeastpart = northeastpart;
+//		}
+//		if (northpart != null) {
+//			this.northpart = northpart;
+//		}
+//		if (southwestpart != null) {
+//			this.southwestpart = southwestpart;
+//		}
+//		if (southeastpart != null) {
+//			this.southeastpart = southeastpart;
+//		}
+//		if (southpart != null) {
+//			this.southpart = southpart;
+//		}
+//		if (westpart != null) {
+//			this.westpart = westpart;
+//		}
+//		if (eastpart != null) {
+//			this.eastpart = eastpart;
+//		}
+//		if (contentpart != null) {
+//			this.contentpart = contentpart;
+//		}
+//	}
 
 	/**
 	 * Create contents of the window
+	 * at initial, all parts are by default
+	 * 
 	 */
 	private void createContents() {
+		int w = getSize().x;
+		int h = getSize().y;
+//		System.out.println(w+ ":" +h+ "wh");
 		// cut the whole shell into nine piece
-		if (northwestpart == null)
+		if (northwestpart == null){
 			northwestpart = new NorthWestPart(this, SWT.NONE, null);
-		if (northeastpart == null)
+			northwestpart.setBounds(0, 0,
+					northwestpart.getImage().getBounds().width, northwestpart
+							.getImage().getBounds().height);
+		}
+		if (northeastpart == null){
 			northeastpart = new NorthEastPart(this, SWT.NONE, null);
-		if (northpart == null)
+			northeastpart.setBounds(w - northeastpart.getImage().getBounds().width,
+					0, northeastpart.getImage().getBounds().width, northeastpart
+							.getImage().getBounds().height);
+		}
+		//use the up part to control movable
+		up = new Composite(this, SWT.NONE);
+		Image image_up = new Image(getDisplay(), "icon/up.png");
+		up.setBackgroundImage(image_up);
+		up.setCursor(new Cursor(getDisplay(),SWT.CURSOR_SIZEALL));
+		up.setBounds(northwestpart.getImage().getBounds().width,
+						0,
+						w - northwestpart.getImage().getBounds().width
+								- northeastpart.getImage().getBounds().width
+								- closeImage.getBounds().width
+								- minImage.getBounds().width, image_up
+								.getBounds().height);
+		closeButton.setBounds(w - northeastpart.getImage().getBounds().width
+				- closeImage.getBounds().width, 0,
+				closeImage.getBounds().width, closeImage.getBounds().height);
+		minButton.setBounds(w - northeastpart.getImage().getBounds().width
+				- closeImage.getBounds().width- minImage.getBounds().width, 0,
+				minImage.getBounds().width, minImage.getBounds().height);
+		if (northpart == null){
 			northpart = new NorthPart(this, SWT.NONE, null);
-		if (southwestpart == null)
+			if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+				northpart.setBounds(
+						northwestpart.getImage().getBounds().width,
+						0,
+						w - northwestpart.getImage().getBounds().width
+								- northeastpart.getImage().getBounds().width
+								- closeImage.getBounds().width
+								- minImage.getBounds().width, 0);
+			}else{
+				northpart.setBounds(
+						northwestpart.getImage().getBounds().width,
+						northpart.getImage().getBounds().height,
+						w - northwestpart.getImage().getBounds().width
+								- northeastpart.getImage().getBounds().width
+								- closeImage.getBounds().width
+								- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
+//				System.out.println(northpart.getBounds().toString()+" northpart");
+			}
+			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
+			northpart.setLayout(northLayout);
+		}
+		if (southwestpart == null){
 			southwestpart = new SouthWestPart(this, SWT.NONE, null);
-		if (southeastpart == null)
+			southwestpart.setBounds(0, h
+					- southwestpart.getImage().getBounds().height, southwestpart
+					.getImage().getBounds().width, southwestpart.getImage()
+					.getBounds().height);
+		}
+		if (southeastpart == null){
 			southeastpart = new SouthEastPart(this, SWT.NONE, null);
-		if (southpart == null)
+			southeastpart.setBounds(w - southeastpart.getImage().getBounds().width,
+					h - southeastpart.getImage().getBounds().height, southeastpart
+							.getImage().getBounds().width, southeastpart.getImage()
+							.getBounds().height);
+		}
+		if (southpart == null){
 			southpart = new SouthPart(this, SWT.NONE, null);
-		if (westpart == null)
+			southpart.setBounds(southwestpart.getImage().getBounds().width, h
+					- southpart.getImage().getBounds().height, w
+					- southwestpart.getImage().getBounds().width
+					- southwestpart.getImage().getBounds().width, southpart
+					.getImage().getBounds().height);
+		}
+		if (westpart == null){
 			westpart = new WestPart(this, SWT.NONE, null);
-		if (eastpart == null)
+			westpart.setBounds(0, northwestpart.getImage().getBounds().height,
+					westpart.getImage().getBounds().width, h
+							- northwestpart.getImage().getBounds().height
+							- southwestpart.getImage().getBounds().height);
+		}
+		if (eastpart == null){
 			eastpart = new EastPart(this, SWT.NONE, null);
+			eastpart.setBounds(w - eastpart.getImage().getBounds().width,
+					northeastpart.getImage().getBounds().height, eastpart
+							.getImage().getBounds().width, h
+							- northeastpart.getImage().getBounds().height
+							- southeastpart.getImage().getBounds().height);
+		}
 		//by default, set the color into dark_shadow
-		if (contentpart == null)
+		if (contentpart == null){
 			contentpart = new ContentPart(this, SWT.NONE, null);
-
+			if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+				contentpart.setBounds(westpart.getImage().getBounds().width,
+						northpart.getImage().getBounds().height, w
+								- westpart.getImage().getBounds().width
+								- eastpart.getImage().getBounds().width, h
+								- northpart.getImage().getBounds().height
+								- southpart.getImage().getBounds().height);
+			} else {
+				contentpart.setBounds(westpart.getImage().getBounds().width,
+						(int)(h * this.ratio), w
+								- westpart.getImage().getBounds().width
+								- eastpart.getImage().getBounds().width, h
+								- (int)(h * this.ratio)
+								- southpart.getImage().getBounds().height);		
+//				System.out.println(contentpart.getBounds().toString()+" contentpart");
+			}
+			Utils.setContentPartComposite(contentpart, CONTENT_TYPE.CONTENT_BOTTOM);
+			contentpart.setLayout(contentLayout);
+		}
+		
+		//set the background color
+		this.setBackground(new Color(getDisplay(), 63,63,63));
 		// add listener as you want here for each part
 		contentpart.addPaintListener(this);
-		northpart.addMouseListener(this);
-		northpart.addMouseMoveListener(this);
-		northpart.addPaintListener(this);
+//		northpart.addMouseListener(this);
+//		northpart.addMouseMoveListener(this);
+//		northpart.addPaintListener(this);
+		up.addMouseListener(this);
+		up.addMouseMoveListener(this);
+		up.addPaintListener(this);
 		southeastpart.addMouseListener(this);// resize, disable now
 		southeastpart.addMouseMoveListener(this);// resize, disable now
-
 		
 		closeButton.addMouseListener(this);
 		closeButton.addMouseTrackListener(this);
@@ -179,9 +331,11 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 
 	}
 
+	//there is no resize any more, but still show the framwork
 	public void controlResized(ControlEvent e) {
 		int w = getSize().x;
 		int h = getSize().y;
+		/*
 		northwestpart.setBounds(0, 0,
 				northwestpart.getImage().getBounds().width, northwestpart
 						.getImage().getBounds().height);
@@ -195,11 +349,25 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		minButton.setBounds(w - northeastpart.getImage().getBounds().width
 				- closeImage.getBounds().width- minImage.getBounds().width, 0,
 				minImage.getBounds().width, minImage.getBounds().height);
-		northpart.setBounds(northwestpart.getImage().getBounds().width, 0,
-				w - northwestpart.getImage().getBounds().width
-						- northeastpart.getImage().getBounds().width
-						- closeImage.getBounds().width- minImage.getBounds().width, northpart.getImage()
-						.getBounds().height);
+//		if not set the ratio, by default
+		if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+			northpart.setBounds(
+					northwestpart.getImage().getBounds().width,
+					0,
+					w - northwestpart.getImage().getBounds().width
+							- northeastpart.getImage().getBounds().width
+							- closeImage.getBounds().width
+							- minImage.getBounds().width, northpart.getImage()
+							.getBounds().height);
+		}else{
+			northpart.setBounds(
+					northwestpart.getImage().getBounds().width,
+					0,
+					w - northwestpart.getImage().getBounds().width
+							- northeastpart.getImage().getBounds().width
+							- closeImage.getBounds().width
+							- minImage.getBounds().width, (int)(h * this.ratio));
+		}
 		southwestpart.setBounds(0, h
 				- southwestpart.getImage().getBounds().height, southwestpart
 				.getImage().getBounds().width, southwestpart.getImage()
@@ -222,12 +390,24 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 						.getImage().getBounds().width, h
 						- northeastpart.getImage().getBounds().height
 						- southeastpart.getImage().getBounds().height);
-		contentpart.setBounds(westpart.getImage().getBounds().width, northpart
-				.getImage().getBounds().height, w
-				- westpart.getImage().getBounds().width
-				- eastpart.getImage().getBounds().width, h
-				- northpart.getImage().getBounds().height
-				- southpart.getImage().getBounds().height);
+//		by default
+		if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+			contentpart.setBounds(westpart.getImage().getBounds().width,
+					northpart.getImage().getBounds().height, w
+							- westpart.getImage().getBounds().width
+							- eastpart.getImage().getBounds().width, h
+							- northpart.getImage().getBounds().height
+							- southpart.getImage().getBounds().height);
+		} else {
+			contentpart.setBounds(westpart.getImage().getBounds().width,
+					(int)(h * this.ratio), w
+							- westpart.getImage().getBounds().width
+							- eastpart.getImage().getBounds().width, h
+							- (int)(h * this.ratio)
+							- southpart.getImage().getBounds().height);			
+		}
+		*/
+//		System.out.println(contentpart.getBounds().x);
 		// region
 		Region oldRegion = getRegion();
 		if (oldRegion != null && !oldRegion.isDisposed()) {
@@ -252,10 +432,10 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	public void paintControl(PaintEvent e) {
 		GC gc = e.gc;
 		if (e.getSource() == contentpart) {
-//			gc.setBackground(color1);
+			//gc.setBackground(color1);
 			// gc.setForeground(color2);
 			// gc.fillGradientRectangle(0, 0, e.width, e.height, true);
-		} else if (e.getSource() == northpart) {
+		} else if (e.getSource() == up) {
 			// String text = getText();
 			// if (text != null) {
 			// gc.setForeground(titleColor);
@@ -287,7 +467,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	}
 
 	public void mouseDown(MouseEvent e) {
-		if (e.getSource() == northpart) {
+		if (e.getSource() == up) {
 			// make the main UI movable
 			if (!getMaximized()) {
 				location = new Point(e.x, e.y);
@@ -303,7 +483,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	}
 
 	public void mouseUp(MouseEvent e) {
-		if (e.getSource() == northpart) {
+		if (e.getSource() == up) {
 			location = null;
 		} else if (e.getSource() == southeastpart) {
 			// if (size == null) {
@@ -332,7 +512,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	}
 
 	public void mouseMove(MouseEvent e) {
-		if (e.getSource() == northpart) {
+		if (e.getSource() == up) {
 			if (location != null) {
 				Point p = getDisplay().map(this, null, e.x, e.y);
 				setLocation(p.x - location.x, p.y - location.y);
@@ -359,19 +539,23 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	public void mouseHover(MouseEvent e) {
 
 	}
-
 	@Override
 	public void dispose() {
 		try {
 			northwestpart.dispose();
-			northeastpart.dispose();
-			northpart.dispose();
+			northeastpart.dispose();			
 			southwestpart.dispose();
 			southeastpart.dispose();
 			southpart.dispose();
 			westpart.dispose();
 			eastpart.dispose();
-			contentpart.dispose();
+			if(up != null)
+				up.dispose();
+			//check it, and maybe we need to check all
+			if(northpart != null)
+				northpart.dispose();
+			if(contentpart != null)
+				contentpart.dispose();
 			
 			closeImage.dispose();
 			closeOverImage.dispose();
@@ -379,9 +563,6 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			minImage.dispose();
 			minOverImage.dispose();
 			minDownImage.dispose();
-			//color1.dispose();
-			// color2.dispose();
-			// titleColor.dispose();
 		} finally {
 			super.dispose();
 		}

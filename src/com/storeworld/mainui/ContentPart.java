@@ -21,7 +21,8 @@ public class ContentPart extends UIComposite {
 			//image = new Image(getDisplay(), "icon/northwest.png");
 		}else{
 			setImage(image);
-		}		
+		}
+		setBackgroundColor(new Color(parent.getDisplay(), 63, 63, 63));
 	}	
 		
 }

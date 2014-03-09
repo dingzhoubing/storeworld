@@ -14,7 +14,7 @@ import com.storeworld.utils.Utils;
 //can make this one instance in the sysytem
 public class EntryPoint {
 
-	public static void main(String[] args) {
+	public static void entry() {
 		try {
 			
 			int screenH =(int)(Constants.SCREEN_HEIGHT * 0.85);
@@ -42,6 +42,9 @@ public class EntryPoint {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public static void main(String [] args){
+		entry();
 	}
 
 }

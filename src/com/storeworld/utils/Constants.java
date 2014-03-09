@@ -19,6 +19,11 @@ public class Constants {
 	public static final String MIN_OVER_IMAGE = "minOverImage";
 	public static final String MIN_DOWN_IMAGE = "minDownImage";
 	
+	//login
+    public enum LOGIN_TYPE {
+    	LOGIN_BOTTOM,  LOGIN_INPUT; 
+    };
+    
 	//tools column
     public enum NORTH_TYPE {
     	NORTH_BOTTOM,  NORTH_INDEX; 
@@ -26,8 +31,11 @@ public class Constants {
 	
     //content column
     public enum CONTENT_TYPE {
-    	CONTENT_BOTTOM,  CONTENT_STOCK, CONTENT_DELIVER, CONTENT_CUSTOMER, CONTENT_PRODUCT, CONTENT_MAIN; 
+    	CONTENT_BOTTOM,  CONTENT_STOCK, CONTENT_DELIVER, CONTENT_ANALYZE, CONTENT_CUSTOMER, CONTENT_PRODUCT, CONTENT_MAIN; 
     };
 
+    public enum FUNCTION {
+    	STOCK, DELIVER, ANALYZE, CUSTOMER, PRODUCT, NONE;
+    };
 	
 }

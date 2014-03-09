@@ -1,4 +1,4 @@
-package com.storeworld.mainui;
+package com.storeworld.login;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -22,12 +22,26 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.storeworld.utils.Constants;
+import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.EastPart;
+import com.storeworld.mainui.NorthEastPart;
+import com.storeworld.mainui.NorthPart;
+import com.storeworld.mainui.NorthWestPart;
+import com.storeworld.mainui.SouthEastPart;
+import com.storeworld.mainui.SouthPart;
+import com.storeworld.mainui.SouthWestPart;
+import com.storeworld.mainui.WestPart;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.LOGIN_TYPE;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
-public class MainUI extends Shell implements ControlListener, PaintListener,
+/**
+ * 
+ * @author dingyuanxiong
+ * the wheels of MainUI, a simple one
+ */
+public class LoginMainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {
 
 	private NorthWestPart northwestpart = null;
@@ -60,21 +74,24 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	private double ratio = 0.0;//the percent of the northpart
 
 	//one instance in the system
-	private static MainUI instance = null; 
-	private MainUI(Display display) {
+	private static LoginMainUI instance = null; 
+	private LoginMainUI(Display display) {
 		super(display, SWT.NO_TRIM);
 		northLayout = new StackLayout();
 		contentLayout = new StackLayout();
 	}
 	
-	public static MainUI getMainUI_Instance(Display display){
+	public static LoginMainUI getMainUI_Instance(Display display){
 		if (instance == null) {
-			instance = new MainUI(display);
+			instance = new LoginMainUI(display);
 			instance.setActive();
 	       }
 	       return instance;
 	}
 	
+	public static void setInstanceNull(){
+		instance = null;
+	}
 	public void setRatio(double rat){
 		if(rat < 0)
 			rat = 0.0;
@@ -86,61 +103,22 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 
 	//we may need to get/set all the nine parts of the UI, but mainly, we need
 	//these two parts(contentpart & northpart)
-	public void setContentPart(ContentPart contentpart, CONTENT_TYPE type){
+	public void setContentPart(ContentPart contentpart, LOGIN_TYPE type){
 //		this.contentpart = contentpart;
-		Utils.setContentPartComposite(contentpart, type);
+		Utils.setLoginPartComposite(contentpart, type);
 	}
-	public Composite getContentPart(CONTENT_TYPE type){
-		return Utils.getContentPartComposites(type);
-	}
-	public void setNorthPart(NorthPart northpart, NORTH_TYPE type){
-//		this.northpart = northpart;
-		Utils.setNorthPartComposite(northpart, type);
-		
-	}
-	public Composite getNorthPart(NORTH_TYPE type){
-		Composite comp = Utils.getNorthPartComposites(type);
-		return comp;
+	public Composite getContentPart(LOGIN_TYPE type){
+		return Utils.getLoginPartComposites(type);
 	}
 	
-	public void show_North_bottom(){
-		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_BOTTOM);
-		northpart.layout();
-	}
-	public void show_North_index(){
-		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
-		northpart.layout();
-		
-	} 
 	
-	public void show_Content_bottom(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_BOTTOM);
-		contentpart.layout();
-	}
+	 
+	
 	public void show_Content_main(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_MAIN);
+		contentLayout.topControl = getContentPart(LOGIN_TYPE.LOGIN_INPUT);
 		contentpart.layout();
 	}
-	public void show_Content_stock(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_STOCK);
-		contentpart.layout();
-	}
-	public void show_Content_deliver(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_DELIVER);
-		contentpart.layout();
-	}
-	public void show_Content_analyze(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_ANALYZE);
-		contentpart.layout();
-	}
-	public void show_Content_customer(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_CUSTOMER);
-		contentpart.layout();
-	}
-	public void show_Content_product(){
-		contentLayout.topControl = getContentPart(CONTENT_TYPE.CONTENT_PRODUCT);
-		contentpart.layout();
-	}
+
 		
 	
 	public void setup(){
@@ -161,40 +139,6 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		closeButton.setBackgroundImage(closeImage);
 		minButton.setBackgroundImage(minImage);
 	}
-	//give a way to initial all the parts 
-//	public void initial(NorthWestPart northwestpart,
-//			NorthEastPart northeastpart, NorthPart northpart,
-//			SouthWestPart southwestpart, SouthEastPart southeastpart,
-//			SouthPart southpart, WestPart westpart, EastPart eastpart,
-//			ContentPart contentpart) {
-//		if (northwestpart != null) {
-//			this.northwestpart = northwestpart;
-//		}
-//		if (northeastpart != null) {
-//			this.northeastpart = northeastpart;
-//		}
-//		if (northpart != null) {
-//			this.northpart = northpart;
-//		}
-//		if (southwestpart != null) {
-//			this.southwestpart = southwestpart;
-//		}
-//		if (southeastpart != null) {
-//			this.southeastpart = southeastpart;
-//		}
-//		if (southpart != null) {
-//			this.southpart = southpart;
-//		}
-//		if (westpart != null) {
-//			this.westpart = westpart;
-//		}
-//		if (eastpart != null) {
-//			this.eastpart = eastpart;
-//		}
-//		if (contentpart != null) {
-//			this.contentpart = contentpart;
-//		}
-//	}
 
 	/**
 	 * Create contents of the window
@@ -256,7 +200,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 								- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
 //				System.out.println(northpart.getBounds().toString()+" northpart");
 			}
-			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
+//			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
 			northpart.setLayout(northLayout);
 		}
 		if (southwestpart == null){
@@ -315,7 +259,7 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 								- southpart.getImage().getBounds().height);		
 //				System.out.println(contentpart.getBounds().toString()+" contentpart");
 			}
-			Utils.setContentPartComposite(contentpart, CONTENT_TYPE.CONTENT_BOTTOM);
+			Utils.setLoginPartComposite(contentpart, LOGIN_TYPE.LOGIN_BOTTOM);
 			contentpart.setLayout(contentLayout);
 		}
 		

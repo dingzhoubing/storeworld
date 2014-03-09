@@ -7,8 +7,22 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.storeworld.analyze.AnalyzeContentPart;
+import com.storeworld.customer.CustomerContentPart;
+import com.storeworld.deliver.DeliverContentPart;
+import com.storeworld.login.Login;
+import com.storeworld.product.ProductContentPart;
+import com.storeworld.stock.StockContentPart;
+import com.storeworld.stock.StockPart;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
+import com.storeworld.utils.Constants.NORTH_TYPE;
+import com.storeworld.utils.Utils;
 
 public class MainContentPart extends ContentPart{
 	
@@ -44,9 +58,15 @@ public class MainContentPart extends ContentPart{
 		btnicon.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				main.dispose();
-//				String[] args = null;
-//				StockUITest.main(args);
+				Utils.setFunctin(FUNCTION.STOCK);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+//				System.out.println("shell is null: "+ (shell==null));
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
+					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_STOCK) == null)
+					shell.setContentPart(new StockContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_STOCK);
+				shell.show_North_index();
+				shell.show_Content_stock();
 			}
 		});
 		
@@ -63,6 +83,19 @@ public class MainContentPart extends ContentPart{
 		label_out.setBounds((int)(w*0.2)+(int)(w*0.25), (int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_out.setAlignment(SWT.CENTER);
 		label_out.setText("\u9001\u8D27");
+		btnicon_1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Utils.setFunctin(FUNCTION.DELIVER);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)
+					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_DELIVER) == null)
+					shell.setContentPart(new DeliverContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_DELIVER);
+				shell.show_North_index();
+				shell.show_Content_deliver();
+			}
+		});
 		
 		
 		Button btnicon_2 = new Button(this, SWT.NONE);
@@ -77,6 +110,20 @@ public class MainContentPart extends ContentPart{
 		label_analyze.setAlignment(SWT.CENTER);
 		label_analyze.setBounds((int)(w*0.2)+(int)(w*0.5), (int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_analyze.setText("\u76D8\u4ED3");
+		btnicon_2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Utils.setFunctin(FUNCTION.ANALYZE);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
+					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_ANALYZE) == null)
+					shell.setContentPart(new AnalyzeContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_ANALYZE);
+				shell.show_North_index();
+				shell.show_Content_analyze();
+			}
+		});
+		
 		
 		
 		Button btnicon_3 = new Button(this, SWT.NONE);
@@ -91,6 +138,19 @@ public class MainContentPart extends ContentPart{
 		label_product.setAlignment(SWT.CENTER);
 		label_product.setBounds((int)(w*0.2), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_product.setText("\u8D27\u54C1");
+		btnicon_3.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Utils.setFunctin(FUNCTION.PRODUCT);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
+					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_PRODUCT) == null)
+					shell.setContentPart(new ProductContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_PRODUCT);
+				shell.show_North_index();
+				shell.show_Content_product();
+			}
+		});
 		
 		
 		Button btnicon_4 = new Button(this, SWT.NONE);
@@ -105,6 +165,20 @@ public class MainContentPart extends ContentPart{
 		label_customer.setAlignment(SWT.CENTER);
 		label_customer.setBounds((int)(w*0.2)+(int)(w*0.25), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_customer.setText("\u5BA2\u6237");
+		btnicon_4.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Utils.setFunctin(FUNCTION.CUSTOMER);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
+					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_CUSTOMER) == null)
+					shell.setContentPart(new CustomerContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_CUSTOMER);
+				shell.show_North_index();
+				shell.show_Content_customer();
+			}
+		});
+		
 		
 		Button btnicon_5 = new Button(this, SWT.NONE);
 		btnicon_5.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
@@ -118,6 +192,16 @@ public class MainContentPart extends ContentPart{
 		label_lock.setAlignment(SWT.CENTER);
 		label_lock.setBounds((int)(w*0.2)+(int)(w*0.5), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_lock.setText("\u4FDD\u5BC6");
+		
+		btnicon_5.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Utils.changeStatus();//be true, make it unlock				
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				shell.setVisible(false);
+				Login.login();
+			}
+		});
 		
 		this.setBackgroundColor(new Color(getDisplay(),63,63,63));
 						

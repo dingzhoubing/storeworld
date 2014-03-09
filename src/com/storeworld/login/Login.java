@@ -6,26 +6,23 @@ import org.eclipse.swt.widgets.Display;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.LOGIN_TYPE;
 import com.storeworld.utils.Utils;
 
 //can make this one instance in the sysytem
-public class LoginUITest {
+//wheels of the mainUI
+public class Login {
 
-	public static void main(String[] args) {
+	public static void login() {
 		try {
 			
 			int screenH =Constants.LOGIN_HEIGHT;
 			int screenW =Constants.LOGIN_WIDTH;
-//			System.out.println(screenH + ":" + screenW + "swh");
 			Display display = Display.getDefault();
-			MainUI shell = MainUI.getMainUI_Instance(display);
-			//set the percent of the north part
+			LoginMainUI shell = LoginMainUI.getMainUI_Instance(display);
 			shell.setSize(screenW, screenH);
-//			shell.setRatio(0.15);
 			shell.setup();
-//			shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
-			shell.setContentPart(new LoginContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_MAIN);
-//			shell.show_North_index();
+			shell.setContentPart(new LoginContentPart(shell.getContentPart(LOGIN_TYPE.LOGIN_BOTTOM), SWT.NONE, null, null), LOGIN_TYPE.LOGIN_INPUT);
 			shell.show_Content_main();
 
 			Utils.center(shell);
@@ -39,6 +36,10 @@ public class LoginUITest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void main(String[] args){
+		login();
 	}
 
 }

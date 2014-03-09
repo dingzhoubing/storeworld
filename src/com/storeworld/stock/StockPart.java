@@ -8,11 +8,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.mainui.NorthPart;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
+import com.storeworld.utils.Constants.NORTH_TYPE;
+import com.storeworld.utils.Utils;
 
 public class StockPart extends NorthPart{
 
@@ -23,7 +26,9 @@ public class StockPart extends NorthPart{
 		initialization();
 	}
 	
-
+	public void grayButton(Button button){
+		//make the image in the button be gray
+	}
 	public void initialization(){
 		int w = current.getBounds().width;
 		int h = current.getBounds().height;
@@ -39,17 +44,18 @@ public class StockPart extends NorthPart{
 		button_index.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				display.dispose();
-//				String[] args = null;
-//				MainUITest.main(args);
-//				MainUI.disposeContentPart();
+				Utils.setFunctin(FUNCTION.NONE);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				//we must have entered the main ui page
+				shell.show_North_bottom();
+				shell.show_Content_main();
 			}
 		});
 		
 		Button button_in = new Button(this, SWT.NONE);
 		button_in.setBounds((int)(2*w*0.03+w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_in.setText("2");
-		Label label_in = new Label(this, SWT.NONE);
+//		Label label_in = new Label(this, SWT.NONE);
 //		label_in.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //		label_in.setBackground(new Color(getDisplay(), 127,127,127));
 //		label_in.setAlignment(SWT.CENTER);
@@ -59,7 +65,7 @@ public class StockPart extends NorthPart{
 		Button button_out = new Button(this, SWT.NONE);
 		button_out.setBounds((int)(3*w*0.03+2*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_out.setText("3");
-		Label label_out = new Label(this, SWT.NONE);
+//		Label label_out = new Label(this, SWT.NONE);
 //		label_out.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //		label_out.setBackground(new Color(getDisplay(), 127,127,127));
 //		label_out.setAlignment(SWT.CENTER);
@@ -90,7 +96,7 @@ public class StockPart extends NorthPart{
 		Button button_prod = new Button(this, SWT.NONE);
 		button_prod.setBounds((int)(12*w*0.03+9*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_prod.setText("6");
-		Label label_prod = new Label(this, SWT.NONE);
+//		Label label_prod = new Label(this, SWT.NONE);
 //		label_prod.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //		label_prod.setBackground(new Color(getDisplay(), 127,127,127));
 //		label_prod.setAlignment(SWT.CENTER);
@@ -109,6 +115,27 @@ public class StockPart extends NorthPart{
 		
 //		this.setCursor(new Cursor(display, SWT.CURSOR_SIZEALL));
 //		this.setBackgroundColor(SWTResourceManager.getColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+		
+		//gray the button
+		switch(Utils.getFunction()){
+		case STOCK:
+			grayButton(button_in);
+			break;
+		case DELIVER:
+			grayButton(button_out);
+			break;
+		case ANALYZE:
+			grayButton(button_aly);
+			break;
+		case PRODUCT:
+			grayButton(button_prod);
+			break;
+		case CUSTOMER:
+			grayButton(button_cus);
+			break;
+		default:
+			break;
+		}
 						
 	}
 	

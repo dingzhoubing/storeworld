@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Text;
 
 import com.storeworld.softwarekeyboard.ShowKeyBoardAdapter;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
+import com.storeworld.utils.Constants.LOGIN_TYPE;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 
 public class Utils {
@@ -21,6 +23,26 @@ public class Utils {
 	private static ImageLoader imageLoader = new ImageLoader();
 	private static HashMap<NORTH_TYPE, Composite> northComps = new HashMap<NORTH_TYPE, Composite>();
 	private static HashMap<CONTENT_TYPE, Composite> contentComps = new HashMap<CONTENT_TYPE, Composite>();
+	private static HashMap<LOGIN_TYPE, Composite> loginComps = new HashMap<LOGIN_TYPE, Composite>();
+	private static boolean login_unlock = false;//false means login, true means unlock 	
+	private static FUNCTION func = FUNCTION.NONE;
+	public static boolean getStatus(){
+		return login_unlock;
+	}
+	public static void changeStatus(){
+		if(!login_unlock)
+			login_unlock = true;
+		else
+			login_unlock = false;
+	}
+	
+	//determin the button to gray in the tools bar
+	public static void setFunctin(FUNCTION type){
+		func = type;
+	}
+	public static FUNCTION getFunction(){
+		return func;
+	}
 	public static void center(Shell shell) {
 
 		int screenH = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -59,7 +81,20 @@ public class Utils {
 		case CONTENT_PRODUCT:
 		case CONTENT_STOCK:
 		case CONTENT_MAIN:
+		case CONTENT_ANALYZE:
 			comp = contentComps.get(type);
+			break;
+		default:
+			break;
+		}
+		return comp;
+	}
+	public static Composite getLoginPartComposites(LOGIN_TYPE type){
+		Composite comp = null;
+		switch (type) {
+		case LOGIN_BOTTOM:
+		case LOGIN_INPUT:	
+			comp = loginComps.get(type);
 			break;
 		default:
 			break;
@@ -72,6 +107,9 @@ public class Utils {
 	}
 	public static void setContentPartComposite(Composite comp, CONTENT_TYPE type){
 		contentComps.put(type, comp);
+	}
+	public static void setLoginPartComposite(Composite comp, LOGIN_TYPE type){
+		loginComps.put(type, comp);
 	}
 	
 	public static void bindTextKeyboard(ArrayList<Text> texts, Shell shell){

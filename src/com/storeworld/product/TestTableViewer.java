@@ -12,13 +12,18 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.storeworld.mainui.ContentPart;
-public class ProductContentPart extends ContentPart{
+
+public class TestTableViewer {
 	private static Table table;
+	/**
+	 * Launch the application
+	 * @param args
+	 */
 	
 	public static void refreshTable(){
 		Color color1 = Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
@@ -29,25 +34,16 @@ public class ProductContentPart extends ContentPart{
 		}
 		table.redraw();
 	}
-	private int FONT_SIZE = 12;
-	private Composite current = null;
-	private Composite composite = null;
-	public ProductContentPart(Composite parent, int style, Image image, Color color) {
-		super(parent, style, image);
-		
-		composite = new Composite(this, SWT.NONE);
-		
-		current = parent;		
-		initialization();
-	}
-	
+	public static void main(String[] args) {
+		final Display display = Display.getDefault();
+		final Shell shell = new Shell(display);
+		shell.setSize(500, 375);
+		shell.setText("SWT Application");
 
-	public void initialization(){
-		int w = current.getBounds().width;
-		int h = current.getBounds().height;
-//		Composite composite  = new Composite(current, SWT.NONE);
-		composite.setBounds(0, 0, w, h);
-		
+		int w = shell.getBounds().width;
+		int h = shell.getBounds().height;
+		Composite composite  = new Composite(shell, SWT.NONE);
+//		composite.setBounds(0, 0, w, h);
 		final TableViewer tableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.BORDER|SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		
 		table = tableViewer.getTable();
@@ -188,9 +184,13 @@ public class ProductContentPart extends ContentPart{
 //		tableViewer.addFilter(new MyFilter());
 		refreshTable();
 		composite.setLayout(new FillLayout());
-		
-//		composite.setBackground(new Color(getDisplay(), 63, 63, 125));
-//		composite.pack();	
-						
+		composite.pack();
+		shell.setLayout(new FillLayout());
+		shell.open();		
+		shell.layout();
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
 	}
 }

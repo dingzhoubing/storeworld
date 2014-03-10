@@ -27,6 +27,7 @@ import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
+//without west and east part, make the UI more clear
 public class MainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {
 
@@ -236,24 +237,36 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		minButton.setBounds(w - northeastpart.getImage().getBounds().width
 				- closeImage.getBounds().width- minImage.getBounds().width, 0,
 				minImage.getBounds().width, minImage.getBounds().height);
+//		if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+//			northpart.setBounds(
+//					northwestpart.getImage().getBounds().width,
+//					0,
+//					w - northwestpart.getImage().getBounds().width
+//							- northeastpart.getImage().getBounds().width
+//							- closeImage.getBounds().width
+//							- minImage.getBounds().width, 0);
+//		}else{
+//			northpart.setBounds(
+//					northwestpart.getImage().getBounds().width,
+//					northpart.getImage().getBounds().height,
+//					w - northwestpart.getImage().getBounds().width
+//							- northeastpart.getImage().getBounds().width
+//							- closeImage.getBounds().width
+//							- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
+////			System.out.println(northpart.getBounds().toString()+" northpart");
+//		}
 		if (northpart == null){
 			northpart = new NorthPart(this, SWT.NONE, null);
 			if (Math.abs((this.ratio - 0.0)) < 1e-6) {
 				northpart.setBounds(
-						northwestpart.getImage().getBounds().width,
 						0,
-						w - northwestpart.getImage().getBounds().width
-								- northeastpart.getImage().getBounds().width
-								- closeImage.getBounds().width
-								- minImage.getBounds().width, 0);
+						northwestpart.getImage().getBounds().height,
+						w, 0);
 			}else{
 				northpart.setBounds(
-						northwestpart.getImage().getBounds().width,
+						0,
 						northpart.getImage().getBounds().height,
-						w - northwestpart.getImage().getBounds().width
-								- northeastpart.getImage().getBounds().width
-								- closeImage.getBounds().width
-								- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
+						w, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
 //				System.out.println(northpart.getBounds().toString()+" northpart");
 			}
 			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
@@ -281,36 +294,48 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 					- southwestpart.getImage().getBounds().width, southpart
 					.getImage().getBounds().height);
 		}
-		if (westpart == null){
-			westpart = new WestPart(this, SWT.NONE, null);
-			westpart.setBounds(0, northwestpart.getImage().getBounds().height,
-					westpart.getImage().getBounds().width, h
-							- northwestpart.getImage().getBounds().height
-							- southwestpart.getImage().getBounds().height);
-		}
-		if (eastpart == null){
-			eastpart = new EastPart(this, SWT.NONE, null);
-			eastpart.setBounds(w - eastpart.getImage().getBounds().width,
-					northeastpart.getImage().getBounds().height, eastpart
-							.getImage().getBounds().width, h
-							- northeastpart.getImage().getBounds().height
-							- southeastpart.getImage().getBounds().height);
-		}
+//		if (westpart == null){
+//			westpart = new WestPart(this, SWT.NONE, null);
+//			westpart.setBounds(0, northwestpart.getImage().getBounds().height,
+//					westpart.getImage().getBounds().width, h
+//							- northwestpart.getImage().getBounds().height
+//							- southwestpart.getImage().getBounds().height);
+//		}
+//		if (eastpart == null){
+//			eastpart = new EastPart(this, SWT.NONE, null);
+//			eastpart.setBounds(w - eastpart.getImage().getBounds().width,
+//					northeastpart.getImage().getBounds().height, eastpart
+//							.getImage().getBounds().width, h
+//							- northeastpart.getImage().getBounds().height
+//							- southeastpart.getImage().getBounds().height);
+//		}
 		//by default, set the color into dark_shadow
+//		if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+//			contentpart.setBounds(westpart.getImage().getBounds().width,
+//					northpart.getImage().getBounds().height, w
+//							- westpart.getImage().getBounds().width
+//							- eastpart.getImage().getBounds().width, h
+//							- northpart.getImage().getBounds().height
+//							- southpart.getImage().getBounds().height);
+//		} else {
+//			contentpart.setBounds(westpart.getImage().getBounds().width,
+//					(int)(h * this.ratio), w
+//							- westpart.getImage().getBounds().width
+//							- eastpart.getImage().getBounds().width, h
+//							- (int)(h * this.ratio)
+//							- southpart.getImage().getBounds().height);		
 		if (contentpart == null){
 			contentpart = new ContentPart(this, SWT.NONE, null);
 			if (Math.abs((this.ratio - 0.0)) < 1e-6) {
-				contentpart.setBounds(westpart.getImage().getBounds().width,
+				contentpart.setBounds(0,
 						northpart.getImage().getBounds().height, w
-								- westpart.getImage().getBounds().width
-								- eastpart.getImage().getBounds().width, h
+								, h
 								- northpart.getImage().getBounds().height
 								- southpart.getImage().getBounds().height);
 			} else {
-				contentpart.setBounds(westpart.getImage().getBounds().width,
+				contentpart.setBounds(0,
 						(int)(h * this.ratio), w
-								- westpart.getImage().getBounds().width
-								- eastpart.getImage().getBounds().width, h
+								, h
 								- (int)(h * this.ratio)
 								- southpart.getImage().getBounds().height);		
 //				System.out.println(contentpart.getBounds().toString()+" contentpart");
@@ -559,8 +584,10 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			southwestpart.dispose();
 			southeastpart.dispose();
 			southpart.dispose();
-			westpart.dispose();
-			eastpart.dispose();
+			if(westpart != null)
+				westpart.dispose();
+			if(eastpart != null)
+				eastpart.dispose();
 			if(up != null)
 				up.dispose();
 			//check it, and maybe we need to check all

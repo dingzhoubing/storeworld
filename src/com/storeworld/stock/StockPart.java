@@ -94,7 +94,7 @@ public class StockPart extends NorthPart{
 //		
 		
 		Button button_prod = new Button(this, SWT.NONE);
-		button_prod.setBounds((int)(12*w*0.03+9*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
+		button_prod.setBounds((int)(11*w*0.03+9*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_prod.setText("6");
 //		Label label_prod = new Label(this, SWT.NONE);
 //		label_prod.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
@@ -104,7 +104,7 @@ public class StockPart extends NorthPart{
 //		label_prod.setText("\u8D27\u54C1");
 		
 		Button button_cus = new Button(this, SWT.NONE);
-		button_cus.setBounds((int)(13*w*0.03+10*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
+		button_cus.setBounds((int)(12*w*0.03+10*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_cus.setText("7");
 //		Label label_cus = new Label(this, SWT.NONE);
 //		label_cus.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
@@ -115,7 +115,7 @@ public class StockPart extends NorthPart{
 		
 //		this.setCursor(new Cursor(display, SWT.CURSOR_SIZEALL));
 //		this.setBackgroundColor(SWTResourceManager.getColor(SWT.COLOR_WIDGET_DARK_SHADOW));
-		
+//		this.setBackgroundColor(new Color(getDisplay(),63,63,125));	
 		//gray the button
 		switch(Utils.getFunction()){
 		case STOCK:
@@ -136,7 +136,7 @@ public class StockPart extends NorthPart{
 		default:
 			break;
 		}
-						
+			
 	}
 	
 	

@@ -4,22 +4,26 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
+
 public class MyCellModifier implements ICellModifier {
-	private TableViewer tv;
+	private TableViewer tv;//just in case
+	private ProductList productlist;
 
-//	public static String[] NAMES = { "张三", "李四", "小红", "翠花" };
-
-	public MyCellModifier(TableViewer tv) {
+	public MyCellModifier(TableViewer tv, ProductList productlist) {
 		this.tv = tv;
+		this.productlist = productlist;
 	}
 
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
 
+	//when initial the table data
 	public Object getValue(Object element, String property) {
 		Product p = (Product) element;
-		if (property.equals("brand")) {
+		if(property.equals("id")){
+			return String.valueOf(p.getID());
+		}else if (property.equals("brand")) {
 			return String.valueOf(p.getBrand());
 		} else if (property.equals("sub_brand")) {
 			return String.valueOf(p.getSubBrand());
@@ -27,29 +31,20 @@ public class MyCellModifier implements ICellModifier {
 			return String.valueOf(p.getSize());
 		}else if (property.equals("unit")) {
 			return String.valueOf(p.getUnit());
-		}else if (property.equals("avg_in")) {
-			return String.valueOf(p.getAvgStockPrice());
-		}else if (property.equals("avg_out")) {
-			return String.valueOf(p.getAvgDeliverPrice());
 		}else if (property.equals("repository")) {
 			return String.valueOf(p.getRepository());
+		}else if(property.equals("operation")){
+//			return String.valueOf("1");
+			return null;// show the operation button
 		}
-		
-		throw new RuntimeException("error column name : " + property);
+		return null;
+//		throw new RuntimeException("error column name : " + property);
 	}
 
-//	private int getNameIndex(String name) {
-//		for (int i = 0; i < NAMES.length; i++) {
-//			if (NAMES[i].equals(name)) {
-//				return i;
-//			}
-//		}
-//		return -1;
-//	}
-
+	//when modify the table
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
-		Product p = (Product) item.getData();
+		Product p = (Product) item.getData();		
 		if (property.equals("brand")) {
 			String newValue = (String) value;
 			if (newValue.equals("")) {
@@ -74,18 +69,6 @@ public class MyCellModifier implements ICellModifier {
 				return;
 			}			
 			p.setUnit(newValue);
-		} else if (property.equals("avg_in")) {
-			String newValue = (String) value;			
-			if (newValue.equals("")) {
-				return;
-			}			
-			p.setAvgStockPrice(Double.valueOf(newValue).doubleValue());
-		} else if (property.equals("avg_out")) {
-			String newValue = (String) value;			
-			if (newValue.equals("")) {
-				return;
-			}			
-			p.setAvgDeliverPrice(Double.valueOf(newValue).doubleValue());
 		} else if (property.equals("repository")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
@@ -93,9 +76,11 @@ public class MyCellModifier implements ICellModifier {
 			}			
 			p.setRepository(Integer.valueOf(newValue).intValue());
 		} else {
-			throw new RuntimeException("错误列名:" + property);
+			return;//just return, do nothing
+//			throw new RuntimeException("错误列名:" + property);
 		}
-		tv.update(p, null);
+//		System.out.println("change?");
+		productlist.productChanged(p);
 	}
 
 }

@@ -1,7 +1,6 @@
 package com.storeworld.utils;
 
 import java.awt.Toolkit;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
@@ -10,9 +9,6 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-
-import com.storeworld.softwarekeyboard.ShowKeyBoardAdapter;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -20,12 +16,66 @@ import com.storeworld.utils.Constants.NORTH_TYPE;
 
 public class Utils {
 	
+	//soft key board
+	private static String inputRecord = "";
+	private static boolean inputNeedChange = false;
+	private static boolean clickButton = false;
+	private static boolean useSoftKeyBoard = true;
+	
 	private static ImageLoader imageLoader = new ImageLoader();
 	private static HashMap<NORTH_TYPE, Composite> northComps = new HashMap<NORTH_TYPE, Composite>();
 	private static HashMap<CONTENT_TYPE, Composite> contentComps = new HashMap<CONTENT_TYPE, Composite>();
 	private static HashMap<LOGIN_TYPE, Composite> loginComps = new HashMap<LOGIN_TYPE, Composite>();
 	private static boolean login_unlock = false;//false means login, true means unlock 	
 	private static FUNCTION func = FUNCTION.NONE;
+	
+	
+	/**
+	 * if click the button of  software keyboard
+	 * @return
+	 */
+	public static boolean getUseSoftKeyBoard(){
+		return useSoftKeyBoard;
+	}
+	public static void settUseSoftKeyBoard(boolean use){
+		useSoftKeyBoard = use;
+	}
+	
+	/**
+	 * if click the button of  software keyboard
+	 * @return
+	 */
+	public static boolean getClickButton(){
+		return clickButton;
+	}
+	public static void setClickButton(boolean click){
+		clickButton = click;
+	}
+	
+	/**
+	 * if the record need change after the  software keyboard
+	 * @return
+	 */
+	public static boolean getInputNeedChange(){
+		return inputNeedChange;
+	}
+	public static void setInputNeedChange(boolean need){
+		inputNeedChange = need;
+	}
+	
+	/**
+	 * record and read the text of the software keyboard
+	 * @return
+	 */
+	public static String getInput(){
+		return inputRecord;
+	}
+	public static void setInput(String input){
+		inputRecord = input;
+	}
+	/**
+	 * to judge it's lock or unlock, and change the status 
+	 */
 	public static boolean getStatus(){
 		return login_unlock;
 	}
@@ -36,6 +86,10 @@ public class Utils {
 			login_unlock = false;
 	}
 	
+	/**
+	 * set and get the current function, to make the corresponding functin button gray 
+	 * @param type
+	 */	
 	//determin the button to gray in the tools bar
 	public static void setFunctin(FUNCTION type){
 		func = type;
@@ -43,6 +97,11 @@ public class Utils {
 	public static FUNCTION getFunction(){
 		return func;
 	}
+	
+	/**
+	 * make the shell in the middle of the screen
+	 * @param shell
+	 */
 	public static void center(Shell shell) {
 
 		int screenH = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -60,6 +119,11 @@ public class Utils {
 		shell.setLocation(((screenW - shellW) / 2), ((screenH - shellH) / 2));
 	}
 	
+	/**
+	 * get the north part composite by type
+	 * @param type
+	 * @return
+	 */
 	public static Composite getNorthPartComposites(NORTH_TYPE type){
 		Composite comp = null;
 		switch (type) {
@@ -72,6 +136,11 @@ public class Utils {
 		}
 		return comp;		
 	}
+	/**
+	 * get the content part composite by type
+	 * @param type
+	 * @return
+	 */
 	public static Composite getContentPartComposites(CONTENT_TYPE type){
 		Composite comp = null;
 		switch (type) {
@@ -89,6 +158,12 @@ public class Utils {
 		}
 		return comp;
 	}
+	
+	/**
+	 * get the login part of the login compiste(the content part as the mainui)
+	 * @param type
+	 * @return
+	 */
 	public static Composite getLoginPartComposites(LOGIN_TYPE type){
 		Composite comp = null;
 		switch (type) {
@@ -101,7 +176,11 @@ public class Utils {
 		}
 		return comp;
 	}
-	
+	/**
+	 * set the parts
+	 * @param comp
+	 * @param type
+	 */
 	public static void setNorthPartComposite(Composite comp, NORTH_TYPE type){
 		northComps.put(type, comp);
 	}
@@ -112,17 +191,24 @@ public class Utils {
 		loginComps.put(type, comp);
 	}
 	
-	public static void bindTextKeyboard(ArrayList<Text> texts, Shell shell){
-		for(int i=0;i<texts.size();i++){
-			texts.get(i).addMouseListener(new ShowKeyBoardAdapter(texts.get(i), shell));
-		}
-	}
 	
+	/**
+	 * get a scaled image
+	 * @param imagepath
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static Image getScaledImage(String imagepath, int width, int height){
 		ImageData[] data = imageLoader.load(imagepath);
 		Image imageScale = new Image(null, data[0].scaledTo(width, height));
 		return imageScale;
 	}
+	/**
+	 * get a gray image
+	 * @param image
+	 * @return
+	 */
 	public static Image getGrayImage(Image image){
 		return new Image(null,image, SWT.IMAGE_GRAY);
 	}

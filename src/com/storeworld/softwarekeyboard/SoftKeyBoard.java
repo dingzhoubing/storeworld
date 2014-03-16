@@ -32,7 +32,10 @@ public class SoftKeyBoard extends Dialog {
 	private int KB_HEIGHT = 190;
 	private int Adjust_y = 20;
 	private int Adjust_x = 3;
+	//layout_adjust means: the north part has a height, so the main part y is not right
 	private int layout_adjust = 0;
+	//composite_shift means: the left navigate has a width, so the main part x is not right
+	private int composite_shift = 0;
 	private Text text_1;
 	
 	public static void setNumber(Text text, String number) {
@@ -73,11 +76,11 @@ public class SoftKeyBoard extends Dialog {
 		int sx = srect.x;
 		int sy = srect.y;
 		if((sy + rect.y + layout_adjust + Adjust_y-1) > KB_HEIGHT){
-			ux = sx + rect.x + Adjust_x;
+			ux = sx + rect.x + Adjust_x + composite_shift;
 			uy = sy + rect.y + layout_adjust - KB_HEIGHT;// + Adjust_x
 			up = true;
 		}else{
-			dx = sx + rect.x + Adjust_x;
+			dx = sx + rect.x + Adjust_x + composite_shift;
 			dy = sy + rect.y + layout_adjust + rect.height - Adjust_y+4;// + Adjust_x
 			up = false;
 		}
@@ -85,13 +88,14 @@ public class SoftKeyBoard extends Dialog {
 
 	}
 	
-	public SoftKeyBoard(Text text, Shell parent, int style) {		
+	public SoftKeyBoard(Text text, Shell parent, int style, int composite_shift) {		
 		super(parent, style);
 		this.text = text;
 		this.pShell = parent;
 //		System.out.println("text bounds: "+text.getBounds());
 //		System.out.println("parent shell bounds: "+pShell.getBounds());
 		layout_adjust = (int)(Constants.SCREEN_HEIGHT * 0.85 * 0.15);//make it from a function
+		this.composite_shift = composite_shift;
 //		System.out.println("text parent bounds: "+text.getParent().getParent().getBounds());
 		setPosition(this.pShell.getBounds(), this.text.getBounds());
 	}

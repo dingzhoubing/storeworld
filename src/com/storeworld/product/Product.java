@@ -12,7 +12,7 @@ public class Product{
 	public Product(){
 		
 	}
-	public Product(String brand,String sub_brand,String size,String unit, double avg_stock,double avg_deliver, int repository){
+	public Product(String brand,String sub_brand,String size,String unit, int repository){
 		this(null, brand,sub_brand,size,unit,repository);
 	}
 	public Product(String ID, String brand,String sub_brand,String size,String unit, int repository){

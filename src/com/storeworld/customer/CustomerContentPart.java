@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -65,7 +66,7 @@ public class CustomerContentPart extends ContentPart{
 	 * call the software keyboard
 	 */
 	public void callKeyBoard(Text text){
-		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift);
+		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, 0);
 		skb.open();
 	}
 	/**
@@ -207,7 +208,7 @@ public class CustomerContentPart extends ContentPart{
 	 * initialize the table elements
 	 */
 	public void initialization(){
-		int w = current.getBounds().width;
+		final int w = current.getBounds().width;
 		int h = current.getBounds().height;
 		composite.setBounds(0, 0, w, h);
 		
@@ -262,14 +263,25 @@ public class CustomerContentPart extends ContentPart{
 		composite_ar.setBackground(base);
 		GridLayout layout = new GridLayout();  
         layout.numColumns = 2;  
+        layout.horizontalSpacing = 0;
+        layout.verticalSpacing = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
+        
         composite_ar.setLayout(layout);  
         composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         Button b1 = new Button(composite_ar, SWT.CHECK);
+        GridData gd_b = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+        gd_b.widthHint = (int)(4*w/5/10);
+		b1.setLayoutData(gd_b);
         b1.setText("八里街");
         b1.setBackground(base);
 
 		Button b2 = new Button(composite_ar, SWT.CHECK);
-		b2.setText("安陆这是一个很长的片区");
+        GridData gd_b2 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+        gd_b2.widthHint = (int)(4*w/5/10);
+		b2.setLayoutData(gd_b2);
+		b2.setText("安陆");//安陆这是一个很长的片区
 		b2.setBackground(base);
 		composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		composite_ar.layout();
@@ -312,12 +324,19 @@ public class CustomerContentPart extends ContentPart{
 		
 		GridLayout layout2 = new GridLayout();  
         layout2.numColumns = 2;  
+        layout2.horizontalSpacing = 0;
+        layout2.verticalSpacing = 0;
+        layout2.marginHeight = 0;
+        layout2.marginWidth = 0;
         composite_fn.setLayout(layout2);  
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
 		 btnNewButton.addListener(SWT.Selection, new Listener() {  
 	            public void handleEvent(Event e) {  	             
 	                Button button = new Button(composite_fn, SWT.CHECK);  
+	                GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+	                gd.widthHint = (int)(4*w/5/10);
+	                button.setLayoutData(gd);
 	                button.setText("姓");  
 	                button.setBackground(base);
 	                composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
@@ -326,23 +345,35 @@ public class CustomerContentPart extends ContentPart{
 	        });	
 		
 		Button btnCheckButton = new Button(composite_fn, SWT.CHECK);
-		btnCheckButton.setText("欧阳");
+		btnCheckButton.setText("欧阳测试");
 		btnCheckButton.setBackground(base);
 
 		Button button = new Button(composite_fn, SWT.CHECK);
+		GridData gd_b3 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_b3.widthHint = (int)(4*w/5/10);
+		button.setLayoutData(gd_b3);
 		button.setText("钱");
 		button.setBackground(base);
 		
 		Button button_1 = new Button(composite_fn, SWT.CHECK);
+		GridData gd_b4 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_b4.widthHint = (int)(4*w/5/10);
+		button_1.setLayoutData(gd_b4);
 		button_1.setText("孙");
 		button_1.setBackground(base);
 		
 		Button button_2 = new Button(composite_fn, SWT.CHECK);
+		GridData gd_b5 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_b5.widthHint = (int)(4*w/5/10);
+		button_2.setLayoutData(gd_b5);
 		button_2.setText("李");
 		button_2.setBackground(base);
 		
 		Button button_3 = new Button(composite_fn, SWT.CHECK);
-		button_3.setText("多次点搜，有垂直滚动条");
+		GridData gd_b6 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_b6.widthHint = (int)(4*w/5/10);
+		button_3.setLayoutData(gd_b6);
+		button_3.setText("多");//次点搜，有垂直滚动条
 		button_3.setBackground(base);
 		
 		composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  

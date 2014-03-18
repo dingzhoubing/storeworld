@@ -60,7 +60,7 @@ public class ProductContentPart extends ContentPart{
 	 * call the software keyboard
 	 */
 	public void callKeyBoard(Text text){
-		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, 0);
+		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, 0, 0);
 		skb.open();
 	}
 	/**

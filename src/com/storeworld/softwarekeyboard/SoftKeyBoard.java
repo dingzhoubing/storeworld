@@ -36,6 +36,8 @@ public class SoftKeyBoard extends Dialog {
 	private int layout_adjust = 0;
 	//composite_shift means: the left navigate has a width, so the main part x is not right
 	private int composite_shift = 0;
+	//composite_updown means: the right part itself has a up/down shift, like the stock page
+	private int composite_updown = 0;
 	private Text text_1;
 	
 	public static void setNumber(Text text, String number) {
@@ -75,20 +77,20 @@ public class SoftKeyBoard extends Dialog {
 	public void setPosition(Rectangle srect, Rectangle rect) {
 		int sx = srect.x;
 		int sy = srect.y;
-		if((sy + rect.y + layout_adjust + Adjust_y-1) > KB_HEIGHT){
+		if((sy + rect.y + layout_adjust + Adjust_y-1 + composite_updown) > KB_HEIGHT){
 			ux = sx + rect.x + Adjust_x + composite_shift;
-			uy = sy + rect.y + layout_adjust - KB_HEIGHT;// + Adjust_x
+			uy = sy + rect.y + layout_adjust +composite_updown - KB_HEIGHT;// + Adjust_x
 			up = true;
 		}else{
 			dx = sx + rect.x + Adjust_x + composite_shift;
-			dy = sy + rect.y + layout_adjust + rect.height - Adjust_y+4;// + Adjust_x
+			dy = sy + rect.y + layout_adjust + composite_updown + rect.height - Adjust_y+4;// + Adjust_x
 			up = false;
 		}
 //		System.out.println("result bounds: "+ ux+" "+uy+" "+KB_WIDTH+" "+KB_HEIGHT);
 
 	}
 	
-	public SoftKeyBoard(Text text, Shell parent, int style, int composite_shift) {		
+	public SoftKeyBoard(Text text, Shell parent, int style, int composite_shift, int composite_updown) {		
 		super(parent, style);
 		this.text = text;
 		this.pShell = parent;
@@ -96,6 +98,7 @@ public class SoftKeyBoard extends Dialog {
 //		System.out.println("parent shell bounds: "+pShell.getBounds());
 		layout_adjust = (int)(Constants.SCREEN_HEIGHT * 0.85 * 0.15);//make it from a function
 		this.composite_shift = composite_shift;
+		this.composite_updown = composite_updown;
 //		System.out.println("text parent bounds: "+text.getParent().getParent().getBounds());
 		setPosition(this.pShell.getBounds(), this.text.getBounds());
 	}

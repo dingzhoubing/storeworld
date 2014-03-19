@@ -41,7 +41,7 @@ public class MainContentPart extends ContentPart{
 //		int x = current.getBounds().x;
 //		int y = current.getBounds().y;
 		//add button and label in the part
-		Button btnicon = new Button(this, SWT.NONE);
+		final Button btnicon = new Button(this, SWT.NONE);
 		btnicon.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));		
 		btnicon.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //		System.out.println(w+":"+h+":"+x+":"+y);
@@ -59,6 +59,7 @@ public class MainContentPart extends ContentPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Utils.setFunctin(FUNCTION.STOCK);
+				
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 //				System.out.println("shell is null: "+ (shell==null));
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
@@ -66,12 +67,13 @@ public class MainContentPart extends ContentPart{
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_STOCK) == null)
 					shell.setContentPart(new StockContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_STOCK);
 				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.STOCK);
 				shell.show_Content_stock();
 			}
 		});
 		
 		
-		Button btnicon_1 = new Button(this, SWT.NONE);
+		final Button btnicon_1 = new Button(this, SWT.NONE);
 		btnicon_1.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_1.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		btnicon_1.setText("\u9001\u8D27ICON");
@@ -87,18 +89,20 @@ public class MainContentPart extends ContentPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Utils.setFunctin(FUNCTION.DELIVER);
+				
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)
 					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_DELIVER) == null)
 					shell.setContentPart(new DeliverContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_DELIVER);
 				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.DELIVER);
 				shell.show_Content_deliver();
 			}
 		});
 		
 		
-		Button btnicon_2 = new Button(this, SWT.NONE);
+		final Button btnicon_2 = new Button(this, SWT.NONE);
 		btnicon_2.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_2.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		btnicon_2.setText("\u76D8\u4ED3ICON");
@@ -114,19 +118,21 @@ public class MainContentPart extends ContentPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Utils.setFunctin(FUNCTION.ANALYZE);
+				
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
 					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_ANALYZE) == null)
 					shell.setContentPart(new AnalyzeContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_ANALYZE);
 				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.ANALYZE);
 				shell.show_Content_analyze();
 			}
 		});
 		
 		
 		
-		Button btnicon_3 = new Button(this, SWT.NONE);
+		final Button btnicon_3 = new Button(this, SWT.NONE);
 		btnicon_3.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_3.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		btnicon_3.setText("\u8D27\u54C1ICON");
@@ -142,18 +148,20 @@ public class MainContentPart extends ContentPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Utils.setFunctin(FUNCTION.PRODUCT);
+
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
 					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_PRODUCT) == null)
 					shell.setContentPart(new ProductContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_PRODUCT);
 				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.PRODUCT);
 				shell.show_Content_product();
 			}
 		});
 		
 		
-		Button btnicon_4 = new Button(this, SWT.NONE);
+		final Button btnicon_4 = new Button(this, SWT.NONE);
 		btnicon_4.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_4.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		btnicon_4.setText("\u5BA2\u6237ICON");
@@ -169,12 +177,14 @@ public class MainContentPart extends ContentPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Utils.setFunctin(FUNCTION.CUSTOMER);
+
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
 					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_CUSTOMER) == null)
 					shell.setContentPart(new CustomerContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_CUSTOMER);
 				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.CUSTOMER);
 				shell.show_Content_customer();
 			}
 		});

@@ -24,8 +24,8 @@ public class StockList {
 		String subbrand = "精一";
 		String size = "50kg";
 		String unit = "包";
-		double price = 50.0;
-		int number = 30;
+		String price = "50.0";
+		String number = "30";
 		Stock stock = new Stock("1",brand, subbrand, size, unit, price, number);
 		stockList.add(stock);
 		
@@ -33,8 +33,8 @@ public class StockList {
 		String subbrand2 = "特精";
 		String size2 = "50kg";
 		String unit2 = "包";
-		double price2 = 75.0;
-		int number2 = 40;
+		String price2 = "75.0";
+		String number2 = "40";
 		Stock stock2 = new Stock("2",brand2, subbrand2, size2, unit2, price2, number2);
 		stockList.add(stock2);
 		
@@ -42,8 +42,8 @@ public class StockList {
 		String subbrand3 = "包子粉";
 		String size3 = "50kg";
 		String unit3= "包";
-		double price3 = 72.0;
-		int number3 = 20;
+		String price3 = "72.0";
+		String number3 = "20";
 		Stock stock3 = new Stock("3", brand3, subbrand3, size3, unit3, price3, number3);
 		stockList.add(stock3);	
 		

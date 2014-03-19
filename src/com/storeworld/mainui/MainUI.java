@@ -18,12 +18,13 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
@@ -109,6 +110,47 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		northpart.layout();
 	}
 	public void show_North_index(){
+		Button btn_current = null;
+		Button btn_last = null;
+		switch(Utils.getFunction()){
+		case STOCK:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.STOCK);
+			break;
+		case DELIVER:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.DELIVER);
+			break;
+		case ANALYZE:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.ANALYZE);
+			break;
+		case PRODUCT:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.PRODUCT);
+			break;
+		case CUSTOMER:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.CUSTOMER);
+			break;
+		default:
+			break;			
+		}
+		switch(Utils.getFunctionLast()){
+		case STOCK:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.STOCK);
+			break;
+		case DELIVER:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.DELIVER);
+			break;
+		case ANALYZE:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.ANALYZE);
+			break;
+		case PRODUCT:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.PRODUCT);
+			break;
+		case CUSTOMER:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.CUSTOMER);
+			break;
+		default:
+			break;			
+		}
+		Utils.grayButton(btn_current, btn_last);
 		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
 		northpart.layout();
 		

@@ -1,4 +1,4 @@
-package com.storeworld.stock;
+package com.storeworld.utils;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
@@ -15,6 +15,11 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * have no use now, if need can extend this class to fill a columnItem in table
+ * @author dingyuanxiong
+ *
+ */
 public class ItemCompositeEditor extends CellEditor {
 
 	private int id = 0;

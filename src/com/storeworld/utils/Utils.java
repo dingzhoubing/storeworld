@@ -1,14 +1,18 @@
 package com.storeworld.utils;
 
 import java.awt.Toolkit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -27,7 +31,78 @@ public class Utils {
 	private static HashMap<CONTENT_TYPE, Composite> contentComps = new HashMap<CONTENT_TYPE, Composite>();
 	private static HashMap<LOGIN_TYPE, Composite> loginComps = new HashMap<LOGIN_TYPE, Composite>();
 	private static boolean login_unlock = false;//false means login, true means unlock 	
+	
+	//record the current function and last function
 	private static FUNCTION func = FUNCTION.NONE;
+	private static FUNCTION func_last = FUNCTION.NONE;
+	//map the function with the button ,to get the current disable button
+	private static HashMap<FUNCTION, Button> func_button = new HashMap<FUNCTION, Button>();
+	
+	//get the brands and sub_brands for ccomboBox
+	private static List<String> brands;
+	private static List<String> sub_brands;
+	
+	private static String comboValue = "";
+	
+	
+	public static HashMap<FUNCTION, Button> getFunc_Button(){
+		return func_button;
+	}
+	
+	public static void grayButton(Button button_current, Button button_last){
+		//make the image in the button be gray
+		if(button_current != null)
+			button_current.setEnabled(false);
+		if(button_last != null)
+			button_last.setEnabled(true);
+	}
+	
+	public static void setComboValue(String src){
+		comboValue = src;
+	}
+	public static String getComboValue(){
+		return comboValue;
+	}
+	
+	
+	public static List<String> getBrands(){
+		//get from database
+//		brands = new String[]{"五得利","五联","金龙"};
+		brands = new ArrayList<String>();
+		brands.add("五得利");
+		brands.add("五联");
+		brands.add("金龙");
+		return brands;
+	}
+	//to check if it's a new brand
+	public static boolean checkBrand(String brand){
+		for(int i=0;i<brands.size();i++){
+			if(brands.get(i).equals(brand)){
+				return true;
+			}
+		}
+		return false;
+	}
+	public static List<String> getSub_Brands(){
+		return sub_brands = new ArrayList<String>();
+	}
+	
+	public static List<String> getSub_Brands(String brand){
+		sub_brands  = new ArrayList<String>();
+		if(brand.equals("五得利")){
+			sub_brands.add("特精");
+			sub_brands.add("包子粉");
+			sub_brands.add("精一");
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.add("精粉");
+			sub_brands.add("馒头粉");
+			sub_brands.add("精二");
+			sub_brands.add("普粉");	
+		}
+		return sub_brands;
+	}
+	
 	
 	
 	/**
@@ -96,6 +171,12 @@ public class Utils {
 	}
 	public static FUNCTION getFunction(){
 		return func;
+	}
+	public static void setFunctinLast(FUNCTION type){
+		func_last = type;
+	}
+	public static FUNCTION getFunctionLast(){
+		return func_last;
 	}
 	
 	/**

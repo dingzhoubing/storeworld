@@ -5,16 +5,17 @@ public class Stock{
 	private String sub_brand;
 	private String size;
 	private String unit;
-	private double price;
-	private int number;
+	private String price;
+	private String number;
+
 	
 	public Stock(){
 		
 	}
-	public Stock(String brand,String sub_brand,String size,String unit, double price, int number){
+	public Stock(String brand,String sub_brand,String size,String unit, String price, String number){
 		this(null, brand,sub_brand,size,unit,price, number);
 	}
-	public Stock(String ID, String brand,String sub_brand,String size,String unit, double price, int number){
+	public Stock(String ID, String brand,String sub_brand,String size,String unit, String price, String number){
 		if(ID != null)		
 			this.id = ID;
 		this.brand = brand;
@@ -54,16 +55,16 @@ public class Stock{
 	public void setUnit(String unit) {
 		this.unit = unit;
 	}
-	public double getPrice(){
+	public String getPrice(){
 		return this.price;
 	}
-	public void setPrice(double price){
+	public void setPrice(String price){
 		this.price = price;
 	}
-	public int getNumber(){
+	public String getNumber(){
 		return this.number;
 	}
-	public void setNumber(int number){
+	public void setNumber(String number){
 		this.number = number;
 	}
 	

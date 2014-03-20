@@ -14,13 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 
-/** A cell editor that works directly on objects of any type. <p/>
- * (Some code taken from {@linkplain org.eclipse.jface.viewers.ComboBoxCellEditor},
- * which unfortunately wasn't suitable with its index-based architecture.
- * The Eclipse copyright is printed above the functions in question.)
- * @param <T> The cell editor will work on a list of objects of this type.
- * It will revieve objects of type T and will return T objects ... or Strings
- * in case the user entered a String not to be found in the items list.
+/** 
+ * wheels from the Internet
+ * make the ComboCellEditor of Jface editable
  * */
 public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     private static final int STYLE_DEFAULT = SWT.NONE;
@@ -141,7 +137,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     }
 
     /**
-     * active the combo
+     * active the combo, comes from CellEditor
      */
     public void activate(ColumnViewerEditorActivationEvent activationEvent) {
 		super.activate(activationEvent);
@@ -206,20 +202,9 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
         }
     }
 
-//  Create control--------------------------------------------------------------
-/* The functions below are partly modified versions of code taken from
- * org.eclipse.jface.viewers ComboBoxCellEditor. It's copyright is printed below:
- *******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-    
+    /**
+     * Create control
+     */
     protected Control createControl(Composite parent) {
         comboBox = new CCombo(parent, getStyle());
         comboBox.setVisibleItemCount(10);

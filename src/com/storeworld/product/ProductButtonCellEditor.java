@@ -11,7 +11,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-public class ButtonCellEditor extends CellEditor {
+/**
+ * the remove button on product table
+ * once hover on a row of the table, show the button
+ * @author dingyuanxiong
+ *
+ */
+public class ProductButtonCellEditor extends CellEditor {
 
     protected Button button;
     protected Table table;
@@ -21,19 +27,19 @@ public class ButtonCellEditor extends CellEditor {
 //    private static final int defaultStyle = SWT.SINGLE;
 
     
-    public ButtonCellEditor() {
+    public ProductButtonCellEditor() {
         setStyle(0);
     }
 
     
-    public ButtonCellEditor(Composite parent, ProductList productlist, int rowHeight) {
+    public ProductButtonCellEditor(Composite parent, ProductList productlist, int rowHeight) {
         this(parent, 0);
         this.table = (Table)parent;
         this.productlist = productlist;
         this.rowHeight = rowHeight;
     }
 
-    public ButtonCellEditor(Composite parent, int style) {
+    public ProductButtonCellEditor(Composite parent, int style) {
         super(parent, 0);
     }
     
@@ -45,7 +51,7 @@ public class ButtonCellEditor extends CellEditor {
         button.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
             	button.setVisible(false);
-            	ButtonCellEditor.this.focusLost();
+            	ProductButtonCellEditor.this.focusLost();
             }
         });
         button.addSelectionListener(new SelectionAdapter() {

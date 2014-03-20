@@ -6,7 +6,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 /** A LabelProvider that simply uses the <code>toString()</code> method
  * to determine an object's label.
  *
- * @author Matthias Basler
  */
 public class GeneralComboLabelProvider extends LabelProvider {
 

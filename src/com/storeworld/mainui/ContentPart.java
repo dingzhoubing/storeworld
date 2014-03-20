@@ -1,13 +1,15 @@
 package com.storeworld.mainui;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
+/**
+ * Content part definition
+ * all Contentpart based on this
+ * @author dingyuanxiong
+ *
+ */
 public class ContentPart extends UIComposite {
 	
 	public ContentPart(Composite parent, int style) {

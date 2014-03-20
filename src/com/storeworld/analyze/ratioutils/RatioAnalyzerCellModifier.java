@@ -1,4 +1,4 @@
-package com.storeworld.analyze.shipmentutils;
+package com.storeworld.analyze.ratioutils;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
@@ -8,11 +8,11 @@ import com.storeworld.stock.Stock;
 /**
  * cannot edit the table
  */
- public class SBrandAnalyzerCellModifier implements ICellModifier{
+ public class RatioAnalyzerCellModifier implements ICellModifier{
 		private TableViewer tv;//just in case
-		private SBrandResultList resultlist;	
+		private RatioResultList resultlist;	
 		
-		public SBrandAnalyzerCellModifier(TableViewer tv, SBrandResultList resultlist) {
+		public RatioAnalyzerCellModifier(TableViewer tv, RatioResultList resultlist) {
 			this.tv = tv;
 			this.resultlist = resultlist;
 		}
@@ -24,11 +24,13 @@ import com.storeworld.stock.Stock;
 
 	@Override
 	public Object getValue(Object element, String property) {
-		SBrandAnalyzer s = (SBrandAnalyzer) element;		
+		RatioAnalyzer s = (RatioAnalyzer) element;		
 		if(property.equals("sub_brand")){
 			return String.valueOf(s.getSubBrand());
 		} else if (property.equals("shipment")) {
-			return String.valueOf(s.getShipment());
+			return String.valueOf(s.getShipment_Profit());
+		} else if (property.equals("profit")) {
+			return String.valueOf(s.getShipment_Profit());
 		}else if (property.equals("ratio")) {
 			return String.valueOf(s.getRatio());
 		}

@@ -41,6 +41,12 @@ import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main part of the stock page
+ * @author dingyuanxiong
+ *
+ */
 public class StockContentPart extends ContentPart{
 	
 	private static Table table;
@@ -509,11 +515,11 @@ public class StockContentPart extends ContentPart{
 		editorCombo.horizontalAlignment = SWT.CENTER;
 		editorCombo.grabHorizontal = true;	
 
-		ICellModifier modifier = new MyStockCellModifier(tableViewer, stocklist);
+		ICellModifier modifier = new StockCellModifier(tableViewer, stocklist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyStockFilter());
+		tableViewer.addFilter(new StockFilter());
 		
 		refreshTable();
 		composite_right.setLayout(new FillLayout());

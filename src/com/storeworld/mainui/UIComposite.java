@@ -1,12 +1,15 @@
 package com.storeworld.mainui;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
+/**
+ * define & realize several common operations of all the UI Composites
+ * @author dingyuanxiong
+ *
+ */
 public class UIComposite extends Composite implements UIPart{
 	public Image image = null;
 	public Color foregroundcolor = null;

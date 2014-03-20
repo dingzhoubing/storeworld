@@ -1,38 +1,49 @@
-package com.storeworld.product;
+package com.storeworld.stock;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.product.Product;
+import com.storeworld.utils.Utils;
 
-public class MyCellModifier implements ICellModifier {
+/**
+ * make the stock table editable
+ * @author dingyuanxiong
+ *
+ */
+public class StockCellModifier implements ICellModifier {
 	private TableViewer tv;//just in case
-	private ProductList productlist;
+	private StockList stocklist;	
 
-	public MyCellModifier(TableViewer tv, ProductList productlist) {
+	public StockCellModifier(TableViewer tv, StockList stocklist) {
 		this.tv = tv;
-		this.productlist = productlist;
+		this.stocklist = stocklist;
 	}
 
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
-
+	
 	//when initial the table data
 	public Object getValue(Object element, String property) {
-		Product p = (Product) element;
+		Stock s = (Stock) element;		
 		if(property.equals("id")){
-			return String.valueOf(p.getID());
+			return String.valueOf(s.getID());
 		}else if (property.equals("brand")) {
-			return String.valueOf(p.getBrand());
+
+			return String.valueOf(s.getBrand());
 		} else if (property.equals("sub_brand")) {
-			return String.valueOf(p.getSubBrand());
+
+			return String.valueOf(s.getSubBrand());
 		} else if (property.equals("size")) {
-			return String.valueOf(p.getSize());
+			return String.valueOf(s.getSize());
 		}else if (property.equals("unit")) {
-			return String.valueOf(p.getUnit());
-		}else if (property.equals("repository")) {
-			return String.valueOf(p.getRepository());
+			return String.valueOf(s.getUnit());
+		}else if (property.equals("price")) {
+			return String.valueOf(s.getPrice());
+		}else if (property.equals("number")) {
+			return String.valueOf(s.getNumber());
 		}else if(property.equals("operation")){
 //			return String.valueOf("1");
 			return null;// show the operation button
@@ -43,44 +54,52 @@ public class MyCellModifier implements ICellModifier {
 
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
-		TableItem item = (TableItem) element;
-		Product p = (Product) item.getData();		
+		TableItem item = (TableItem) element;		
+		Stock s = (Stock) item.getData();		
 		if (property.equals("brand")) {
 			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
 			}			
-			p.setBrand(newValue);
+			s.setBrand(newValue);
+
 		} else if (property.equals("sub_brand")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
-			p.setSubBrand(newValue);
+			s.setSubBrand(newValue);
+
 		} else if (property.equals("size")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
-			p.setSize(newValue);
+			s.setSize(newValue);
 		} else if (property.equals("unit")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
-			p.setUnit(newValue);
-		} else if (property.equals("repository")) {
+			s.setUnit(newValue);
+		} else if (property.equals("price")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
-			p.setRepository(Integer.valueOf(newValue).intValue());
-		} else {
+			s.setPrice(newValue);
+		} else if (property.equals("number")) {
+			String newValue = (String) value;			
+			if (newValue.equals("")) {
+				return;
+			}			
+			s.setNumber(newValue);
+		}else {
 			return;//just return, do nothing
 //			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
 //		System.out.println("change?");
-		productlist.productChanged(p);
+		stocklist.stockChanged(s);
 	}
 
 }

@@ -1,5 +1,13 @@
 package com.storeworld.stock;
-public class Stock{
+
+import com.storeworld.common.DataInTable;
+
+/**
+ * the stock(½ø»õ) definition
+ * @author dingyuanxiong
+ *
+ */
+public class Stock extends DataInTable{
 	private String id;//the identifier of the record
 	private String brand;
 	private String sub_brand;

@@ -3,6 +3,11 @@ package com.storeworld.customer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+/**
+ * make the customer table sortable
+ * @author dingyuanxiong
+ *
+ */
 public class CustomerSorter extends ViewerSorter {
 		private static final int NAME = 1;
 		private static final int AREA = 2;

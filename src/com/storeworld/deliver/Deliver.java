@@ -1,5 +1,13 @@
 package com.storeworld.deliver;
-public class Deliver{
+
+import com.storeworld.common.DataInTable;
+
+/**
+ * define the deliver class
+ * @author dingyuanxiong
+ *
+ */
+public class Deliver extends DataInTable{
 	private String id;//the identifier of the record
 	private String brand;
 	private String sub_brand;

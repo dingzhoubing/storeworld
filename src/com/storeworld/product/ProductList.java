@@ -5,12 +5,20 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
 
+/**
+ * get the data in product table
+ * connect database
+ * @author dingyuanxiong
+ *
+ */
 public class ProductList {
 	
-	private ArrayList<Product> productList = new ArrayList<Product>();
+	private ArrayList<DataInTable> productList = new ArrayList<DataInTable>();
 	//hash set, so make it only has one of one kind
-	private Set<IProductListViewer> changeListeners = new HashSet<IProductListViewer>();
+	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 
 	
 	public ProductList() {
@@ -68,7 +76,7 @@ public class ProductList {
 		
 	}
 	
-	public ArrayList<Product> getProducts() {
+	public ArrayList<DataInTable> getProducts() {
 		return this.productList;
 	}
 	
@@ -78,9 +86,9 @@ public class ProductList {
 	public void addProduct() {
 		Product product = new Product();
 		this.productList.add(product);
-		Iterator<IProductListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).addProduct(product);
+			(iterator.next()).add(product);
 	}
 
 	/**
@@ -88,24 +96,24 @@ public class ProductList {
 	 */
 	public void removeProduct(Product product) {
 		this.productList.remove(product);
-		Iterator<IProductListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).removeProduct(product);
+			(iterator.next()).remove(product);
 	}
 
 	/**
 	 * @param update a product
 	 */
 	public void productChanged(Product product) {
-		Iterator<IProductListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).updateProduct(product);
+			(iterator.next()).update(product);
 	}
 
 	/**
 	 * @param may multi contentprovider?£¬ one remove
 	 */
-	public void removeChangeListener(IProductListViewer viewer) {
+	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
@@ -113,7 +121,7 @@ public class ProductList {
 	 * @param may multi contentprovider? one add
 	 * viewer is a content provider
 	 */
-	public void addChangeListener(IProductListViewer viewer) {
+	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	

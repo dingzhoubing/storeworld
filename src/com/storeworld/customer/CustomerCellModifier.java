@@ -4,12 +4,16 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
-
-public class MyCustomerCellModifier implements ICellModifier {
+/**
+ * modify the data of customer table
+ * @author dingyuanxiong
+ *
+ */
+public class CustomerCellModifier implements ICellModifier {
 	private TableViewer tv;//just in case
 	private CustomerList customerlist;
 
-	public MyCustomerCellModifier(TableViewer tv, CustomerList customerlist) {
+	public CustomerCellModifier(TableViewer tv, CustomerList customerlist) {
 		this.tv = tv;
 		this.customerlist = customerlist;
 	}

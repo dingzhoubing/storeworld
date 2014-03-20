@@ -18,12 +18,16 @@ import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.login.Login;
 import com.storeworld.product.ProductContentPart;
 import com.storeworld.stock.StockContentPart;
-import com.storeworld.stock.StockPart;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
+/**
+ * the main content part after login
+ * @author dingyuanxiong
+ *
+ */
 public class MainContentPart extends ContentPart{
 	
 	private int FONT_SIZE = 12;
@@ -63,7 +67,7 @@ public class MainContentPart extends ContentPart{
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 //				System.out.println("shell is null: "+ (shell==null));
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
-					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_STOCK) == null)
 					shell.setContentPart(new StockContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_STOCK);
 				shell.show_North_index();
@@ -92,7 +96,7 @@ public class MainContentPart extends ContentPart{
 				
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)
-					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_DELIVER) == null)
 					shell.setContentPart(new DeliverContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_DELIVER);
 				shell.show_North_index();
@@ -121,7 +125,7 @@ public class MainContentPart extends ContentPart{
 				
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
-					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_ANALYZE) == null)
 					shell.setContentPart(new AnalyzeContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_ANALYZE);
 				shell.show_North_index();
@@ -151,7 +155,7 @@ public class MainContentPart extends ContentPart{
 
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
-					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_PRODUCT) == null)
 					shell.setContentPart(new ProductContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_PRODUCT);
 				shell.show_North_index();
@@ -180,7 +184,7 @@ public class MainContentPart extends ContentPart{
 
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
-					shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_CUSTOMER) == null)
 					shell.setContentPart(new CustomerContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_CUSTOMER);
 				shell.show_North_index();

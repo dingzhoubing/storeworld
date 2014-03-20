@@ -35,6 +35,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main of the customer page
+ * @author dingyuanxiong
+ *
+ */
 public class CustomerContentPart extends ContentPart{
 	
 	private static Table table;
@@ -183,26 +189,7 @@ public class CustomerContentPart extends ContentPart{
 				}
 			}
 		});
-	}
-	
-	/**
-	 * after sort of the table column, refresh the table to show it
-	 */
-	public static void refreshTable(){
-//		System.out.println("table size: "+table.getItemCount());
-		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
-		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-		for(int i=0;i<table.getItemCount();i++){
-			TableItem item = table.getItem(i);
-			if(i%2 == 0){
-//				System.out.println("set row: "+i);
-				item.setBackground(color1);
-			}else{
-				item.setBackground(color2);
-			}
-		}
-		table.redraw();
-	}
+	}	
 	
 	/**
 	 * initialize the table elements
@@ -383,7 +370,7 @@ public class CustomerContentPart extends ContentPart{
 	   composite_firstname.layout();
 		
 
-	 //right part		
+	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
@@ -415,7 +402,7 @@ public class CustomerContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?CustomerSorter.NAME_ASC:CustomerSorter.NAME_DESC);
 				asc = !asc;				
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 
@@ -429,7 +416,7 @@ public class CustomerContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?CustomerSorter.AREA_ASC:CustomerSorter.AREA_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -443,7 +430,7 @@ public class CustomerContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?CustomerSorter.PHONE_ASC:CustomerSorter.PHONE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -457,7 +444,7 @@ public class CustomerContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?CustomerSorter.ADDRESS_ASC:CustomerSorter.ADDRESS_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -472,7 +459,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		//set the editor of the table columns
 		tableViewer.setContentProvider(new CustomerContentProvider(tableViewer, customerlist));
-		tableViewer.setLabelProvider(new TableLabelProvider());
+		tableViewer.setLabelProvider(new CustomerTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		tableViewer.setInput(customerlist);		
 		tableViewer.setColumnProperties(new String[]{"id","name","area","phone","address","operation"});		
@@ -493,13 +480,13 @@ public class CustomerContentPart extends ContentPart{
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	
 
-		ICellModifier modifier = new MyCustomerCellModifier(tableViewer, customerlist);
+		ICellModifier modifier = new CustomerCellModifier(tableViewer, customerlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyCustomerFilter());
+		tableViewer.addFilter(new CustomerFilter());
 		
-		refreshTable();
+		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
 		
 	}

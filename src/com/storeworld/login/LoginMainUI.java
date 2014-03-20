@@ -40,6 +40,7 @@ import com.storeworld.utils.Utils;
  * 
  * @author dingyuanxiong
  * the wheels of MainUI, a simple one
+ * to show the UI of the login page
  */
 public class LoginMainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {

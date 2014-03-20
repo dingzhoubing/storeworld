@@ -5,12 +5,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
 
+/**
+ * produce the data for deliver table
+ * @author dingyuanxiong
+ *
+ */
 public class DeliverList {
 	
-	private ArrayList<Deliver> deliverList = new ArrayList<Deliver>();
+	private ArrayList<DataInTable> deliverList = new ArrayList<DataInTable>();
 	//hash set, so make it only has one of one kind
-	private Set<IDeliverListViewer> changeListeners = new HashSet<IDeliverListViewer>();
+	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 
 	
 	public DeliverList() {
@@ -49,44 +56,44 @@ public class DeliverList {
 		
 	}
 	
-	public ArrayList<Deliver> getStocks() {
+	public ArrayList<DataInTable> getDelivers() {
 		return this.deliverList;
 	}
 	
 	/**
 	 * add a deliver
 	 */
-	public void addStock() {
+	public void addDeliver() {
 		Deliver deliver = new Deliver();
 		this.deliverList.add(deliver);
-		Iterator<IDeliverListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).addStock(deliver);
+			(iterator.next()).add(deliver);
 	}
 
 	/**
 	 * @param remove a deliver
 	 */
-	public void removeStock(Deliver deliver) {
+	public void removeDeliver(Deliver deliver) {
 		this.deliverList.remove(deliver);
-		Iterator<IDeliverListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).removeStock(deliver);
+			(iterator.next()).remove(deliver);
 	}
 
 	/**
 	 * @param update a deliver
 	 */
 	public void deliverChanged(Deliver deliver) {
-		Iterator<IDeliverListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).updateStock(deliver);
+			(iterator.next()).update(deliver);
 	}
 
 	/**
 	 * @param may multi contentprovider?£¬ one remove
 	 */
-	public void removeChangeListener(IDeliverListViewer viewer) {
+	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
@@ -94,7 +101,7 @@ public class DeliverList {
 	 * @param may multi contentprovider? one add
 	 * viewer is a content provider
 	 */
-	public void addChangeListener(IDeliverListViewer viewer) {
+	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	

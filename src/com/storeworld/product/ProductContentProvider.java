@@ -7,11 +7,19 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-public class ContentProvider implements IStructuredContentProvider, IProductListViewer{
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
+
+/**
+ * content provider & table operations on product page
+ * @author dingyuanxiong
+ *
+ */
+public class ProductContentProvider implements IStructuredContentProvider, IDataListViewer{
 		
 		private ProductList productlist;
 		private TableViewer tableviewer;
-		public ContentProvider(TableViewer tableviewer, ProductList productlist){
+		public ProductContentProvider(TableViewer tableviewer, ProductList productlist){
 			this.tableviewer = tableviewer;
 			this.productlist = productlist;
 		}
@@ -30,7 +38,7 @@ public class ContentProvider implements IStructuredContentProvider, IProductList
 	                ((ProductList) oldInput).removeChangeListener(this);
 		}
 		@Override
-		public void addProduct(Product product) {
+		public void add(DataInTable product) {
 			tableviewer.add(product);
 			MessageBox messageBox =   
 					   new MessageBox(new Shell(),   					     
@@ -41,7 +49,7 @@ public class ContentProvider implements IStructuredContentProvider, IProductList
 			
 		}
 		@Override
-		public void removeProduct(Product product) {
+		public void remove(DataInTable product) {
 			tableviewer.remove(product);
 			//no use later
 			MessageBox messageBox =   
@@ -52,7 +60,7 @@ public class ContentProvider implements IStructuredContentProvider, IProductList
 			
 		}
 		@Override
-		public void updateProduct(Product product) {
+		public void update(DataInTable product) {
 			tableviewer.update(product, null);			
 			
 		}

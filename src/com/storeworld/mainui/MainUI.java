@@ -28,7 +28,11 @@ import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
-//without west and east part, make the UI more clear
+/** without west and east part, make the UI more clear
+ *  the UI framework
+ *  @author dingyuanxiong
+ *
+ */
 public class MainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {
 

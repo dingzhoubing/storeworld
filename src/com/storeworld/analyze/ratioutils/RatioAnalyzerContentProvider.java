@@ -1,14 +1,20 @@
-package com.storeworld.analyze.shipmentutils;
+package com.storeworld.analyze.ratioutils;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-public class SBrandAnalyzerContentProvider implements IStructuredContentProvider{
+/**
+ * just a content provider, we cannot change the content
+ * of the table, so there is no need to realize the operators
+ * @author dingyuanxiong
+ *
+ */
+public class RatioAnalyzerContentProvider implements IStructuredContentProvider{
 	
-	private SBrandResultList resultlist;
+	private RatioResultList resultlist;
 	private TableViewer tableviewer;
-	public SBrandAnalyzerContentProvider(TableViewer tableviewer, SBrandResultList resultlist){
+	public RatioAnalyzerContentProvider(TableViewer tableviewer, RatioResultList resultlist){
 		this.tableviewer = tableviewer;
 		this.resultlist = resultlist;
 	}

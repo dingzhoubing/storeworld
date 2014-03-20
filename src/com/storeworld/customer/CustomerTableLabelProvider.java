@@ -4,7 +4,12 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class TableLabelProvider extends LabelProvider  implements ITableLabelProvider {
+/**
+ * get the label content of the customer table
+ * @author dingyuanxiong
+ *
+ */
+public class CustomerTableLabelProvider extends LabelProvider  implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Customer){
 				Customer c = (Customer)element;

@@ -5,19 +5,25 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
 
-public class CustomerList {
+/**
+ * the class to get all the customer data in table
+ * @author dingyuanxiong
+ *
+ */
+public class CustomerList{
 	
-	private ArrayList<Customer> customerList = new ArrayList<Customer>();
+	private ArrayList<DataInTable> customerList = new ArrayList<DataInTable>();
 	//hash set, so make it only has one of one kind
-	private Set<ICustomerListViewer> changeListeners = new HashSet<ICustomerListViewer>();
-
+//	private Set<ICustomerListViewer> changeListeners = new HashSet<ICustomerListViewer>();
+	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	
 	public CustomerList() {
 		super();
 		this.initial();
 	}
-	
 	//initial data, later, in database
 	public void initial(){		
 		String name = "¿œ¡ı";
@@ -50,7 +56,7 @@ public class CustomerList {
 		
 	}
 	
-	public ArrayList<Customer> getCustomers() {
+	public ArrayList<DataInTable> getCustomers() {
 		return this.customerList;
 	}
 	
@@ -60,9 +66,9 @@ public class CustomerList {
 	public void addCustomer() {
 		Customer customer = new Customer();
 		this.customerList.add(customer);
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).addCustomer(customer);
+			(iterator.next()).add(customer);
 	}
 
 	/**
@@ -70,24 +76,24 @@ public class CustomerList {
 	 */
 	public void removeCustomer(Customer customer) {
 		this.customerList.remove(customer);
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).removeCustomer(customer);
+			(iterator.next()).remove(customer);
 	}
 
 	/**
 	 * @param update a product
 	 */
 	public void customerChanged(Customer customer) {
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).updateCustomer(customer);
+			(iterator.next()).update(customer);
 	}
 
 	/**
 	 * @param may multi contentprovider?£¨ one remove
 	 */
-	public void removeChangeListener(ICustomerListViewer viewer) {
+	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
@@ -95,7 +101,7 @@ public class CustomerList {
 	 * @param may multi contentprovider? one add
 	 * viewer is a content provider
 	 */
-	public void addChangeListener(ICustomerListViewer viewer) {
+	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	

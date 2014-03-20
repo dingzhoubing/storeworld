@@ -1,5 +1,14 @@
 package com.storeworld.customer;
-public class Customer{
+
+import com.storeworld.common.DataInTable;
+
+/**
+ * define the class Customer
+ * @author dingyuanxiong
+ *
+ */
+
+public class Customer extends DataInTable{
 	private String id;//the identifier of the record
 	private String name;
 	private String area;
@@ -20,6 +29,10 @@ public class Customer{
 		this.phone = phone;
 		this.address = address;		
 	}
+	/**
+	 * each class should have an unique id
+	 * @return
+	 */
 	public String getID(){
 		return this.id;
 	}

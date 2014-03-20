@@ -1,5 +1,13 @@
 package com.storeworld.product;
-public class Product{
+
+import com.storeworld.common.DataInTable;
+
+/**
+ * definition of the product
+ * @author dingyuanxiong
+ *
+ */
+public class Product extends DataInTable{
 	private String id;//the identifier of the record
 	private String brand;
 	private String sub_brand;

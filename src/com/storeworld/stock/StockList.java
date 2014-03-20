@@ -5,12 +5,20 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
 
+/**
+ * get the data of the stock table
+ * connect database
+ * @author dingyuanxiong
+ *
+ */
 public class StockList {
 	
-	private ArrayList<Stock> stockList = new ArrayList<Stock>();
+	private ArrayList<DataInTable> stockList = new ArrayList<DataInTable>();
 	//hash set, so make it only has one of one kind
-	private Set<IStockListViewer> changeListeners = new HashSet<IStockListViewer>();
+	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 
 	
 	public StockList() {
@@ -49,7 +57,7 @@ public class StockList {
 		
 	}
 	
-	public ArrayList<Stock> getStocks() {
+	public ArrayList<DataInTable> getStocks() {
 		return this.stockList;
 	}
 	
@@ -59,9 +67,9 @@ public class StockList {
 	public void addStock() {
 		Stock stock = new Stock();
 		this.stockList.add(stock);
-		Iterator<IStockListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).addStock(stock);
+			(iterator.next()).add(stock);
 	}
 
 	/**
@@ -69,24 +77,24 @@ public class StockList {
 	 */
 	public void removeStock(Stock stock) {
 		this.stockList.remove(stock);
-		Iterator<IStockListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).removeStock(stock);
+			(iterator.next()).remove(stock);
 	}
 
 	/**
 	 * @param update a stock
 	 */
 	public void stockChanged(Stock stock) {
-		Iterator<IStockListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).updateStock(stock);
+			(iterator.next()).update(stock);
 	}
 
 	/**
 	 * @param may multi contentprovider?£¬ one remove
 	 */
-	public void removeChangeListener(IStockListViewer viewer) {
+	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
@@ -94,7 +102,7 @@ public class StockList {
 	 * @param may multi contentprovider? one add
 	 * viewer is a content provider
 	 */
-	public void addChangeListener(IStockListViewer viewer) {
+	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	

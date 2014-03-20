@@ -7,7 +7,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-public class StockContentProvider implements IStructuredContentProvider, IStockListViewer{
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
+
+/**
+ * provide data interface & table operations
+ * @author dingyuanxiong
+ *
+ */
+public class StockContentProvider implements IStructuredContentProvider, IDataListViewer{
 		
 		private StockList stocklist;
 		private TableViewer tableviewer;
@@ -30,7 +38,7 @@ public class StockContentProvider implements IStructuredContentProvider, IStockL
 	                ((StockList) oldInput).removeChangeListener(this);
 		}
 		@Override
-		public void addStock(Stock stock) {
+		public void add(DataInTable stock) {
 			tableviewer.add(stock);
 			MessageBox messageBox =   
 					   new MessageBox(new Shell(),   					     
@@ -41,7 +49,7 @@ public class StockContentProvider implements IStructuredContentProvider, IStockL
 			
 		}
 		@Override
-		public void removeStock(Stock stock) {
+		public void remove(DataInTable stock) {
 			tableviewer.remove(stock);
 			//no use later
 			MessageBox messageBox =   
@@ -52,7 +60,7 @@ public class StockContentProvider implements IStructuredContentProvider, IStockL
 			
 		}
 		@Override
-		public void updateStock(Stock stock) {
+		public void update(DataInTable stock) {
 			tableviewer.update(stock, null);			
 			
 		}

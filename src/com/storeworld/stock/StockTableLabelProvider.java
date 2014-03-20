@@ -4,6 +4,12 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * get the content part of the column in stock table
+ * and also the image of the column
+ * @author dingyuanxiong
+ *
+ */
 public class StockTableLabelProvider extends LabelProvider  implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Stock){

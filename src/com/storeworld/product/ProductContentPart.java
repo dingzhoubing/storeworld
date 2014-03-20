@@ -30,6 +30,12 @@ import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main part of the product page
+ * @author dingyuanxiong
+ *
+ */
 public class ProductContentPart extends ContentPart{
 	
 	private static Table table;
@@ -234,7 +240,7 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_1.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.BRAND_ASC:Sorter.BRAND_DESC);
+				tableViewer.setSorter(asc?ProductSorter.BRAND_ASC:ProductSorter.BRAND_DESC);
 				asc = !asc;				
 				refreshTable();
 			}
@@ -248,7 +254,7 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_2.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.SUB_BRAND_ASC:Sorter.SUB_BRAND_DESC);
+				tableViewer.setSorter(asc?ProductSorter.SUB_BRAND_ASC:ProductSorter.SUB_BRAND_DESC);
 				asc = !asc;
 				refreshTable();
 			}
@@ -262,7 +268,7 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_3.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.SIZE_ASC:Sorter.SIZE_DESC);
+				tableViewer.setSorter(asc?ProductSorter.SIZE_ASC:ProductSorter.SIZE_DESC);
 				asc = !asc;
 				refreshTable();
 			}
@@ -276,7 +282,7 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_4.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.UNIT_ASC:Sorter.UNIT_DESC);
+				tableViewer.setSorter(asc?ProductSorter.UNIT_ASC:ProductSorter.UNIT_DESC);
 				asc = !asc;
 				refreshTable();
 			}
@@ -290,7 +296,7 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_5.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.REPOSITORY_ASC:Sorter.REPOSITORY_DESC);
+				tableViewer.setSorter(asc?ProductSorter.REPOSITORY_ASC:ProductSorter.REPOSITORY_DESC);
 				asc = !asc;
 				refreshTable();
 			}
@@ -305,8 +311,8 @@ public class ProductContentPart extends ContentPart{
 		
 		
 		//set the editor of the table columns
-		tableViewer.setContentProvider(new ContentProvider(tableViewer, productlist));
-		tableViewer.setLabelProvider(new TableLabelProvider());
+		tableViewer.setContentProvider(new ProductContentProvider(tableViewer, productlist));
+		tableViewer.setLabelProvider(new ProductTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		tableViewer.setInput(productlist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","repository","operation"});		
@@ -317,7 +323,7 @@ public class ProductContentPart extends ContentPart{
 		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
 		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
 		cellEditor[5] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[6] = new ButtonCellEditor(tableViewer.getTable(), productlist, rowHeight);//ButtonCellEditor
+		cellEditor[6] = new ProductButtonCellEditor(tableViewer.getTable(), productlist, rowHeight);//ButtonCellEditor
 		tableViewer.setCellEditors(cellEditor);
 		
 		//initial the editor for hover and set the cell modifier
@@ -328,11 +334,11 @@ public class ProductContentPart extends ContentPart{
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	
 
-		ICellModifier modifier = new MyCellModifier(tableViewer, productlist);
+		ICellModifier modifier = new ProductCellModifier(tableViewer, productlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyFilter());
+		tableViewer.addFilter(new ProductFilter());
 		
 		refreshTable();
 		composite.setLayout(new FillLayout());

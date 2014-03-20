@@ -3,7 +3,12 @@ package com.storeworld.product;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
-public class Sorter extends ViewerSorter {
+/**
+ * make the product table sortable
+ * @author dingyuanxiong
+ *
+ */
+public class ProductSorter extends ViewerSorter {
 		private static final int BRAND = 1;
 		private static final int SUB_BRAND = 2;
 		private static final int SIZE = 3;
@@ -12,23 +17,23 @@ public class Sorter extends ViewerSorter {
 //		private static final int AVG_OUT = 6;
 		private static final int REPOSITORY = 5;
 		
-		public static final Sorter BRAND_ASC = new Sorter(BRAND);
-		public static final Sorter BRAND_DESC = new Sorter(-BRAND);
-		public static final Sorter SUB_BRAND_ASC = new Sorter(SUB_BRAND);
-		public static final Sorter SUB_BRAND_DESC = new Sorter(-SUB_BRAND);
-		public static final Sorter SIZE_ASC = new Sorter(SIZE);
-		public static final Sorter SIZE_DESC = new Sorter(-SIZE);
-		public static final Sorter UNIT_ASC = new Sorter(UNIT);
-		public static final Sorter UNIT_DESC = new Sorter(-UNIT);
+		public static final ProductSorter BRAND_ASC = new ProductSorter(BRAND);
+		public static final ProductSorter BRAND_DESC = new ProductSorter(-BRAND);
+		public static final ProductSorter SUB_BRAND_ASC = new ProductSorter(SUB_BRAND);
+		public static final ProductSorter SUB_BRAND_DESC = new ProductSorter(-SUB_BRAND);
+		public static final ProductSorter SIZE_ASC = new ProductSorter(SIZE);
+		public static final ProductSorter SIZE_DESC = new ProductSorter(-SIZE);
+		public static final ProductSorter UNIT_ASC = new ProductSorter(UNIT);
+		public static final ProductSorter UNIT_DESC = new ProductSorter(-UNIT);
 //		public static final Sorter AVG_IN_ASC = new Sorter(AVG_IN);
 //		public static final Sorter AVG_IN_DESC = new Sorter(-AVG_IN);
 //		public static final Sorter AVG_OUT_ASC = new Sorter(AVG_OUT);
 //		public static final Sorter AVG_OUT_DESC = new Sorter(-AVG_OUT);
-		public static final Sorter REPOSITORY_ASC = new Sorter(REPOSITORY);
-		public static final Sorter REPOSITORY_DESC = new Sorter(-REPOSITORY);
+		public static final ProductSorter REPOSITORY_ASC = new ProductSorter(REPOSITORY);
+		public static final ProductSorter REPOSITORY_DESC = new ProductSorter(-REPOSITORY);
 		
 		private int sortType ;
-		private Sorter(int sortType){
+		private ProductSorter(int sortType){
 			this.sortType = sortType;
 		}
 		public int compare(Viewer viewer, Object e1, Object e2) {

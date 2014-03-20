@@ -1,11 +1,12 @@
-package com.storeworld.deliver;
+package com.storeworld.product;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-public class MyDeliverFilter extends ViewerFilter {
+public class ProductFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-
+//		Product p = (Product) element;
+//		return p.getBrand().startsWith("Îå");
 		return true;
 	}
 }

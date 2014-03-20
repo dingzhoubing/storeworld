@@ -7,7 +7,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-public class DeliverContentProvider implements IStructuredContentProvider, IDeliverListViewer{
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
+
+/**
+ * content & operations on deliver table
+ * @author dingyuanxiong
+ *
+ */
+public class DeliverContentProvider implements IStructuredContentProvider, IDataListViewer{
 		
 		private DeliverList deliverlist;
 		private TableViewer tableviewer;
@@ -16,7 +24,7 @@ public class DeliverContentProvider implements IStructuredContentProvider, IDeli
 			this.deliverlist = deliverlist;
 		}
 		public Object[] getElements(Object inputElement) {
-			return deliverlist.getStocks().toArray();
+			return deliverlist.getDelivers().toArray();
 		}
 		
 		public void dispose() {
@@ -30,7 +38,7 @@ public class DeliverContentProvider implements IStructuredContentProvider, IDeli
 	                ((DeliverList) oldInput).removeChangeListener(this);
 		}
 		@Override
-		public void addStock(Deliver deliver) {
+		public void add(DataInTable deliver) {
 			tableviewer.add(deliver);
 			MessageBox messageBox =   
 					   new MessageBox(new Shell(),   					     
@@ -41,7 +49,7 @@ public class DeliverContentProvider implements IStructuredContentProvider, IDeli
 			
 		}
 		@Override
-		public void removeStock(Deliver deliver) {
+		public void remove(DataInTable deliver) {
 			tableviewer.remove(deliver);
 			//no use later
 			MessageBox messageBox =   
@@ -52,7 +60,7 @@ public class DeliverContentProvider implements IStructuredContentProvider, IDeli
 			
 		}
 		@Override
-		public void updateStock(Deliver deliver) {
+		public void update(DataInTable deliver) {
 			tableviewer.update(deliver, null);			
 			
 		}

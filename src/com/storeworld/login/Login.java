@@ -9,8 +9,11 @@ import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
 import com.storeworld.utils.Utils;
 
-//can make this one instance in the sysytem
-//wheels of the mainUI
+/**
+ * the entry point of the whole project
+ * @author dingyuanxiong
+ *
+ */
 public class Login {
 
 	public static void login() {

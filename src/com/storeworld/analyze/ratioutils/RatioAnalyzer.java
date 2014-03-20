@@ -1,26 +1,30 @@
-package com.storeworld.analyze.shipmentutils;
+package com.storeworld.analyze.ratioutils;
+
+import com.storeworld.common.DataInTable;
 
 /**
- * the Sub_Brand_Anayzer
+ * the RatioAnalyzer
  * @author dingyuanxiong
  *
  */
-public class SBrandAnalyzer {
+public class RatioAnalyzer extends DataInTable{
 	private String sub_brand;
-	private String shipment;
+	//it can be shipment or profit, as the type in the AnalyzerBase defined
+	private String shipment_profit;
 	private String ratio;
-
-	public SBrandAnalyzer() {
-
+	
+	public RatioAnalyzer() {
+		
 	}
 
-	public SBrandAnalyzer(String sub_brand, String shipment,
+	public RatioAnalyzer(String sub_brand, String shipment_profit,
 			String ratio) {
 		this.sub_brand = sub_brand;
-		this.shipment = shipment;
+		this.shipment_profit = shipment_profit;
 		this.ratio = ratio;
 	}
 
+	
 	public String getSubBrand() {
 		return this.sub_brand;
 	}
@@ -29,12 +33,12 @@ public class SBrandAnalyzer {
 		this.sub_brand = sub_brand;
 	}
 
-	public String getShipment() {
-		return this.shipment;
+	public String getShipment_Profit() {
+		return this.shipment_profit;
 	}
 
-	public void setShipmen(String shipment) {
-		this.shipment = shipment;
+	public void setShipment_Profit(String shipment_profit) {
+		this.shipment_profit = shipment_profit;
 	}
 
 	public String getRatio() {
@@ -48,7 +52,7 @@ public class SBrandAnalyzer {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(this.sub_brand + " ");
-		sb.append(this.shipment + " ");
+		sb.append(this.shipment_profit + " ");
 		sb.append(this.ratio);
 		return sb.toString();
 	}

@@ -1,5 +1,7 @@
 package com.storeworld.analyze;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -19,15 +21,29 @@ import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.storeworld.analyze.shipmentutils.ShipmentBlock;
+import com.storeworld.analyze.ratioutils.RatioBlock;
 import com.storeworld.mainui.ContentPart;
 
+/**
+ * 盘仓界面
+ * @author dingyuanxiong
+ *
+ */
 public class AnalyzeContentPart extends ContentPart{
-		
+	
+	/**
+	 * the base composite 
+	 */
 	private Composite current = null;
+	/**
+	 * the composite based on "current", add all controls on it
+	 */
 	private Composite composite = null;
 	private Text text_tips;
-	
+	/**
+	 * record all the analyzed result in this list, easy to remove all
+	 */
+	private ArrayList<AnalyzerBase> alys = new ArrayList<AnalyzerBase>();
 	
 	public AnalyzeContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -46,7 +62,9 @@ public class AnalyzeContentPart extends ContentPart{
 		final int h = current.getBounds().height;
 		composite.setBounds(0, 0, w, h);
 		
-		//left side navigate
+		/**
+		 * left side navigate
+		 */
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 255,240,245);
 		composite_left.setBackground(base);
@@ -55,11 +73,12 @@ public class AnalyzeContentPart extends ContentPart{
 		//expand bar
 		ExpandBar expandBar = new ExpandBar(composite_left, SWT.V_SCROLL);  
 	     {  
+	    	 //shipment expandbar
 	         Composite comp1 = new Composite(expandBar, SWT.NONE);  
 	         GridLayout gd = new GridLayout(1, false);
 	         gd.marginWidth=(int)(w/5/10);
 	         comp1.setLayout(gd);  
-
+	         //used for spacing the controls
 	         Label lbl_space2 = new Label(comp1, SWT.NONE);
 	         lbl_space2.setText("");
 	         lbl_space2.setVisible(false);
@@ -119,6 +138,7 @@ public class AnalyzeContentPart extends ContentPart{
 	        
 	     }  
 	     {  
+	    	 //the profit expandbar
 	         Composite comp2 = new Composite(expandBar, SWT.NONE);  
 	         GridLayout gd = new GridLayout(1, false);
 	         gd.marginWidth=(int)(w/5/10);
@@ -173,11 +193,15 @@ public class AnalyzeContentPart extends ContentPart{
 	        
 		
 
-	   //right part		
+	     /**
+	      * right part to show the analyzed result	
+	      */
+	    //right part base compoiste
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
 		
+		//text area to show the tips
 		StyledText styledText = new StyledText(composite_right, SWT.BORDER);
 		styledText.setBounds((int)(4*w/5/50), (int)(4*w/5/50), (int)(4*w/5/4), (int)(h/10));
 		styledText.setText("五得利最近一个月出货量\n"+"总计:15000包");
@@ -187,6 +211,9 @@ public class AnalyzeContentPart extends ContentPart{
 		styleRange.fontStyle  =  SWT.BOLD;
 		styledText.setStyleRange(styleRange);
 		
+		/**
+		 * the group buttons, showing the for kind of classification
+		 */
 		Composite composite_group = new Composite(composite_right, SWT.NONE);
 		composite_group.setBounds((int)(2*4*w/5/3), (int)(2*4*w/5/50/3), (int)(4*w/5/3-h/30), (int)(h/18));
 		GridLayout layout = new GridLayout(4, true);  
@@ -225,6 +252,9 @@ public class AnalyzeContentPart extends ContentPart{
         btn_all.setLayoutData(gd_text4);        
         composite_group.layout();
 
+        /**
+         * the scroll composite to show the analyzed table result and graph
+         */
         final Composite composite_main = new Composite(composite_right, SWT.BORDER);
         composite_main.setBounds(0, (int)(h/8+h/100), (int)(4*w/5), (int)(7*h/8-h/100));
         
@@ -245,10 +275,14 @@ public class AnalyzeContentPart extends ContentPart{
 		layout_content.marginWidth = 20;
         composite_content.setLayout(layout_content);
         composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        /**
+         * add the button listener for the classification
+         */
         btn_month.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
-        		BrandComposite bc = new BrandComposite(composite_content, 0, new ShipmentBlock());        		
+        		RatioComposite bc = new RatioComposite(composite_content, 0, new RatioBlock());    
+        		alys.add(bc);
                 composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
                 composite_content.layout(); 
         	}
@@ -257,12 +291,20 @@ public class AnalyzeContentPart extends ContentPart{
         btn_season.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
-        		TrendComposite tc = new TrendComposite(composite_content, 0, new ShipmentBlock());        		
+        		TrendComposite tc = new TrendComposite(composite_content, 0, new RatioBlock()); 
+        		alys.add(tc);
                 composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
                 composite_content.layout(); 
         	}
         });
-        
+        btn_year.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		for(int i=0;i<alys.size();i++){
+        			alys.get(i).remove();
+        		}
+        	}
+        });
         composite_content.layout();
         composite_scroll.layout();
         composite_main.layout();

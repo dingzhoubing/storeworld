@@ -3,15 +3,19 @@ package com.storeworld.login;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import com.storeworld.mainui.CoolBarPart;
 import com.storeworld.mainui.MainContentPart;
 import com.storeworld.mainui.MainUI;
-import com.storeworld.stock.StockPart;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
-//can make this one instance in the sysytem
+/**
+ * the entry part of the main content part
+ * @author dingyuanxiong
+ *
+ */
 public class EntryPoint {
 
 	public static void entry() {

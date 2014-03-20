@@ -1,11 +1,11 @@
-package com.storeworld.analyze.shipmentutils;
+package com.storeworld.analyze.ratioutils;
 
 /**
- * using this class to pass all the need args to the BrandComposite
+ * using this class to pass all the need args to the RatioComposite
  * @author dingyuanxiong
  *
  */
-public class ShipmentBlock {
+public class RatioBlock {
 	
 	private int rowHeight;//=30
 	private int width;
@@ -17,7 +17,7 @@ public class ShipmentBlock {
 	 * true: shipment
 	 * false: profit
 	 */
-	private boolean shipment_profit;
+	private boolean shipment_or_profit = true;
 	/**
 	 * to determin the type to analyze is: sub_brand or area
 	 * true: sub_brand
@@ -25,15 +25,37 @@ public class ShipmentBlock {
 	 */
 	private boolean sbrand_area;
 	
-	public ShipmentBlock(){}
-	public ShipmentBlock(int rowHeight, int width, int height,String brand, boolean shipment_profit, 
+	/**
+	 * the resultlist to be shown in table
+	 */	
+	private RatioResultList resultlist;
+	
+	public RatioBlock(){}
+	public RatioBlock(int rowHeight, int width, int height,String brand, boolean shipment_profit, 
 			boolean sbrand_area){
 		this.rowHeight = rowHeight;
 		this.width = width;
 		this.height = height;
 		this.brand = brand;
-		this.shipment_profit = shipment_profit;		
+		this.shipment_or_profit = shipment_profit;		
 		this.sbrand_area = sbrand_area;
+	}
+	public RatioBlock(int rowHeight, int width, int height,String brand, boolean shipment_profit, 
+			boolean sbrand_area,RatioResultList resultlist){
+		this.rowHeight = rowHeight;
+		this.width = width;
+		this.height = height;
+		this.brand = brand;
+		this.shipment_or_profit = shipment_profit;		
+		this.sbrand_area = sbrand_area;
+		this.resultlist = resultlist;
+	}
+	
+	public void setRatioResultList(RatioResultList resultlist){
+		this.resultlist = resultlist;
+	}
+	public RatioResultList getRatioResultList(){
+		return this.resultlist;
 	}
 	
 	public void setSbrand_Area(boolean type){
@@ -71,11 +93,11 @@ public class ShipmentBlock {
 		return this.brand;
 	}
 	
-	public void setShipment_Profit(boolean type){
-		this.shipment_profit = type;
+	public void setShipment_or_Profit(boolean type){
+		this.shipment_or_profit = type;
 	}
-	public boolean getShipment_Profit(){
-		return this.shipment_profit;
+	public boolean getShipment_or_Profit(){
+		return this.shipment_or_profit;
 	}
 	
 	

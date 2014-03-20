@@ -11,6 +11,12 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * the item in left navigate part
+ * the history items
+ * @author dingyuanxiong
+ *
+ */
 public class ItemComposite extends Composite {
 
 	private int id = 0;
@@ -25,6 +31,7 @@ public class ItemComposite extends Composite {
 		return this.id;
 	}
 	
+	//three text of the history item
 	private Text up = new Text(this, SWT.NONE);
 	private Text down_left = new Text(this, SWT.NONE);
 	private Text down_right = new Text(this, SWT.RIGHT | SWT.NONE);

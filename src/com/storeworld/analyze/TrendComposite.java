@@ -6,26 +6,34 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.storeworld.analyze.shipmentutils.ShipmentBlock;
+import com.storeworld.analyze.ratioutils.RatioBlock;
 
-public class TrendComposite extends Composite {
+/**
+ * show the trend graph of the result
+ * @author dingyuanxiong
+ *
+ */
+public class TrendComposite extends Composite implements AnalyzerBase{
 	
-	private ShipmentBlock args;
+	private RatioBlock args;
 	
-	public TrendComposite(Composite parent, int style, ShipmentBlock args) {
+	public TrendComposite(Composite parent, int style, RatioBlock args) {
 		super(parent, style);
 		this.args = args;
 
 		showComposite();
 	}
-	
-	private Image comuteTrend(){
+	/**
+	 * get the trend image and show it on the compiste
+	 * @return
+	 */
+	private Image computeTrend(){
 		Image image = null;
 		//compute to get the trend image
 		return image;
 	}
 	
-	private void showComposite(){
+	public void showComposite(){
 //		int width= args.getWidth();
 //		int height = args.getHeight();
 		
@@ -38,15 +46,18 @@ public class TrendComposite extends Composite {
 		lbl_title.setBounds(0, 0, (int)(width/10), (int)(height/20));
 		lbl_title.setText("äNÁ¿Ú…„Ý");
 		
-		Image image = comuteTrend();			
+		Image image = computeTrend();			
 		Composite composite_image  = new Composite(this, SWT.BORDER);
 		composite_image.setBackground(new Color(this.getDisplay(), 204, 250, 204));
 		composite_image.setBounds(0, (int)(height/20), (int)(width), (int)(5*height/10));		
-		
-		
-		
-		
-	}	
+
+	}
+	/**
+	 * release the source
+	 */
+	public void remove(){
+		this.dispose();
+	}
 	
 }
 

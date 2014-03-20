@@ -6,18 +6,26 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 
+/**
+ * the Utils class of the whole project
+ * @author dingyuanxiong
+ *
+ */
 public class Utils {
 	
 	//soft key board
@@ -26,7 +34,10 @@ public class Utils {
 	private static boolean clickButton = false;
 	private static boolean useSoftKeyBoard = true;
 	
+	//gray image
 	private static ImageLoader imageLoader = new ImageLoader();
+	
+	//map the layers in StackLayout
 	private static HashMap<NORTH_TYPE, Composite> northComps = new HashMap<NORTH_TYPE, Composite>();
 	private static HashMap<CONTENT_TYPE, Composite> contentComps = new HashMap<CONTENT_TYPE, Composite>();
 	private static HashMap<LOGIN_TYPE, Composite> loginComps = new HashMap<LOGIN_TYPE, Composite>();
@@ -57,6 +68,7 @@ public class Utils {
 			button_last.setEnabled(true);
 	}
 	
+	//record the comboValue
 	public static void setComboValue(String src){
 		comboValue = src;
 	}
@@ -64,7 +76,7 @@ public class Utils {
 		return comboValue;
 	}
 	
-	
+	//get the brands
 	public static List<String> getBrands(){
 		//get from database
 //		brands = new String[]{"五得利","五联","金龙"};
@@ -83,10 +95,12 @@ public class Utils {
 		}
 		return false;
 	}
+	//return an empty sub brands list
 	public static List<String> getSub_Brands(){
 		return sub_brands = new ArrayList<String>();
 	}
 	
+	//get the sub brands
 	public static List<String> getSub_Brands(String brand){
 		sub_brands  = new ArrayList<String>();
 		if(brand.equals("五得利")){
@@ -293,5 +307,21 @@ public class Utils {
 	public static Image getGrayImage(Image image){
 		return new Image(null,image, SWT.IMAGE_GRAY);
 	}
+	
+	public static void refreshTable(Table table){
+		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
+		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
+		for(int i=0;i<table.getItemCount();i++){
+			TableItem item = table.getItem(i);
+			if(i%2 == 0){
+				item.setBackground(color1);
+			}else{
+				item.setBackground(color2);
+			}
+		}
+		table.redraw();
+	}
+	
+	
 	
 }

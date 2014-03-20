@@ -43,6 +43,12 @@ import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main class of the deliver page
+ * @author dingyuanxiong
+ *
+ */
 public class DeliverContentPart extends ContentPart{
 	
 	private static Table table;
@@ -215,25 +221,6 @@ public class DeliverContentPart extends ContentPart{
 				}
 			}
 		});
-	}
-	
-	/**
-	 * after sort of the table column, refresh the table to show it
-	 */
-	public static void refreshTable(){
-//		System.out.println("table size: "+table.getItemCount());
-		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
-		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-		for(int i=0;i<table.getItemCount();i++){
-			TableItem item = table.getItem(i);
-			if(i%2 == 0){
-//				System.out.println("set row: "+i);
-				item.setBackground(color1);
-			}else{
-				item.setBackground(color2);
-			}
-		}
-		table.redraw();
 	}
 	
 	
@@ -528,7 +515,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.BRAND_ASC:DeliverSorter.BRAND_DESC);
 				asc = !asc;				
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 
@@ -542,7 +529,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.SUB_BRAND_ASC:DeliverSorter.SUB_BRAND_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -556,7 +543,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.SIZE_ASC:DeliverSorter.SIZE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -570,7 +557,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.UNIT_ASC:DeliverSorter.UNIT_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
@@ -583,7 +570,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.PRICE_ASC:DeliverSorter.PRICE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
@@ -596,7 +583,7 @@ public class DeliverContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?DeliverSorter.NUMBER_ASC:DeliverSorter.NUMBER_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -619,10 +606,10 @@ public class DeliverContentPart extends ContentPart{
 		cellEditor[0] = null;//ID
 //		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
 //		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
-		GeneralComboCellEditor comboboxCellEditor = new GeneralComboCellEditor(tableViewer.getTable(), Utils.getBrands(), true);
+		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands(), true);
 		comboboxCellEditor.setActivationStyle(SWT.Expand);
 		cellEditor[1] = comboboxCellEditor;		
-		GeneralComboCellEditor comboboxCellEditor2 = new GeneralComboCellEditor(tableViewer.getTable(), Utils.getSub_Brands(), true);
+		GeneralComboCellEditor<String> comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands(), true);
 		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
 		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
@@ -644,13 +631,13 @@ public class DeliverContentPart extends ContentPart{
 		editorCombo.horizontalAlignment = SWT.CENTER;
 		editorCombo.grabHorizontal = true;	
 		
-		ICellModifier modifier = new MyDeliverCellModifier(tableViewer, deliverlist);
+		ICellModifier modifier = new DeliverCellModifier(tableViewer, deliverlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyDeliverFilter());
+		tableViewer.addFilter(new DeliverFilter());
 		
-		refreshTable();
+		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
 		
 

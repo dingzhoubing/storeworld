@@ -16,7 +16,7 @@ import java.util.List;
 
  */
 
-public abstract class ObjectExternalizable implements IStoreworld,commonDTO{
+public abstract class ObjectExternalizable implements IStoreworld,CommonDTO{
 
 	public String readUTF(ObjectInput in) throws IOException {
 		byte exist = in.readByte();

@@ -220,8 +220,8 @@ public class CustomerInfoService extends BaseAction{
 				customerInfoDto.setCustomer_area((String) retMap.get("customer_area"));
 				customerInfoDto.setCustomer_name((String) retMap.get("customer_name"));
 				customerInfoDto.setReserve1((String) retMap.get("reserve1"));
-				customerInfoDto.setReserve1((String) retMap.get("reserve2"));
-				customerInfoDto.setReserve1((String) retMap.get("reserve3"));
+				customerInfoDto.setReserve2((String) retMap.get("reserve2"));
+				customerInfoDto.setReserve3((String) retMap.get("reserve3"));
 				customerInfoDto.setTelephone((String) retMap.get("telephone"));
 				customerInfoDto.setCustomer_addr((String) retMap.get("customer_addr"));
 				customerInfoList.add(customerInfoDto);
@@ -303,8 +303,8 @@ public class CustomerInfoService extends BaseAction{
 				customerInfoDto.setCustomer_area((String) retMap.get("customer_area"));
 				customerInfoDto.setCustomer_name((String) retMap.get("customer_name"));
 				customerInfoDto.setReserve1((String) retMap.get("reserve1"));
-				customerInfoDto.setReserve1((String) retMap.get("reserve2"));
-				customerInfoDto.setReserve1((String) retMap.get("reserve3"));
+				customerInfoDto.setReserve2((String) retMap.get("reserve2"));
+				customerInfoDto.setReserve3((String) retMap.get("reserve3"));
 				customerInfoDto.setTelephone((String) retMap.get("telephone"));
 				customerInfoDto.setCustomer_addr((String) retMap.get("customer_addr"));
 				customerInfoList.add(customerInfoDto);

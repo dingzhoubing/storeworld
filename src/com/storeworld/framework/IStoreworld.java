@@ -1,5 +1,8 @@
 package com.storeworld.framework;
 
-public class IStoreworld {
+import java.io.Externalizable;
+import java.io.Serializable;
+
+public interface IStoreworld extends Externalizable,Serializable{
 
 }

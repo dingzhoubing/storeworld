@@ -100,7 +100,7 @@ public class CustomerInfoService extends BaseAction{
 	 * @throws Exception
 	 */
 	public boolean deleteCustomerInfo(String id) throws Exception{
-		String sql="delete from customer_info ci where ci.id=?";
+		String sql="delete from customer_info where id=?";
 		Object[] params_temp={id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {

@@ -21,8 +21,8 @@ public class StockInfo implements java.io.Serializable{
 
 	}
 
-	public StockInfo(String brand,String sub_brand,float unit_price,String unit,
-	String standard,int quantity,String stock_time,String stock_from,
+	public StockInfo(String brand,String sub_brand,Float unit_price,String unit,
+	String standard,Integer quantity,String stock_time,String stock_from,
 	String reserve1,String reserve2,String reserve3){
 		this.brand=brand;
 		this.sub_brand=sub_brand;
@@ -61,11 +61,11 @@ public class StockInfo implements java.io.Serializable{
 		this.sub_brand = sub_brand;
 	}
 
-	public float getUnit_price() {
+	public Float getUnit_price() {
 		return unit_price;
 	}
 
-	public void setUnit_price(float unit_price) {
+	public void setUnit_price(Float unit_price) {
 		this.unit_price = unit_price;
 	}
 
@@ -85,11 +85,11 @@ public class StockInfo implements java.io.Serializable{
 		this.standard = standard;
 	}
 
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
 

@@ -13,7 +13,7 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 	private Float unit_price;
 	private String unit;
 	private String standard;
-	private int repertory; 
+	private Integer repertory; 
 	private String reserve1;
 	private String reserve2;
 	private String reserve3;
@@ -66,10 +66,10 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 	public void setSub_brand(String sub_brand) {
 		this.sub_brand = sub_brand;
 	}
-	public float getUnit_price() {
+	public Float getUnit_price() {
 		return unit_price;
 	}
-	public void setUnit_price(float unit_price) {
+	public void setUnit_price(Float unit_price) {
 		this.unit_price = unit_price;
 	}
 	public String getUnit() {
@@ -84,10 +84,10 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 	public void setStandard(String standard) {
 		this.standard = standard;
 	}
-	public int getRepertory() {
+	public Integer getRepertory() {
 		return repertory;
 	}
-	public void setRepertory(int repertory) {
+	public void setRepertory(Integer repertory) {
 		this.repertory = repertory;
 	}
 	public String getReserve1() {

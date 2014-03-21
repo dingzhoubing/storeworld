@@ -8,17 +8,18 @@ import com.storeworld.framework.ObjectExternalizable;
 
 public class DeliverInfoDTO extends ObjectExternalizable{
 
+	private String id;
 	private String customer_area;
 	private String customer_name;
 	private String deliver_addr;
 	private String order_num;
 	private String brand;
 	private String sub_brand;
-	private float unit_price;
+	private Float unit_price;
 	private String unit;
-	private int quantity;
-	private float total_price;
-	private float real_price;
+	private Integer quantity;
+	private Float total_price;
+	private Float real_price;
 	private String deliver_time;
 	private String standard;
 	private String stock_from;
@@ -36,6 +37,7 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	 */
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
+		this.id = readUTF(in);
 		this.customer_area = readUTF(in);
 		this.customer_name = readUTF(in);
 		this.deliver_addr = readUTF(in);
@@ -63,6 +65,7 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	 * @throws IOException
 	 */
 	public void writeExternal(ObjectOutput out) throws IOException {
+		writeUTF(out, this.id);
 		writeUTF(out, this.customer_area);
 		writeUTF(out, this.customer_name);
 		writeUTF(out, this.deliver_addr);
@@ -83,6 +86,16 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 		writeUTF(out, this.reserve2);
 		writeUTF(out, this.reserve3);
 	}
+	
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getCustomer_area() {
 		return customer_area;
 	}
@@ -119,10 +132,10 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	public void setSub_brand(String sub_brand) {
 		this.sub_brand = sub_brand;
 	}
-	public float getUnit_price() {
+	public Float getUnit_price() {
 		return unit_price;
 	}
-	public void setUnit_price(float unit_price) {
+	public void setUnit_price(Float unit_price) {
 		this.unit_price = unit_price;
 	}
 	public String getUnit() {
@@ -131,22 +144,22 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	public void setUnit(String unit) {
 		this.unit = unit;
 	}
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	public float getTotal_price() {
+	public Float getTotal_price() {
 		return total_price;
 	}
-	public void setTotal_price(float total_price) {
+	public void setTotal_price(Float total_price) {
 		this.total_price = total_price;
 	}
-	public float getReal_price() {
+	public Float getReal_price() {
 		return real_price;
 	}
-	public void setReal_price(float real_price) {
+	public void setReal_price(Float real_price) {
 		this.real_price = real_price;
 	}
 	public String getDeliver_time() {

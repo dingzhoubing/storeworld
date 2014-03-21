@@ -322,6 +322,11 @@ public class Utils {
 		table.redraw();
 	}
 	
-	
+	public static boolean isNotNull(String str) {
+		if (str != null && str.trim().length() > 0
+				&& !("null".equals(str.trim().toLowerCase())))
+			return true;
+		return false;
+	}
 	
 }

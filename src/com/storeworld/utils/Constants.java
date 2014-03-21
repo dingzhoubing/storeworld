@@ -24,6 +24,10 @@ public class Constants {
 	public static final String MIN_OVER_IMAGE = "minOverImage";
 	public static final String MIN_DOWN_IMAGE = "minDownImage";
 	
+	public static final String USERNAME = "root";//”√ªß√˚
+	public static final String PASSWORD = "";//√‹¬Î
+	public static final String DRIVER = "com.mysql.jdbc.Driver";
+	public static final String URL="jdbc:mysql://127.0.0.1:3306/storeworld";
 	//login
     public enum LOGIN_TYPE {
     	LOGIN_BOTTOM,  LOGIN_INPUT; 

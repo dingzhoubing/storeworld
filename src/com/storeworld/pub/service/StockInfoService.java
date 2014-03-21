@@ -44,7 +44,15 @@ public class StockInfoService extends BaseAction{
 				box.setMessage("插入记录失败！");
 				box.open();
 				return;*/
+		}else if(snum==1){
+			try{
+				GoodsInfoService tempService=new GoodsInfoService();
+				tempService.addGoodsInfo(map);
+			}catch(Exception e){
+				System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
 			}
+		}
+		
 		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -88,6 +96,7 @@ public class StockInfoService extends BaseAction{
 		return true;
 	}
 	
+	
 	/**
 	 * 批量新增进货信息
 	 * @param listMap 装的是多条进货信息
@@ -112,13 +121,13 @@ public class StockInfoService extends BaseAction{
 	}
 	
 	/**
-	 * 删除一条进货信息，用ID标识。
+	 * 删除一条进货信息，用ID标识。delete操作表不能用别名
 	 * @param id
 	 * @return
 	 * @throws Exception
 	 */
 	public boolean deleteStockInfo(String id) throws Exception{
-		String sql="delete from stock_info si where si.id=?";
+		String sql="delete from stock_info where id=?";
 		Object[] params_temp={id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {

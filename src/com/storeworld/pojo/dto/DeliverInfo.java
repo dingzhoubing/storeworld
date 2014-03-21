@@ -9,11 +9,11 @@ public class DeliverInfo implements java.io.Serializable{
 	private String order_num;
 	private String brand;
 	private String sub_brand;
-	private float unit_price;
+	private Float unit_price;
 	private String unit;
-	private int quantity;
-	private float total_price;
-	private float real_price;
+	private Integer quantity;
+	private Float total_price;
+	private Float real_price;
 	private String deliver_time;
 	private String standard;
 	private String stock_from;
@@ -24,8 +24,8 @@ public class DeliverInfo implements java.io.Serializable{
 	private String reserve3;
 
 	public DeliverInfo(String customer_area,String customer_name,String deliver_addr,
-			String order_num,String brand,String sub_brand,float unit_price,
-			String unit,int quantity,float total_price,float real_price,String deliver_time,
+			String order_num,String brand,String sub_brand,Float unit_price,
+			String unit,Integer quantity,Float total_price,Float real_price,String deliver_time,
 			String standard,String stock_from,String is_print,String telephone,
 			String reserve1,String reserve2,String reserve3){
 		this.customer_area=customer_area;
@@ -110,11 +110,11 @@ public class DeliverInfo implements java.io.Serializable{
 		this.sub_brand = sub_brand;
 	}
 
-	public float getUnit_price() {
+	public Float getUnit_price() {
 		return unit_price;
 	}
 
-	public void setUnit_price(float unit_price) {
+	public void setUnit_price(Float unit_price) {
 		this.unit_price = unit_price;
 	}
 
@@ -126,27 +126,27 @@ public class DeliverInfo implements java.io.Serializable{
 		this.unit = unit;
 	}
 
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
 
-	public float getTotal_price() {
+	public Float getTotal_price() {
 		return total_price;
 	}
 
-	public void setTotal_price(float total_price) {
+	public void setTotal_price(Float total_price) {
 		this.total_price = total_price;
 	}
 
-	public float getReal_price() {
+	public Float getReal_price() {
 		return real_price;
 	}
 
-	public void setReal_price(float real_price) {
+	public void setReal_price(Float real_price) {
 		this.real_price = real_price;
 	}
 

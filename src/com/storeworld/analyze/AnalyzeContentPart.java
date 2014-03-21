@@ -16,9 +16,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.storeworld.analyze.ratioutils.RatioBlock;
@@ -255,15 +257,22 @@ public class AnalyzeContentPart extends ContentPart{
         /**
          * the scroll composite to show the analyzed table result and graph
          */
-        final Composite composite_main = new Composite(composite_right, SWT.BORDER);
+        final Composite composite_main = new Composite(composite_right, SWT.NONE);
         composite_main.setBounds(0, (int)(h/8+h/100), (int)(4*w/5), (int)(7*h/8-h/100));
         
         composite_main.setBackground(new Color(composite.getDisplay(), 255,240,245));
         composite_main.setLayout(new FillLayout());
         final ScrolledComposite composite_scroll = new ScrolledComposite(composite_main,  SWT.NONE|SWT.V_SCROLL);//
-		composite_scroll.setVisible(true);
+//		composite_scroll.setVisible(true);
 		composite_scroll.setExpandHorizontal(true);  
 		composite_scroll.setExpandVertical(true);  
+		composite_scroll.addListener(SWT.Activate, new Listener(){    
+			public void handleEvent(Event e){
+				//need to forceFocus
+				composite_scroll.forceFocus();
+//				composite_scroll.setFocus(); 
+				}
+		}); 
 		final Composite composite_content = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_content);
 		composite_content.setBackground(new Color(composite.getDisplay(), 255,240,245));
@@ -303,10 +312,13 @@ public class AnalyzeContentPart extends ContentPart{
         		for(int i=0;i<alys.size();i++){
         			alys.get(i).remove();
         		}
+				composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
+				composite_content.layout();  
         	}
         });
-        composite_content.layout();
-        composite_scroll.layout();
         composite_main.layout();
+        composite_content.layout();
+//        composite_scroll.layout();
+
 	}
 }

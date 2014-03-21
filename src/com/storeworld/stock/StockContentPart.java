@@ -276,6 +276,13 @@ public class StockContentPart extends ContentPart{
 		composite_scroll.setVisible(true);
 		composite_scroll.setExpandHorizontal(true);  
 		composite_scroll.setExpandVertical(true);  
+		//make the scroll bar move as the mouse wheel
+		composite_scroll.addListener(SWT.Activate, new Listener(){    
+			public void handleEvent(Event e){      
+				composite_scroll.forceFocus();
+//				composite_scroll.setFocus();   
+				}
+		}); 
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
 		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
@@ -487,12 +494,12 @@ public class StockContentPart extends ContentPart{
 //		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
 //		cellEditor[1] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getBrands(),SWT.NONE);	
 //		ComboBoxCellEditor comboboxCellEditor = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
-		GeneralComboCellEditor comboboxCellEditor = new GeneralComboCellEditor(tableViewer.getTable(), Utils.getBrands(), true);
+		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands(), true);
 		comboboxCellEditor.setActivationStyle(SWT.Expand);
 		cellEditor[1] = comboboxCellEditor;
 //		ComboBoxCellEditor comboboxCellEditor2 = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
 		
-		GeneralComboCellEditor comboboxCellEditor2 = new GeneralComboCellEditor(tableViewer.getTable(), Utils.getSub_Brands(), true);
+		GeneralComboCellEditor<String> comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands(), true);
 		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
 //		cellEditor[2] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getSub_Brands(),SWT.NONE);

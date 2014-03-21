@@ -64,7 +64,7 @@ public class Utils {
 		//make the image in the button be gray
 		if(button_current != null)
 			button_current.setEnabled(false);
-		if(button_last != null)
+		if(button_last != null && button_last != button_current)// avoid click index directly
 			button_last.setEnabled(true);
 	}
 	

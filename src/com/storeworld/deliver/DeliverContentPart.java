@@ -258,6 +258,12 @@ public class DeliverContentPart extends ContentPart{
 		final ScrolledComposite composite_scroll = new ScrolledComposite(composite_2, SWT.V_SCROLL);//	
 		composite_scroll.setExpandHorizontal(true);  
 		composite_scroll.setExpandVertical(true);  
+		composite_scroll.addListener(SWT.Activate, new Listener(){    
+			public void handleEvent(Event e){     
+				composite_scroll.forceFocus();
+//				composite_scroll.setFocus();   
+				}
+		}); 
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
 		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));

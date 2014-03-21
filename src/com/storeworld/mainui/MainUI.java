@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.storeworld.utils.Constants.CONTENT_TYPE;
@@ -116,6 +117,8 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	public void show_North_index(){
 		Button btn_current = null;
 		Button btn_last = null;
+
+		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
 		switch(Utils.getFunction()){
 		case STOCK:
 			btn_current = Utils.getFunc_Button().get(FUNCTION.STOCK);
@@ -155,7 +158,6 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			break;			
 		}
 		Utils.grayButton(btn_current, btn_last);
-		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
 		northpart.layout();
 		
 	} 
@@ -276,7 +278,8 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 								- northeastpart.getImage().getBounds().width
 								- closeImage.getBounds().width
 								- minImage.getBounds().width, image_up
-								.getBounds().height);
+								.getBounds().height);		
+		
 		closeButton.setBounds(w - northeastpart.getImage().getBounds().width
 				- closeImage.getBounds().width, 0,
 				closeImage.getBounds().width, closeImage.getBounds().height);
@@ -315,7 +318,13 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 						w, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
 //				System.out.println(northpart.getBounds().toString()+" northpart");
 			}
-			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
+			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);
+			final Label lbl_title = new Label(up, SWT.NONE);
+			lbl_title.setBounds(0, 0, (int)(5*w/18),(int)(w/18/3));
+			lbl_title.setBackground(new Color(up.getDisplay(),63, 63,63));
+			lbl_title.setForeground(new Color(up.getDisplay(),255, 255,255));
+			lbl_title.setText("钱多多 - 进出货小助手");
+			
 			northpart.setLayout(northLayout);
 		}
 		if (southwestpart == null){

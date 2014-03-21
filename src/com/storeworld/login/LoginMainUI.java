@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.storeworld.mainui.ContentPart;
@@ -203,6 +204,12 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 			}
 //			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
 			northpart.setLayout(northLayout);
+			//show the title
+			final Label lbl_title = new Label(up, SWT.NONE);
+			lbl_title.setBounds(0, 0, (int)(5*w/18),(int)(w/18/2));
+			lbl_title.setBackground(new Color(up.getDisplay(),63, 63,63));
+			lbl_title.setForeground(new Color(up.getDisplay(),255, 255,255));
+			lbl_title.setText("钱多多 - 进出货小助手");
 		}
 		if (southwestpart == null){
 			southwestpart = new SouthWestPart(this, SWT.NONE, null);

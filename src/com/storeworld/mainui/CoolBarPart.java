@@ -1,5 +1,7 @@
 package com.storeworld.mainui;
 
+import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,7 +33,7 @@ public class CoolBarPart extends NorthPart{
 //	private Button button_last;
 	
 	public CoolBarPart(Composite parent, int style, Image image, Color color) {
-		super(parent, style, new Image(parent.getDisplay(), "icon/north.png"));
+		super(parent, style, new Image(parent.getDisplay(), "icon/north.png"));//style
 		current = parent;
 		initialization();
 	}
@@ -40,6 +42,7 @@ public class CoolBarPart extends NorthPart{
 	public void initialization(){
 		int w = current.getBounds().width;
 		int h = current.getBounds().height;
+		
 		final Button button_index = new Button(this, SWT.NONE);
 		button_index.setBounds((int)(w*0.03), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_index.setText("Ê×í“");

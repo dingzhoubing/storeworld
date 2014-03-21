@@ -30,9 +30,7 @@ public class EntryPoint {
 			shell.setSize(screenW, screenH);
 			shell.setRatio(0.15);
 			shell.setup();
-//			shell.setNorthPart(new StockPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
 			shell.setContentPart(new MainContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_MAIN);
-//			shell.show_North_index();
 			shell.show_Content_main();
 
 			Utils.center(shell);

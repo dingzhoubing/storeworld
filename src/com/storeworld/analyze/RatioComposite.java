@@ -51,6 +51,7 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		this.args = args;
 		resultlist = args.getRatioResultList();
 		showComposite();
+//		this.layout();
 	}	
 	
 	public void showComposite(){

@@ -36,6 +36,7 @@ public class BaseAction {
     	}
     	try{
     		connection = (Connection) DriverManager.getConnection(Constants.URL,Constants.USERNAME,Constants.PASSWORD);
+    		//connection.setAutoCommit(false);   // 设置连接不自动提交，即用该连接进行的操作都不更新到数据库  
     	}catch(SQLException e){
     		e.printStackTrace();
     	}

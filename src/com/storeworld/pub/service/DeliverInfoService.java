@@ -199,13 +199,13 @@ public class DeliverInfoService extends BaseAction{
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean batchUpdateDeliverInfo(List<String> listId,List<Map<String,Object>> listCommonMap,List<Map<String,Object>> listUniMap) throws Exception{
+	public boolean batchUpdateDeliverInfo(List<String> listId,Map<String,Object> commonMap,List<Map<String,Object>> listUniMap) throws Exception{
 
 		boolean ret_total=true;//执行批量更新的返回值
 		int num=listId.size();
 		try{
 			for(int j=0;j<num;j++){
-				boolean ret_one=updateDeliverInfo(listId.get(j),listCommonMap.get(j),listUniMap.get(j));//执行一次更新的结果
+				boolean ret_one=updateDeliverInfo(listId.get(j),commonMap,listUniMap.get(j));//执行一次更新的结果
 				if(ret_one!=true){
 					ret_total=false;
 					return ret_total;

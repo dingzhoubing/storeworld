@@ -9,10 +9,8 @@ import java.util.Map;
 import com.storeworld.framework.ObjectExternalizable;
 
 /**
- * CCB-COS copyright ccb 2009<br>
+ * CCB-COS copyright ccb 2014<br>
  * author : sunbingbing<br>
- * company : CCB <br>
- * 
  * @version : 1.0<br>
  *          Description :
  */

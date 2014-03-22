@@ -11,10 +11,9 @@ import com.storeworld.framework.ObjectExternalizable;
 
 
 /**
- * CCB-COS copyright ccb 2009<br>
- * author : Œ‚‘®<br>
- * company : CCB <br>
- * Create at: 2009-10-13
+ * CCB-COS copyright ccb 2014<br>
+ * author : sunbingbing<br>
+ * Create at: 2014-10-13
  * 
  * 
  

@@ -74,6 +74,7 @@ public class ProductList {
 		Product prod5 = new Product("5", brand5, subbrand5, size5, unit5, repository5+"");
 		productList.add(prod5);				
 		
+		ProductUtils.setNewLineID("6");
 	}
 	
 	public ArrayList<DataInTable> getProducts() {

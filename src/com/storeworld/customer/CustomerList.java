@@ -71,16 +71,14 @@ public class CustomerList{
 		Customer cus4 = new Customer("4",name4, area4, phone4, address4);
 		customerList.add(cus4);
 		
+		//by the list of Customer from database
+		CustomerUtils.setNewLineID("5");
+		
 	}
 	
 	public ArrayList<DataInTable> getCustomers() {
-//		String name4 = "温家宝";
-//		String area4 = "安陆";
-//		String phone4 = "1357245478";
-//		String address4 = "深光路14号";
-//		System.out.println("call once");
-//		Customer cus_new = new Customer("5");
-//		customerList.add(cus_new);
+
+//		CustomerFilter.initialFilterOut(customerList);
 		return this.customerList;
 	}
 	

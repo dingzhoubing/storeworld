@@ -40,11 +40,11 @@ public class ProductContentProvider implements IStructuredContentProvider, IData
 		@Override
 		public void add(DataInTable product) {
 			tableviewer.add(product);
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("add product: "+product);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("add product: "+product);   
+//			messageBox.open(); 
 //			System.out.println(product);
 			
 		}
@@ -52,11 +52,11 @@ public class ProductContentProvider implements IStructuredContentProvider, IData
 		public void remove(DataInTable product) {
 			tableviewer.remove(product);
 			//no use later
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("remove product: "+product);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("remove product: "+product);   
+//			messageBox.open(); 
 			
 		}
 		@Override

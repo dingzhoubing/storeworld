@@ -76,5 +76,20 @@ public class Customer extends DataInTable{
 		sb.append(this.address+" ");
 		return sb.toString();
 	}
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Customer){
+			Customer cus_obj = (Customer)obj;
+			if(this.getID().equals(cus_obj.getID()))
+				return true;
+			else
+				return false;
+		}else
+			return false;
+	}
+	
+	
+	
+	
 	
 }

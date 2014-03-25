@@ -53,11 +53,11 @@ public class CustomerContentProvider implements IStructuredContentProvider, IDat
 		public void remove(DataInTable customer) {
 			tableviewer.remove(customer);
 			//no use later
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("remove customer: "+customer);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("remove customer: "+customer);   
+//			messageBox.open(); 
 			
 		}
 		@Override

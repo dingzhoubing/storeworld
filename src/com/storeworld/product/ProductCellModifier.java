@@ -183,7 +183,7 @@ public class ProductCellModifier implements ICellModifier {
 				productlist.productChanged(p);
 				if (ProductValidator.checkID(p.getID()) && ProductValidator.rowLegal(p)) {
 					int new_id = Integer.valueOf(p.getID()) + 1;
-					CustomerValidator.setNewID(String.valueOf(new_id));
+					ProductValidator.setNewID(String.valueOf(new_id));
 					Product prod_new = new Product(String.valueOf(new_id));
 					productlist.addProduct(prod_new);
 					Utils.refreshTable(tv.getTable());

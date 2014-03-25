@@ -1,18 +1,15 @@
 package com.storeworld.customer;
 
+import java.util.ArrayList;
+
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -41,6 +38,7 @@ import com.storeworld.utils.Utils;
 /**
  * the main of the customer page
  * @author dingyuanxiong
+ * need to do: dispose control, color control
  *
  */
 public class CustomerContentPart extends ContentPart{
@@ -53,17 +51,28 @@ public class CustomerContentPart extends ContentPart{
 	//define the cell Editor of each column
 	private static CellEditor[] cellEditor = new CellEditor[6];
 	private static TableEditor editor = null;
-	private static TableEditor editorEdit = null;//software number keyboard
-	
+	private static TableEditor editorEdit = null;//software number keyboard	
 	
 	private Composite current = null;
 	private Composite composite = null;
 	//record the last hover on row number
 	private static int visibleButton_last = -1;
+	
+	//the shift width of the table, determine the location of the soft keyboard
 	private int composite_shift = 0;
 	
 	private int phoneColumn = 3;
 	
+	
+
+	
+	/**
+	 * constructor
+	 * @param parent
+	 * @param style
+	 * @param image
+	 * @param color
+	 */
 	public CustomerContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -89,10 +98,12 @@ public class CustomerContentPart extends ContentPart{
 	 */
 	public void addListenerForTable(){
 		
+		//click to show the soft keyboard
 		table.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
+				//if use the soft keyboard
 				if(Utils.getUseSoftKeyBoard()){
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
@@ -127,35 +138,17 @@ public class CustomerContentPart extends ContentPart{
 					////
 					if(Utils.getClickButton() && Utils.getInputNeedChange()){
 						c.setPhone(Utils.getInput());
-//						customerlist.customerChanged(c);	
 						text.setText(c.getPhone());//validate the text
-//						text.forceFocus();
-//						int pos = text.getText().length() + 1;
-//						text.setSelection(pos,pos);
 						if(CustomerValidator.validatePhone(table, table.getItem(rowCurrent), colCurrent, c.getPhone()))
 						{
-						customerlist.customerChanged(c);	
-						text.setText(c.getPhone());
+							customerlist.customerChanged(c);	
+							text.setText(c.getPhone());
 						}else{
 							c.setPhone(phonelast);
 						}
 						//initial the next click
 						Utils.setClickButton(false);
-//						text.forceFocus();
-//						int pos1 = text.getText().length() + 1;
-//						text.setSelection(pos1,pos1);
 					}
-//					text.forceFocus();
-//					int pos1 = text.getText().length() + 1;
-//					text.setSelection(pos1,pos1);
-					//////
-
-					//add message, no use later
-//					MessageBox messageBox =   
-//							   new MessageBox(new Shell(),   					     
-//							    SWT.ICON_WARNING);   
-//					messageBox.setMessage("change customer: "+c);   
-//					messageBox.open(); 
 					}
 				}
 			}
@@ -200,24 +193,25 @@ public class CustomerContentPart extends ContentPart{
 		    }
 		});
 		
-		//control the verify
-		Text text = (Text)cellEditor[3].getControl();
-		text.addVerifyListener(new VerifyListener(){
-			public void verifyText(VerifyEvent e){
-				String inStr = e.text;
-				if (inStr.length() > 0){
-					try{
-						if(!inStr.equals(""))
-							e.doit = true;
-						else
-							e.doit=false;
-					}catch(Exception ep){
-						e.doit = false;
-					}
-				}
-			}
-		});
+//		//control the verify
+//		Text text = (Text)cellEditor[3].getControl();
+//		text.addVerifyListener(new VerifyListener(){
+//			public void verifyText(VerifyEvent e){
+//				String inStr = e.text;
+//				if (inStr.length() > 0){
+//					try{
+//						if(!inStr.equals(""))
+//							e.doit = true;
+//						else
+//							e.doit=false;
+//					}catch(Exception ep){
+//						e.doit = false;
+//					}
+//				}
+//			}
+//		});
 	}	
+	
 	
 	/**
 	 * initialize the table elements
@@ -232,6 +226,7 @@ public class CustomerContentPart extends ContentPart{
 		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
 		composite_shift = (int)(w/5);
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
+		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 255,240,245);
@@ -287,56 +282,12 @@ public class CustomerContentPart extends ContentPart{
         layout.verticalSpacing = 0;
         layout.marginHeight = 0;
         layout.marginWidth = 0;
-        
+        //set the size of the gridlayout
         composite_ar.setLayout(layout);  
         composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        final Button b1 = new Button(composite_ar, SWT.CHECK);
-        final CustomerFilter cf = new CustomerFilter();
-        b1.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		
-        		if(b1.getSelection()){
-        			CustomerFilter.setArea(b1.getText());
-        			tableViewer.addFilter(cf);
-        		}
-        		else{
-        			CustomerFilter.setArea("");
-        			tableViewer.removeFilter(cf);
-        		}
-        		Utils.refreshTable(table);
-        	}
-        });
-        GridData gd_b = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-        gd_b.widthHint = (int)(4*w/5/10);
-		b1.setLayoutData(gd_b);
-        b1.setText("八里街");
-        b1.setBackground(base);
-
-		final Button b2 = new Button(composite_ar, SWT.CHECK);
-        GridData gd_b2 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-        gd_b2.widthHint = (int)(4*w/5/10);
-		b2.setLayoutData(gd_b2);
-		b2.setText("安陆");//安陆这是一个很长的片区
-		b2.setBackground(base);
-		composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		composite_ar.layout();
-		b2.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		
-        		if(b2.getSelection()){
-        			CustomerFilter.setArea(b2.getText());
-        			tableViewer.addFilter(cf);
-        		}
-        		else{
-        			CustomerFilter.setArea("");
-        			tableViewer.removeFilter(cf);
-        		}
-        		Utils.refreshTable(table);
-        	}
-        });
-		
+        //show the area checkbox button
+        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
+           
 		//first name label
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setBounds((int)(w/5/20), (int)(3*w/5/10)+(int)(2*(h-3*w/50)/5)+(int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
@@ -356,7 +307,7 @@ public class CustomerContentPart extends ContentPart{
 						   new MessageBox(new Shell(),   					     
 						    SWT.ICON_WARNING);   
 				messageBox.setMessage("显示所有客户"); 
-				messageBox.open(); 
+				messageBox.open(); 				
 			}
 		});
 		
@@ -380,63 +331,15 @@ public class CustomerContentPart extends ContentPart{
         layout2.marginHeight = 0;
         layout2.marginWidth = 0;
         composite_fn.setLayout(layout2);  
-        composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-		 btnNewButton.addListener(SWT.Selection, new Listener() {  
-	            public void handleEvent(Event e) {  	             
-	                Button button = new Button(composite_fn, SWT.CHECK);  
-	                GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-	                gd.widthHint = (int)(4*w/5/10);
-	                button.setLayoutData(gd);
-	                button.setText("姓");  
-	                button.setBackground(base);
-	                composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-	                composite_fn.layout();  
-	            }  
-	        });	
-		
-		Button btnCheckButton = new Button(composite_fn, SWT.CHECK);
-		btnCheckButton.setText("欧阳测试");
-		btnCheckButton.setBackground(base);
-
-		Button button = new Button(composite_fn, SWT.CHECK);
-		GridData gd_b3 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_b3.widthHint = (int)(4*w/5/10);
-		button.setLayoutData(gd_b3);
-		button.setText("钱");
-		button.setBackground(base);
-		
-		Button button_1 = new Button(composite_fn, SWT.CHECK);
-		GridData gd_b4 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_b4.widthHint = (int)(4*w/5/10);
-		button_1.setLayoutData(gd_b4);
-		button_1.setText("孙");
-		button_1.setBackground(base);
-		
-		Button button_2 = new Button(composite_fn, SWT.CHECK);
-		GridData gd_b5 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_b5.widthHint = (int)(4*w/5/10);
-		button_2.setLayoutData(gd_b5);
-		button_2.setText("李");
-		button_2.setBackground(base);
-		
-		Button button_3 = new Button(composite_fn, SWT.CHECK);
-		GridData gd_b6 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_b6.widthHint = (int)(4*w/5/10);
-		button_3.setLayoutData(gd_b6);
-		button_3.setText("多");//次点搜，有垂直滚动条
-		button_3.setBackground(base);
-		new Label(composite_fn, SWT.NONE);
-		
-		composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
+        composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));		  
         composite_fn.layout();  
+        //show all the firstname checkbox button
+        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
 		
-	   composite_area.layout();
-	   composite_firstname.layout();
+	    composite_area.layout();
+	    composite_firstname.layout();
 		
-
-
-		
+	    //==========================================================================================================
 		//define a table, right part				
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
@@ -523,8 +426,11 @@ public class CustomerContentPart extends ContentPart{
 		tableViewer.setLabelProvider(new CustomerTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		//always get the ID from the database!
-		Customer cus_new = new Customer("5");//dynamic from the database
-		CustomerValidator.setNewID("5");
+		
+		Customer cus_new = new Customer(CustomerUtils.getNewLineID());//dynamic from the database
+		
+		//always keep a new line in the last of the table 
+		CustomerValidator.setNewID(CustomerUtils.getNewLineID());
 		customerlist.addCustomer(cus_new);
 		tableViewer.setInput(customerlist);		
 		tableViewer.setColumnProperties(new String[]{"id","name","area","phone","address","operation"});		
@@ -547,11 +453,6 @@ public class CustomerContentPart extends ContentPart{
 		
 		ICellModifier modifier = new CustomerCellModifier(tableViewer, customerlist);
 		tableViewer.setCellModifier(modifier);
-		
-		//add Filter, no use now
-		//tableViewer.addFilter(new CustomerFilter());
-//		CustomerFilter cf = new CustomerFilter();
-		
 		
 		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());

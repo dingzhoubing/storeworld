@@ -123,9 +123,6 @@ public class ProductContentPart extends ContentPart{
 							}
 							//initial the next click
 							Utils.setClickButton(false);
-//							text.forceFocus();
-//							int pos = text.getText().length() + 1;
-//							text.setSelection(pos,pos);
 						}
 					}else if(colCurrent == repColumn){
 						String repositorylast = p.getRepository();
@@ -143,32 +140,20 @@ public class ProductContentPart extends ContentPart{
 							Utils.setClickButton(false);
 						}
 					}
-//					if(Utils.getClickButton() && Utils.getInputNeedChange()){
-//						productlist.productChanged(p);		
-//						//initial the next click
-//						Utils.setClickButton(false);
-//					}
-					//add message, no use later
-//					MessageBox messageBox =   
-//							   new MessageBox(new Shell(),   					     
-//							    SWT.ICON_WARNING);   
-//					messageBox.setMessage("change product: "+p);   
-//					messageBox.open(); 
 					}
 				}
 			}
 			}
 			
 		});
-		
-		
+			
 		//hover to show the delete button
 		table.addListener(SWT.MouseHover, new Listener() {
 			public void handleEvent(Event event) {
 				int ptY = event.y;
 				int index = table.getTopIndex();
 				int row = -1;
-				for (; index < table.getItemCount(); index++) {
+				for (; index < table.getItemCount()-1; index++) {
 					final TableItem item = table.getItem(index);
 					//the width of the line maybe 0
 					int rowY = item.getBounds().y;					
@@ -198,42 +183,24 @@ public class ProductContentPart extends ContentPart{
 		    }
 		});
 		//control the verify
-		Text text = (Text)cellEditor[4].getControl();
-		text.addVerifyListener(new VerifyListener(){
-			public void verifyText(VerifyEvent e){
-				String inStr = e.text;
-				if (inStr.length() > 0){
-					try{
-						if(inStr.equals("°ü"))
-							e.doit = true;
-						else
-							e.doit=false;
-					}catch(Exception ep){
-						e.doit = false;
-					}
-				}
-			}
-		});
+//		Text text = (Text)cellEditor[4].getControl();
+//		text.addVerifyListener(new VerifyListener(){
+//			public void verifyText(VerifyEvent e){
+//				String inStr = e.text;
+//				if (inStr.length() > 0){
+//					try{
+//						if(inStr.equals("°ü"))
+//							e.doit = true;
+//						else
+//							e.doit=false;
+//					}catch(Exception ep){
+//						e.doit = false;
+//					}
+//				}
+//			}
+//		});
 	}
 	
-//	/**
-//	 * after sort of the table column, refresh the table to show it
-//	 */
-//	public static void refreshTable(){
-////		System.out.println("table size: "+table.getItemCount());
-//		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
-//		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-//		for(int i=0;i<table.getItemCount();i++){
-//			TableItem item = table.getItem(i);
-//			if(i%2 == 0){
-////				System.out.println("set row: "+i);
-//				item.setBackground(color1);
-//			}else{
-//				item.setBackground(color2);
-//			}
-//		}
-//		table.redraw();
-//	}
 	
 	/**
 	 * initialize the table elements
@@ -341,9 +308,13 @@ public class ProductContentPart extends ContentPart{
 		tableViewer.setContentProvider(new ProductContentProvider(tableViewer, productlist));
 		tableViewer.setLabelProvider(new ProductTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
-		Product prod_new = new Product("6");//dynamic from the database
-		ProductValidator.setNewID("6");
+		
+		
+		Product prod_new = new Product(ProductUtils.getNewLineID());//dynamic from the database
+		ProductValidator.setNewID(ProductUtils.getNewLineID());
 		productlist.addProduct(prod_new);
+		
+		
 		tableViewer.setInput(productlist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","repository","operation"});		
 		cellEditor = new CellEditor[7];

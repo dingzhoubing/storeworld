@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -211,6 +212,13 @@ public class Utils {
 	 */
 	public static Image getGrayImage(Image image){
 		return new Image(null,image, SWT.IMAGE_GRAY);
+	}
+	
+	public static boolean isNotNull(String str) {
+		if (str != null && str.trim().length() > 0
+				&& !("null".equals(str.trim().toLowerCase())))
+			return true;
+		return false;
 	}
 	
 }

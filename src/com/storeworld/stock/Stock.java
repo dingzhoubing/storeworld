@@ -11,8 +11,8 @@ public class Stock extends DataInTable{
 	private String id;//the identifier of the record
 	private String brand;//the brand of the stock
 	private String sub_brand;//the sub_brand of the stock
-	private String size;
-	private String unit;
+	private String size;//the size of the stock
+	private String unit;//the unit of the stock
 	private String price;
 	private String number;
 

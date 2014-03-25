@@ -46,11 +46,12 @@ public class CustomerButtonCellEditor extends CellEditor {
 	@Override
 	protected Control createControl(Composite parent) {
 		button = new Button(parent, 0);
-        
+//        button.setFocus();
+//        button.setVisible(true);
         
         button.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
-            	button.setVisible(false);
+            	button.setVisible(false);//false
             	CustomerButtonCellEditor.this.focusLost();
             }
         });
@@ -98,7 +99,7 @@ public class CustomerButtonCellEditor extends CellEditor {
 	}
 
 	@Override
-	protected void doSetValue(Object value) {
+	protected void doSetValue(Object value) {		
 	}
 
 }

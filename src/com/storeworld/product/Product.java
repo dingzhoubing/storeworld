@@ -15,15 +15,19 @@ public class Product extends DataInTable{
 	private String unit;
 //	private double avg_stock_price;
 //	private double avg_deliver_price;
-	private int repository;
+	private String repository;//make it easy to process
 	
 	public Product(){
 		
 	}
-	public Product(String brand,String sub_brand,String size,String unit, int repository){
+	public Product(String ID){
+		this.id = ID;
+	}
+	
+	public Product(String brand,String sub_brand,String size,String unit, String repository){
 		this(null, brand,sub_brand,size,unit,repository);
 	}
-	public Product(String ID, String brand,String sub_brand,String size,String unit, int repository){
+	public Product(String ID, String brand,String sub_brand,String size,String unit, String repository){
 		if(ID != null)		
 			this.id = ID;
 		this.brand = brand;
@@ -76,10 +80,10 @@ public class Product extends DataInTable{
 //	public void setAvgDeliverPrice(double price) {
 //		this.avg_deliver_price = price;
 //	}
-	public int getRepository() {
+	public String getRepository() {
 		return this.repository;
 	}
-	public void setRepository(int repository) {
+	public void setRepository(String repository) {
 		this.repository = repository;
 	}
 	

@@ -24,6 +24,7 @@ public class CustomerContentProvider implements IStructuredContentProvider, IDat
 			this.productlist = productlist;
 		}
 		public Object[] getElements(Object inputElement) {
+//			System.out.println("call here");
 			return productlist.getCustomers().toArray();
 		}
 		
@@ -40,11 +41,11 @@ public class CustomerContentProvider implements IStructuredContentProvider, IDat
 		@Override
 		public void add(DataInTable customer) {
 			tableviewer.add(customer);
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("add customer: "+customer);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("add customer: "+customer);   
+//			messageBox.open(); 
 //			System.out.println(product);
 			
 		}

@@ -5,8 +5,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
+
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.utils.Utils;
 
 /**
  * the class to get all the customer data in table
@@ -20,9 +29,17 @@ public class CustomerList{
 //	private Set<ICustomerListViewer> changeListeners = new HashSet<ICustomerListViewer>();
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	
+	
+	
 	public CustomerList() {
+//		super();
+//		this.initial();
+	}
+	public CustomerList(Table table){
 		super();
+		
 		this.initial();
+		
 	}
 	//initial data, later, in database
 	public void initial(){		
@@ -57,14 +74,23 @@ public class CustomerList{
 	}
 	
 	public ArrayList<DataInTable> getCustomers() {
+//		String name4 = "温家宝";
+//		String area4 = "安陆";
+//		String phone4 = "1357245478";
+//		String address4 = "深光路14号";
+//		System.out.println("call once");
+//		Customer cus_new = new Customer("5");
+//		customerList.add(cus_new);
 		return this.customerList;
 	}
+	
+	
 	
 	/**
 	 * add a product
 	 */
-	public void addCustomer() {
-		Customer customer = new Customer();
+	public void addCustomer(Customer customer) {
+//		Customer customer = new Customer();
 		this.customerList.add(customer);
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
@@ -85,9 +111,12 @@ public class CustomerList{
 	 * @param update a product
 	 */
 	public void customerChanged(Customer customer) {
+		// no matter valid or not, we should update the table
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
-		while (iterator.hasNext())
+		while (iterator.hasNext()) {
 			(iterator.next()).update(customer);
+		}
+		//update the database here
 	}
 
 	/**

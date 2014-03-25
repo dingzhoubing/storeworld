@@ -11,6 +11,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.utils.Utils;
+
 /**
  * the remove button on product table
  * once hover on a row of the table, show the button
@@ -72,7 +74,7 @@ public class ProductButtonCellEditor extends CellEditor {
 //						System.out.println("row: "+(index));
 						productlist.removeProduct(p);
 						button.setVisible(false);
-						ProductContentPart.refreshTable();												
+						Utils.refreshTable(table);											
 								 
 						break;
 					}

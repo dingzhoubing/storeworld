@@ -35,7 +35,7 @@ public class ProductList {
 //		double avg_in = 68.0;
 //		double avg_out = 72.0;
 		int repository = 3000;
-		Product prod = new Product("1",brand, subbrand, size, unit, repository);
+		Product prod = new Product("1",brand, subbrand, size, unit, repository+"");
 		productList.add(prod);
 		String brand2 = "五得利";
 		String subbrand2 = "特精";
@@ -44,7 +44,7 @@ public class ProductList {
 //		double avg_in2 = 69.0;
 //		double avg_out2 = 74.0;
 		int repository2 = 2500;
-		Product prod2 = new Product("2",brand2, subbrand2, size2, unit2, repository2);
+		Product prod2 = new Product("2",brand2, subbrand2, size2, unit2, repository2+"");
 		productList.add(prod2);
 		String brand3 = "五得利";
 		String subbrand3 = "普粉";
@@ -53,7 +53,7 @@ public class ProductList {
 //		double avg_in3 = 63.0;
 //		double avg_out3 = 67.0;
 		int repository3 = 3000;
-		Product prod3 = new Product("3",brand3, subbrand3, size3, unit3, repository3);
+		Product prod3 = new Product("3",brand3, subbrand3, size3, unit3, repository3+"");
 		productList.add(prod3);
 		String brand4 = "金龙";
 		String subbrand4 = "精粉";
@@ -62,7 +62,7 @@ public class ProductList {
 //		double avg_in4 = 66.0;
 //		double avg_out4 = 70.0;
 		int repository4 = 4000;
-		Product prod4 = new Product("4", brand4, subbrand4, size4, unit4, repository4);
+		Product prod4 = new Product("4", brand4, subbrand4, size4, unit4, repository4+"");
 		productList.add(prod4);
 		String brand5 = "五联";
 		String subbrand5 = "包子粉";
@@ -71,7 +71,7 @@ public class ProductList {
 //		double avg_in5 = 65.0;
 //		double avg_out5 = 69.0;
 		int repository5 = 2800;
-		Product prod5 = new Product("5", brand5, subbrand5, size5, unit5, repository5);
+		Product prod5 = new Product("5", brand5, subbrand5, size5, unit5, repository5+"");
 		productList.add(prod5);				
 		
 	}
@@ -83,8 +83,7 @@ public class ProductList {
 	/**
 	 * add a product
 	 */
-	public void addProduct() {
-		Product product = new Product();
+	public void addProduct(Product product) {
 		this.productList.add(product);
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())

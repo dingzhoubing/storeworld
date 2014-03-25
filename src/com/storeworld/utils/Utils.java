@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -16,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -54,7 +57,7 @@ public class Utils {
 	private static List<String> sub_brands;
 	
 	private static String comboValue = "";
-	
+		
 	
 	public static HashMap<FUNCTION, Button> getFunc_Button(){
 		return func_button;
@@ -311,7 +314,8 @@ public class Utils {
 	public static void refreshTable(Table table){
 		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
 		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-		for(int i=0;i<table.getItemCount();i++){
+		Color color3 = new Color(table.getDisplay(), 230, 230, 230);
+		for(int i=0;i<table.getItemCount()-1;i++){
 			TableItem item = table.getItem(i);
 			if(i%2 == 0){
 				item.setBackground(color1);
@@ -319,6 +323,8 @@ public class Utils {
 				item.setBackground(color2);
 			}
 		}
+		TableItem item = table.getItem(table.getItemCount()-1);
+		item.setBackground(color3);
 		table.redraw();
 	}
 	

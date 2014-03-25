@@ -7,6 +7,8 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -53,6 +55,7 @@ public class CustomerContentPart extends ContentPart{
 	private static TableEditor editor = null;
 	private static TableEditor editorEdit = null;//software number keyboard
 	
+	
 	private Composite current = null;
 	private Composite composite = null;
 	//record the last hover on row number
@@ -68,6 +71,11 @@ public class CustomerContentPart extends ContentPart{
 		initialization();
 		addListenerForTable();
 	}
+	
+	public static CellEditor[] getCellEditor(){
+		return cellEditor;
+	}
+	
 	/**
 	 * call the software keyboard
 	 */
@@ -115,20 +123,39 @@ public class CustomerContentPart extends ContentPart{
 					Text text = (Text)(editorEdit.getEditor());	
 					callKeyBoard(text);
 					Customer c = (Customer)(table.getItem(rowCurrent).getData());					
-					if(Utils.getClickButton() && Utils.getInputNeedChange())
-						c.setPhone(Utils.getInput());
-					
+					String phonelast = c.getPhone();
+					////
 					if(Utils.getClickButton() && Utils.getInputNeedChange()){
-						customerlist.customerChanged(c);		
+						c.setPhone(Utils.getInput());
+//						customerlist.customerChanged(c);	
+						text.setText(c.getPhone());//validate the text
+//						text.forceFocus();
+//						int pos = text.getText().length() + 1;
+//						text.setSelection(pos,pos);
+						if(CustomerValidator.validatePhone(table, table.getItem(rowCurrent), colCurrent, c.getPhone()))
+						{
+						customerlist.customerChanged(c);	
+						text.setText(c.getPhone());
+						}else{
+							c.setPhone(phonelast);
+						}
 						//initial the next click
 						Utils.setClickButton(false);
+//						text.forceFocus();
+//						int pos1 = text.getText().length() + 1;
+//						text.setSelection(pos1,pos1);
 					}
+//					text.forceFocus();
+//					int pos1 = text.getText().length() + 1;
+//					text.setSelection(pos1,pos1);
+					//////
+
 					//add message, no use later
-					MessageBox messageBox =   
-							   new MessageBox(new Shell(),   					     
-							    SWT.ICON_WARNING);   
-					messageBox.setMessage("change product: "+c);   
-					messageBox.open(); 
+//					MessageBox messageBox =   
+//							   new MessageBox(new Shell(),   					     
+//							    SWT.ICON_WARNING);   
+//					messageBox.setMessage("change customer: "+c);   
+//					messageBox.open(); 
 					}
 				}
 			}
@@ -143,7 +170,7 @@ public class CustomerContentPart extends ContentPart{
 				int ptY = event.y;
 				int index = table.getTopIndex();
 				int row = -1;
-				for (; index < table.getItemCount(); index++) {
+				for (; index < table.getItemCount()-1; index++) {
 					final TableItem item = table.getItem(index);
 					//the width of the line maybe 0
 					int rowY = item.getBounds().y;					
@@ -161,7 +188,7 @@ public class CustomerContentPart extends ContentPart{
 					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
 						editor.setEditor(cellEditor[5].getControl(), table.getItem(visibleButton_last), 5);
 						if(!editor.getEditor().isDisposed())
-							editor.getEditor().setVisible(false);
+							editor.getEditor().setVisible(false);//false
 					}
 				}
 			}
@@ -172,6 +199,7 @@ public class CustomerContentPart extends ContentPart{
 		        event.height =rowHeight;
 		    }
 		});
+		
 		//control the verify
 		Text text = (Text)cellEditor[3].getControl();
 		text.addVerifyListener(new VerifyListener(){
@@ -198,7 +226,12 @@ public class CustomerContentPart extends ContentPart{
 		final int w = current.getBounds().width;
 		int h = current.getBounds().height;
 		composite.setBounds(0, 0, w, h);
-		
+	    //right part		
+		Composite composite_right  = new Composite(composite, SWT.NONE);
+		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
+		composite_shift = (int)(w/5);
+		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 255,240,245);
@@ -257,14 +290,30 @@ public class CustomerContentPart extends ContentPart{
         
         composite_ar.setLayout(layout);  
         composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        Button b1 = new Button(composite_ar, SWT.CHECK);
+        final Button b1 = new Button(composite_ar, SWT.CHECK);
+        final CustomerFilter cf = new CustomerFilter();
+        b1.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		
+        		if(b1.getSelection()){
+        			CustomerFilter.setArea(b1.getText());
+        			tableViewer.addFilter(cf);
+        		}
+        		else{
+        			CustomerFilter.setArea("");
+        			tableViewer.removeFilter(cf);
+        		}
+        		Utils.refreshTable(table);
+        	}
+        });
         GridData gd_b = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         gd_b.widthHint = (int)(4*w/5/10);
 		b1.setLayoutData(gd_b);
         b1.setText("八里街");
         b1.setBackground(base);
 
-		Button b2 = new Button(composite_ar, SWT.CHECK);
+		final Button b2 = new Button(composite_ar, SWT.CHECK);
         GridData gd_b2 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         gd_b2.widthHint = (int)(4*w/5/10);
 		b2.setLayoutData(gd_b2);
@@ -272,6 +321,21 @@ public class CustomerContentPart extends ContentPart{
 		b2.setBackground(base);
 		composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		composite_ar.layout();
+		b2.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		
+        		if(b2.getSelection()){
+        			CustomerFilter.setArea(b2.getText());
+        			tableViewer.addFilter(cf);
+        		}
+        		else{
+        			CustomerFilter.setArea("");
+        			tableViewer.removeFilter(cf);
+        		}
+        		Utils.refreshTable(table);
+        	}
+        });
 		
 		//first name label
 		Label label = new Label(composite_left, SWT.NONE);
@@ -362,6 +426,7 @@ public class CustomerContentPart extends ContentPart{
 		button_3.setLayoutData(gd_b6);
 		button_3.setText("多");//次点搜，有垂直滚动条
 		button_3.setBackground(base);
+		new Label(composite_fn, SWT.NONE);
 		
 		composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
         composite_fn.layout();  
@@ -370,14 +435,9 @@ public class CustomerContentPart extends ContentPart{
 	   composite_firstname.layout();
 		
 
-	    //right part		
-		Composite composite_right  = new Composite(composite, SWT.NONE);
-		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
-		composite_shift = (int)(w/5);
+
 		
-		//define a table
-		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		
+		//define a table, right part				
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
@@ -458,17 +518,22 @@ public class CustomerContentPart extends ContentPart{
 		
 		
 		//set the editor of the table columns
+		customerlist = new CustomerList(table);
 		tableViewer.setContentProvider(new CustomerContentProvider(tableViewer, customerlist));
 		tableViewer.setLabelProvider(new CustomerTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
+		//always get the ID from the database!
+		Customer cus_new = new Customer("5");//dynamic from the database
+		CustomerValidator.setNewID("5");
+		customerlist.addCustomer(cus_new);
 		tableViewer.setInput(customerlist);		
 		tableViewer.setColumnProperties(new String[]{"id","name","area","phone","address","operation"});		
 		cellEditor = new CellEditor[6];
 		cellEditor[0] = null;//ID
-		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
-		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
+		cellEditor[1] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 1);		
+		cellEditor[2] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 2);
+		cellEditor[3] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 3);
+		cellEditor[4] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 4);
 		cellEditor[5] = new CustomerButtonCellEditor(tableViewer.getTable(), customerlist, rowHeight);//ButtonCellEditor
 		tableViewer.setCellEditors(cellEditor);
 		
@@ -479,12 +544,14 @@ public class CustomerContentPart extends ContentPart{
 		editorEdit = new TableEditor(table);
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	
-
+		
 		ICellModifier modifier = new CustomerCellModifier(tableViewer, customerlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new CustomerFilter());
+		//tableViewer.addFilter(new CustomerFilter());
+//		CustomerFilter cf = new CustomerFilter();
+		
 		
 		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());

@@ -4,6 +4,10 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.customer.Customer;
+import com.storeworld.customer.CustomerValidator;
+import com.storeworld.utils.Utils;
+
 /**
  * make the product table editable
  * @author dingyuanxiong
@@ -28,15 +32,30 @@ public class ProductCellModifier implements ICellModifier {
 		if(property.equals("id")){
 			return String.valueOf(p.getID());
 		}else if (property.equals("brand")) {
-			return String.valueOf(p.getBrand());
+			if(p.getBrand() != null)
+				return String.valueOf(p.getBrand());
+			else
+				return String.valueOf("");
 		} else if (property.equals("sub_brand")) {
-			return String.valueOf(p.getSubBrand());
+			if(p.getSubBrand() != null)
+				return String.valueOf(p.getSubBrand());
+			else
+				return String.valueOf("");
 		} else if (property.equals("size")) {
-			return String.valueOf(p.getSize());
+			if(p.getSize() != null)
+				return String.valueOf(p.getSize());
+			else
+				return String.valueOf("");
 		}else if (property.equals("unit")) {
-			return String.valueOf(p.getUnit());
+			if(p.getUnit() != null)
+				return String.valueOf(p.getUnit());
+			else
+				return String.valueOf("");
 		}else if (property.equals("repository")) {
-			return String.valueOf(p.getRepository());
+			if(p.getRepository() != null)
+				return String.valueOf(p.getRepository());
+			else
+				return String.valueOf("");
 		}else if(property.equals("operation")){
 //			return String.valueOf("1");
 			return null;// show the operation button
@@ -49,42 +68,128 @@ public class ProductCellModifier implements ICellModifier {
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
 		Product p = (Product) item.getData();		
+		String brandlast = "";
+		String sub_brandlast = "";
+		String sizelast = "";
+		String unitlast = "";
+		String repolast = "";
+		boolean hasBeenChanged = false;
 		if (property.equals("brand")) {
 			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
 			}			
+			brandlast = p.getBrand();
+			if (brandlast != null) {
+				if (!brandlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			p.setBrand(newValue);
 		} else if (property.equals("sub_brand")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
+			
+			sub_brandlast = p.getSubBrand();
+			if (sub_brandlast != null) {
+				if (!sub_brandlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			p.setSubBrand(newValue);
 		} else if (property.equals("size")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
+			sizelast = p.getSize();
+			if (sizelast != null) {
+				if (!sizelast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			p.setSize(newValue);
 		} else if (property.equals("unit")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
 			}			
+			
+			unitlast = p.getUnit();
+			if (unitlast != null) {
+				if (!unitlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			p.setUnit(newValue);
 		} else if (property.equals("repository")) {
 			String newValue = (String) value;			
 			if (newValue.equals("")) {
 				return;
-			}			
-			p.setRepository(Integer.valueOf(newValue).intValue());
+			}	
+			
+			repolast = p.getRepository();
+			if (repolast != null) {
+				if (!repolast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
+			
+			p.setRepository(newValue);
 		} else {
 			return;//just return, do nothing
 //			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
-//		System.out.println("change?");
-		productlist.productChanged(p);
+
+		boolean valid = false;
+		if (hasBeenChanged) {
+
+			if (property.equals("brand")) {
+				valid = ProductValidator.validateBrand(tv.getTable(), item, 1, p.getBrand());
+				if (!valid) {
+					p.setBrand(brandlast);
+				}
+
+			} else if (property.equals("sub_brand")) {
+				valid = ProductValidator.validateSub_Brand(tv.getTable(), item, 2, p.getSubBrand());
+				if (!valid) {
+					p.setSubBrand(sub_brandlast);
+				}
+
+			} else if (property.equals("size")) {
+				valid = ProductValidator.validateSize(tv.getTable(), item, 3, p.getSize());
+				if (!valid) {
+					p.setSize(sizelast);
+				}
+			} else if (property.equals("unit")) {
+				valid = ProductValidator.validateUnit(tv.getTable(), item, 4, p.getUnit());
+				if (!valid) {
+					p.setUnit(unitlast);
+				}
+			}else if (property.equals("repository")) {
+				valid = ProductValidator.validateRepository(tv.getTable(), item, 5, p.getRepository());
+				if (!valid) {
+					p.setUnit(unitlast);
+				}
+			}
+			if (valid) {
+				productlist.productChanged(p);
+				if (ProductValidator.checkID(p.getID()) && ProductValidator.rowLegal(p)) {
+					int new_id = Integer.valueOf(p.getID()) + 1;
+					CustomerValidator.setNewID(String.valueOf(new_id));
+					Product prod_new = new Product(String.valueOf(new_id));
+					productlist.addProduct(prod_new);
+					Utils.refreshTable(tv.getTable());
+				}
+			}
+		}
 	}
 
 }

@@ -18,6 +18,9 @@ public class Customer extends DataInTable{
 	public Customer(){
 		
 	}
+	public Customer(String ID){
+		this.id = ID;
+	}
 	public Customer(String name,String area, String phone, String address){
 		this(null, name, area,  phone, address);
 	}

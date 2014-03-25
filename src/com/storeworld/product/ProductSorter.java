@@ -101,14 +101,21 @@ public class ProductSorter extends ViewerSorter {
 //					return Double.valueOf(d2).compareTo(Double.valueOf(d1));
 //				}
 				case REPOSITORY:{
-					int d1 = p1.getRepository();
-					int d2 = p2.getRepository();
-					return Double.valueOf(d1).compareTo(Double.valueOf(d2));
+					String d1 = p1.getRepository();
+					String d2 = p2.getRepository();
+					int double_d1 = Integer.valueOf(d1);
+					int double_d2 = Integer.valueOf(d2);
+//					return Double.valueOf(d1).compareTo(Double.valueOf(d2));
+					return Integer.valueOf(double_d1).compareTo(Integer.valueOf(double_d2));
+					
 				}
 				case -REPOSITORY:{
-					int d1 = p1.getRepository();
-					int d2 = p2.getRepository();
-					return Double.valueOf(d2).compareTo(Double.valueOf(d1));
+					String d1 = p1.getRepository();
+					String d2 = p2.getRepository();
+					int double_d1 = Integer.valueOf(d1);
+					int double_d2 = Integer.valueOf(d2);
+//					return Double.valueOf(d1).compareTo(Double.valueOf(d2));
+					return Integer.valueOf(double_d2).compareTo(Integer.valueOf(double_d1));
 				}
 			}
 			return 0;

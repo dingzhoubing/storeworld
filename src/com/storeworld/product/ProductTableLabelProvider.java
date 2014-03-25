@@ -30,7 +30,7 @@ public class ProductTableLabelProvider extends LabelProvider  implements ITableL
 //					return p.getAvgDeliverPrice() + "";
 //				}
 				else if(columnIndex ==5){
-					return p.getRepository()+"";
+					return p.getRepository();
 				}
 			}
 			return null;

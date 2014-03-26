@@ -44,7 +44,15 @@ public class DeliverInfoService extends BaseAction{
 		int snum=executeUpdate(sql,params);
 		if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
 			throw new Exception("新增送货信息失败，请检查数据!");
+		}
+		else if(snum==1){
+			try{
+				GoodsInfoService tempService=new GoodsInfoService();
+				tempService.addGoodsInfo(uniMap);
+			}catch(Exception e){
+				//System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
 			}
+		}
 		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

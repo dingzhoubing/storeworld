@@ -30,7 +30,7 @@ public class GoodsInfoService extends BaseAction{
 			throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard"));
 		}
 		String sql="insert into goods_info(brand,sub_brand,unit_price,unit,standard,reserve1,reserve2,reserve3,repertory) values(?,?,?,?,?,?,?,?,?)";
-		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),map.get("unit"),map.get("standard")+"KG",map.get("reserve1"),map.get("reserve2"),map.get("reserve3"),map.get("repertory")};//来自map
+		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),map.get("unit"),map.get("standard"),map.get("reserve1"),map.get("reserve2"),map.get("reserve3"),map.get("repertory")};//来自map
 		List<Object> params=objectArray2ObjectList(params_temp);
 		//2.调用接口执行插入
 		BaseAction tempAction=new BaseAction();

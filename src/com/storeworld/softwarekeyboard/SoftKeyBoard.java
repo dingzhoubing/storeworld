@@ -17,6 +17,12 @@ import com.storeworld.softwarekeyboard.SoftKeyBoard.KeyBoardAdapter;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Utils;
 
+/**
+ * the popup software keyboard
+ * 
+ * @author dingyuanxiong
+ *
+ */
 public class SoftKeyBoard extends Dialog {
 
 	protected Object result;

@@ -14,6 +14,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+/**
+ * the remove button on stock table
+ * once mouse hover on a row of the table, the button appears
+ * @author dingyuanxiong
+ *
+ */
 public class StockButtonCellEditor extends CellEditor {
 
     protected Button button;

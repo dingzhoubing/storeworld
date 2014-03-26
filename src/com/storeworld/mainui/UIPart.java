@@ -4,6 +4,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * interface of common UI functions
+ * @author dingyuanxiong
+ *
+ */
 public interface UIPart {
 
 	//image of the part

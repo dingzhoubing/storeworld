@@ -1,5 +1,14 @@
 package com.storeworld.customer;
-public class Customer{
+
+import com.storeworld.common.DataInTable;
+
+/**
+ * define the class Customer
+ * @author dingyuanxiong
+ *
+ */
+
+public class Customer extends DataInTable{
 	private String id;//the identifier of the record
 	private String name;
 	private String area;
@@ -8,6 +17,9 @@ public class Customer{
 	
 	public Customer(){
 		
+	}
+	public Customer(String ID){
+		this.id = ID;
 	}
 	public Customer(String name,String area, String phone, String address){
 		this(null, name, area,  phone, address);
@@ -20,6 +32,10 @@ public class Customer{
 		this.phone = phone;
 		this.address = address;		
 	}
+	/**
+	 * each class should have an unique id
+	 * @return
+	 */
 	public String getID(){
 		return this.id;
 	}
@@ -60,5 +76,20 @@ public class Customer{
 		sb.append(this.address+" ");
 		return sb.toString();
 	}
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Customer){
+			Customer cus_obj = (Customer)obj;
+			if(this.getID().equals(cus_obj.getID()))
+				return true;
+			else
+				return false;
+		}else
+			return false;
+	}
+	
+	
+	
+	
 	
 }

@@ -4,6 +4,12 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * get the label of deliver table
+ * we can also give the column an image by this
+ * @author dingyuanxiong
+ *
+ */
 public class DeliverTableLabelProvider extends LabelProvider  implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Deliver){

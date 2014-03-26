@@ -14,6 +14,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.utils.Utils;
+
+/**
+ * the remove button on a deliver table
+ * once hover on a row of a table
+ * @author dingyuanxiong
+ *
+ */
 public class DeliverButtonCellEditor extends CellEditor {
 
     protected Button button;
@@ -62,14 +70,14 @@ public class DeliverButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Deliver c = (Deliver)(table.getItem(index).getData());		
-						deliverlist.removeStock(c);
+						deliverlist.removeDeliver(c);
 						MessageBox messageBox =   
 								   new MessageBox(new Shell(),   					     
 								    SWT.ICON_WARNING);   
 						messageBox.setMessage("É¾³ý: "+c);   
 						messageBox.open(); 
 						button.setVisible(false);
-						DeliverContentPart.refreshTable();												
+						Utils.refreshTable(table);											
 								 
 						break;
 					}

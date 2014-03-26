@@ -14,25 +14,28 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.utils.Utils;
+/**
+ * the remove button in customer page
+ * @author dingyuanxiong
+ *
+ */
 public class CustomerButtonCellEditor extends CellEditor {
 
     protected Button button;
     protected Table table;
-    protected CustomerList productlist;
+    protected CustomerList customerlist;
     protected int rowHeight = 0;
-    
-//    private static final int defaultStyle = SWT.SINGLE;
-
     
     public CustomerButtonCellEditor() {
         setStyle(0);
     }
 
     
-    public CustomerButtonCellEditor(Composite parent, CustomerList productlist, int rowHeight) {
+    public CustomerButtonCellEditor(Composite parent, CustomerList customerlist, int rowHeight) {
         this(parent, 0);
         this.table = (Table)parent;
-        this.productlist = productlist;
+        this.customerlist = customerlist;
         this.rowHeight = rowHeight;
     }
 
@@ -43,11 +46,12 @@ public class CustomerButtonCellEditor extends CellEditor {
 	@Override
 	protected Control createControl(Composite parent) {
 		button = new Button(parent, 0);
-        
+//        button.setFocus();
+//        button.setVisible(true);
         
         button.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
-            	button.setVisible(false);
+            	button.setVisible(false);//false
             	CustomerButtonCellEditor.this.focusLost();
             }
         });
@@ -62,14 +66,14 @@ public class CustomerButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 //						Customer c = (Customer)(table.getItem(index).getData());		
-//						productlist.removeCustomer(c);
+//						customerlist.removeCustomer(c);
 						MessageBox messageBox =   
 								   new MessageBox(new Shell(),   					     
 								    SWT.ICON_WARNING);   
 						messageBox.setMessage("跳转进货页面");   
 						messageBox.open(); 
 						button.setVisible(false);
-						CustomerContentPart.refreshTable();												
+						Utils.refreshTable(table);											
 								 
 						break;
 					}
@@ -95,7 +99,7 @@ public class CustomerButtonCellEditor extends CellEditor {
 	}
 
 	@Override
-	protected void doSetValue(Object value) {
+	protected void doSetValue(Object value) {		
 	}
 
 }

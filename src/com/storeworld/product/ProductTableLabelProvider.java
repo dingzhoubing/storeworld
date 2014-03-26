@@ -4,7 +4,12 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class TableLabelProvider extends LabelProvider  implements ITableLabelProvider {
+/**
+ * get the label of a table column & also image
+ * @author dingyuanxiong
+ *
+ */
+public class ProductTableLabelProvider extends LabelProvider  implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Product){
 				Product p = (Product)element;
@@ -25,7 +30,7 @@ public class TableLabelProvider extends LabelProvider  implements ITableLabelPro
 //					return p.getAvgDeliverPrice() + "";
 //				}
 				else if(columnIndex ==5){
-					return p.getRepository()+"";
+					return p.getRepository();
 				}
 			}
 			return null;

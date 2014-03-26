@@ -18,16 +18,22 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.Utils;
 
-//without west and east part, make the UI more clear
+/** without west and east part, make the UI more clear
+ *  the UI framework
+ *  @author dingyuanxiong
+ *
+ */
 public class MainUI extends Shell implements ControlListener, PaintListener,
 		MouseListener, MouseMoveListener, MouseTrackListener {
 
@@ -109,7 +115,49 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		northpart.layout();
 	}
 	public void show_North_index(){
+		Button btn_current = null;
+		Button btn_last = null;
+
 		northLayout.topControl = getNorthPart(NORTH_TYPE.NORTH_INDEX);
+		switch(Utils.getFunction()){
+		case STOCK:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.STOCK);
+			break;
+		case DELIVER:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.DELIVER);
+			break;
+		case ANALYZE:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.ANALYZE);
+			break;
+		case PRODUCT:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.PRODUCT);
+			break;
+		case CUSTOMER:
+			btn_current = Utils.getFunc_Button().get(FUNCTION.CUSTOMER);
+			break;
+		default:
+			break;			
+		}
+		switch(Utils.getFunctionLast()){
+		case STOCK:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.STOCK);
+			break;
+		case DELIVER:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.DELIVER);
+			break;
+		case ANALYZE:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.ANALYZE);
+			break;
+		case PRODUCT:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.PRODUCT);
+			break;
+		case CUSTOMER:
+			btn_last = Utils.getFunc_Button().get(FUNCTION.CUSTOMER);
+			break;
+		default:
+			break;			
+		}
+		Utils.grayButton(btn_current, btn_last);
 		northpart.layout();
 		
 	} 
@@ -230,7 +278,8 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 								- northeastpart.getImage().getBounds().width
 								- closeImage.getBounds().width
 								- minImage.getBounds().width, image_up
-								.getBounds().height);
+								.getBounds().height);		
+		
 		closeButton.setBounds(w - northeastpart.getImage().getBounds().width
 				- closeImage.getBounds().width, 0,
 				closeImage.getBounds().width, closeImage.getBounds().height);
@@ -269,7 +318,13 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 						w, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
 //				System.out.println(northpart.getBounds().toString()+" northpart");
 			}
-			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
+			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);
+			final Label lbl_title = new Label(up, SWT.NONE);
+			lbl_title.setBounds(0, 0, (int)(5*w/18),(int)(w/18/3));
+			lbl_title.setBackground(new Color(up.getDisplay(),63, 63,63));
+			lbl_title.setForeground(new Color(up.getDisplay(),255, 255,255));
+			lbl_title.setText("钱多多 - 进出货小助手");
+			
 			northpart.setLayout(northLayout);
 		}
 		if (southwestpart == null){

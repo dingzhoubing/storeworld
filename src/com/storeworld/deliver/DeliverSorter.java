@@ -3,6 +3,11 @@ package com.storeworld.deliver;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+/**
+ * make the deliver table sortable
+ * @author dingyuanxiong
+ *
+ */
 public class DeliverSorter extends ViewerSorter {
 	private static final int BRAND = 1;
 	private static final int SUB_BRAND = 2;

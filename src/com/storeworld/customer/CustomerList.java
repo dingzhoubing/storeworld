@@ -5,19 +5,42 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
 
-public class CustomerList {
+import com.storeworld.common.DataInTable;
+import com.storeworld.common.IDataListViewer;
+import com.storeworld.utils.Utils;
+
+/**
+ * the class to get all the customer data in table
+ * @author dingyuanxiong
+ *
+ */
+public class CustomerList{
 	
-	private ArrayList<Customer> customerList = new ArrayList<Customer>();
+	private ArrayList<DataInTable> customerList = new ArrayList<DataInTable>();
 	//hash set, so make it only has one of one kind
-	private Set<ICustomerListViewer> changeListeners = new HashSet<ICustomerListViewer>();
-
+//	private Set<ICustomerListViewer> changeListeners = new HashSet<ICustomerListViewer>();
+	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
+	
+	
 	
 	public CustomerList() {
-		super();
-		this.initial();
+//		super();
+//		this.initial();
 	}
-	
+	public CustomerList(Table table){
+		super();
+		
+		this.initial();
+		
+	}
 	//initial data, later, in database
 	public void initial(){		
 		String name = "¿œ¡ı";
@@ -48,21 +71,28 @@ public class CustomerList {
 		Customer cus4 = new Customer("4",name4, area4, phone4, address4);
 		customerList.add(cus4);
 		
+		//by the list of Customer from database
+		CustomerUtils.setNewLineID("5");
+		
 	}
 	
-	public ArrayList<Customer> getCustomers() {
+	public ArrayList<DataInTable> getCustomers() {
+
+//		CustomerFilter.initialFilterOut(customerList);
 		return this.customerList;
 	}
+	
+	
 	
 	/**
 	 * add a product
 	 */
-	public void addCustomer() {
-		Customer customer = new Customer();
+	public void addCustomer(Customer customer) {
+//		Customer customer = new Customer();
 		this.customerList.add(customer);
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).addCustomer(customer);
+			(iterator.next()).add(customer);
 	}
 
 	/**
@@ -70,24 +100,27 @@ public class CustomerList {
 	 */
 	public void removeCustomer(Customer customer) {
 		this.customerList.remove(customer);
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())
-			(iterator.next()).removeCustomer(customer);
+			(iterator.next()).remove(customer);
 	}
 
 	/**
 	 * @param update a product
 	 */
 	public void customerChanged(Customer customer) {
-		Iterator<ICustomerListViewer> iterator = changeListeners.iterator();
-		while (iterator.hasNext())
-			(iterator.next()).updateCustomer(customer);
+		// no matter valid or not, we should update the table
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()) {
+			(iterator.next()).update(customer);
+		}
+		//update the database here
 	}
 
 	/**
 	 * @param may multi contentprovider?£¨ one remove
 	 */
-	public void removeChangeListener(ICustomerListViewer viewer) {
+	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
@@ -95,7 +128,7 @@ public class CustomerList {
 	 * @param may multi contentprovider? one add
 	 * viewer is a content provider
 	 */
-	public void addChangeListener(ICustomerListViewer viewer) {
+	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	

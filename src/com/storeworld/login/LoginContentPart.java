@@ -18,6 +18,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Label;
 
+/**
+ * the logic of login
+ * @author dingyuanxiong
+ *
+ */
 public class LoginContentPart extends ContentPart{
 		
 	private Text text1;

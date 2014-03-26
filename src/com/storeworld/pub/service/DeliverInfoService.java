@@ -199,6 +199,7 @@ public class DeliverInfoService extends BaseAction{
 	 * @return
 	 * @throws Exception
 	 */
+
 	public boolean batchUpdateDeliverInfo(List<String> listId,Map<String,Object> commonMap,List<Map<String,Object>> listUniMap) throws Exception{
 
 		boolean ret_total=true;//执行批量更新的返回值

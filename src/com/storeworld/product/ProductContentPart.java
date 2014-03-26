@@ -30,6 +30,12 @@ import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main part of the product page
+ * @author dingyuanxiong
+ *
+ */
 public class ProductContentPart extends ContentPart{
 	
 	private static Table table;
@@ -104,38 +110,50 @@ public class ProductContentPart extends ContentPart{
 					callKeyBoard(text);
 					Product p = (Product)(table.getItem(rowCurrent).getData());
 					if(colCurrent == sizeColumn){
-						if(Utils.getClickButton() && Utils.getInputNeedChange())
+						String sizelast = p.getSize();
+						if(Utils.getClickButton() && Utils.getInputNeedChange()){
 							p.setSize(Utils.getInput()+"kg");
+							text.setText(p.getSize());
+							if(ProductValidator.validateSize(table, table.getItem(rowCurrent), colCurrent, p.getSize()))
+							{
+								productlist.productChanged(p);
+								text.setText(p.getSize());
+							}else{
+								p.setSize(sizelast);
+							}
+							//initial the next click
+							Utils.setClickButton(false);
+						}
 					}else if(colCurrent == repColumn){
-						if(Utils.getClickButton() && Utils.getInputNeedChange())
-							p.setRepository(Integer.valueOf(Utils.getInput()));
+						String repositorylast = p.getRepository();
+						if(Utils.getClickButton() && Utils.getInputNeedChange()){
+							p.setRepository(Utils.getInput());
+							text.setText(p.getRepository());
+							if(ProductValidator.validateRepository(table, table.getItem(rowCurrent), colCurrent, p.getRepository()))
+							{
+								productlist.productChanged(p);
+								text.setText(p.getRepository());
+							}else{
+								p.setRepository(repositorylast);;
+							}
+							//initial the next click
+							Utils.setClickButton(false);
+						}
 					}
-					if(Utils.getClickButton() && Utils.getInputNeedChange()){
-						productlist.productChanged(p);		
-						//initial the next click
-						Utils.setClickButton(false);
-					}
-					//add message, no use later
-					MessageBox messageBox =   
-							   new MessageBox(new Shell(),   					     
-							    SWT.ICON_WARNING);   
-					messageBox.setMessage("change product: "+p);   
-					messageBox.open(); 
 					}
 				}
 			}
 			}
 			
 		});
-		
-		
+			
 		//hover to show the delete button
 		table.addListener(SWT.MouseHover, new Listener() {
 			public void handleEvent(Event event) {
 				int ptY = event.y;
 				int index = table.getTopIndex();
 				int row = -1;
-				for (; index < table.getItemCount(); index++) {
+				for (; index < table.getItemCount()-1; index++) {
 					final TableItem item = table.getItem(index);
 					//the width of the line maybe 0
 					int rowY = item.getBounds().y;					
@@ -165,42 +183,24 @@ public class ProductContentPart extends ContentPart{
 		    }
 		});
 		//control the verify
-		Text text = (Text)cellEditor[4].getControl();
-		text.addVerifyListener(new VerifyListener(){
-			public void verifyText(VerifyEvent e){
-				String inStr = e.text;
-				if (inStr.length() > 0){
-					try{
-						if(inStr.equals("°ü"))
-							e.doit = true;
-						else
-							e.doit=false;
-					}catch(Exception ep){
-						e.doit = false;
-					}
-				}
-			}
-		});
+//		Text text = (Text)cellEditor[4].getControl();
+//		text.addVerifyListener(new VerifyListener(){
+//			public void verifyText(VerifyEvent e){
+//				String inStr = e.text;
+//				if (inStr.length() > 0){
+//					try{
+//						if(inStr.equals("°ü"))
+//							e.doit = true;
+//						else
+//							e.doit=false;
+//					}catch(Exception ep){
+//						e.doit = false;
+//					}
+//				}
+//			}
+//		});
 	}
 	
-	/**
-	 * after sort of the table column, refresh the table to show it
-	 */
-	public static void refreshTable(){
-//		System.out.println("table size: "+table.getItemCount());
-		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
-		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-		for(int i=0;i<table.getItemCount();i++){
-			TableItem item = table.getItem(i);
-			if(i%2 == 0){
-//				System.out.println("set row: "+i);
-				item.setBackground(color1);
-			}else{
-				item.setBackground(color2);
-			}
-		}
-		table.redraw();
-	}
 	
 	/**
 	 * initialize the table elements
@@ -234,9 +234,9 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_1.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.BRAND_ASC:Sorter.BRAND_DESC);
+				tableViewer.setSorter(asc?ProductSorter.BRAND_ASC:ProductSorter.BRAND_DESC);
 				asc = !asc;				
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 
@@ -248,9 +248,9 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_2.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.SUB_BRAND_ASC:Sorter.SUB_BRAND_DESC);
+				tableViewer.setSorter(asc?ProductSorter.SUB_BRAND_ASC:ProductSorter.SUB_BRAND_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -262,9 +262,9 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_3.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.SIZE_ASC:Sorter.SIZE_DESC);
+				tableViewer.setSorter(asc?ProductSorter.SIZE_ASC:ProductSorter.SIZE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -276,9 +276,9 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_4.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.UNIT_ASC:Sorter.UNIT_DESC);
+				tableViewer.setSorter(asc?ProductSorter.UNIT_ASC:ProductSorter.UNIT_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 			
@@ -290,9 +290,9 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_5.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?Sorter.REPOSITORY_ASC:Sorter.REPOSITORY_DESC);
+				tableViewer.setSorter(asc?ProductSorter.REPOSITORY_ASC:ProductSorter.REPOSITORY_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -305,19 +305,26 @@ public class ProductContentPart extends ContentPart{
 		
 		
 		//set the editor of the table columns
-		tableViewer.setContentProvider(new ContentProvider(tableViewer, productlist));
-		tableViewer.setLabelProvider(new TableLabelProvider());
+		tableViewer.setContentProvider(new ProductContentProvider(tableViewer, productlist));
+		tableViewer.setLabelProvider(new ProductTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
+		
+		
+		Product prod_new = new Product(ProductUtils.getNewLineID());//dynamic from the database
+		ProductValidator.setNewID(ProductUtils.getNewLineID());
+		productlist.addProduct(prod_new);
+		
+		
 		tableViewer.setInput(productlist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","repository","operation"});		
 		cellEditor = new CellEditor[7];
 		cellEditor[0] = null;//ID
-		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
-		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[5] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[6] = new ButtonCellEditor(tableViewer.getTable(), productlist, rowHeight);//ButtonCellEditor
+		cellEditor[1] = new ProductTextCellEditor(tableViewer.getTable());		
+		cellEditor[2] = new ProductTextCellEditor(tableViewer.getTable());
+		cellEditor[3] = new ProductTextCellEditor(tableViewer.getTable());
+		cellEditor[4] = new ProductTextCellEditor(tableViewer.getTable());
+		cellEditor[5] = new ProductTextCellEditor(tableViewer.getTable());
+		cellEditor[6] = new ProductButtonCellEditor(tableViewer.getTable(), productlist, rowHeight);//ButtonCellEditor
 		tableViewer.setCellEditors(cellEditor);
 		
 		//initial the editor for hover and set the cell modifier
@@ -328,13 +335,13 @@ public class ProductContentPart extends ContentPart{
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	
 
-		ICellModifier modifier = new MyCellModifier(tableViewer, productlist);
+		ICellModifier modifier = new ProductCellModifier(tableViewer, productlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyFilter());
+		tableViewer.addFilter(new ProductFilter());
 		
-		refreshTable();
+		Utils.refreshTable(table);
 		composite.setLayout(new FillLayout());
 		
 	}

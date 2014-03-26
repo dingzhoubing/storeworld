@@ -1,4 +1,4 @@
-package com.storeworld.stock;
+package com.storeworld.deliver;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
@@ -6,14 +6,18 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.storeworld.product.Product;
 
-
-public class MyStockCellModifier implements ICellModifier {
+/**
+ * make the deliver table editable
+ * @author dingyuanxiong
+ *
+ */
+public class DeliverCellModifier implements ICellModifier {
 	private TableViewer tv;//just in case
-	private StockList stocklist;
+	private DeliverList deliverlist;
 
-	public MyStockCellModifier(TableViewer tv, StockList stocklist) {
+	public DeliverCellModifier(TableViewer tv, DeliverList deliverlist) {
 		this.tv = tv;
-		this.stocklist = stocklist;
+		this.deliverlist = deliverlist;
 	}
 
 	public boolean canModify(Object element, String property) {
@@ -22,7 +26,7 @@ public class MyStockCellModifier implements ICellModifier {
 
 	//when initial the table data
 	public Object getValue(Object element, String property) {
-		Stock s = (Stock) element;
+		Deliver s = (Deliver) element;
 		if(property.equals("id")){
 			return String.valueOf(s.getID());
 		}else if (property.equals("brand")) {
@@ -48,7 +52,7 @@ public class MyStockCellModifier implements ICellModifier {
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
-		Stock s = (Stock) item.getData();		
+		Deliver s = (Deliver) item.getData();		
 		if (property.equals("brand")) {
 			String newValue = (String) value;
 			if (newValue.equals("")) {
@@ -90,7 +94,7 @@ public class MyStockCellModifier implements ICellModifier {
 //			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
 //		System.out.println("change?");
-		stocklist.stockChanged(s);
+		deliverlist.deliverChanged(s);
 	}
 
 }

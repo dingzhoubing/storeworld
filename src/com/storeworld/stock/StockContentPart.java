@@ -1,12 +1,14 @@
 package com.storeworld.stock;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,8 +38,15 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
+import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
+
+/**
+ * the main part of the stock page
+ * @author dingyuanxiong
+ *
+ */
 public class StockContentPart extends ContentPart{
 	
 	private static Table table;
@@ -49,6 +58,7 @@ public class StockContentPart extends ContentPart{
 	private static CellEditor[] cellEditor = new CellEditor[8];
 	private static TableEditor editor = null;
 	private static TableEditor editorEdit = null;//software number keyboard
+	private static TableEditor editorCombo = null;//sub brand list
 	
 	private Composite current = null;
 	private Composite composite = null;
@@ -60,6 +70,7 @@ public class StockContentPart extends ContentPart{
 	private int sizeColumn = 3;
 	private int priceColumn = 5;
 	private int numberColumn = 6;
+	private int sub_brandColomn = 2;
 	
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -120,10 +131,10 @@ public class StockContentPart extends ContentPart{
 							c.setSize(Utils.getInput()+"kg");
 					}else if(colCurrent == priceColumn){
 						if(Utils.getClickButton() && Utils.getInputNeedChange())
-							c.setPrice(Double.valueOf(Utils.getInput()));
+							c.setPrice(Utils.getInput());
 					}else if(colCurrent == numberColumn){
 						if(Utils.getClickButton() && Utils.getInputNeedChange())
-							c.setNumber(Integer.valueOf(Utils.getInput()));
+							c.setNumber(Utils.getInput());
 					}
 					
 					if(Utils.getClickButton() && Utils.getInputNeedChange()){
@@ -137,6 +148,17 @@ public class StockContentPart extends ContentPart{
 							    SWT.ICON_WARNING);   
 					messageBox.setMessage("change product: "+c);   
 					messageBox.open(); 
+					}else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						CCombo combo = (CCombo)(editorCombo.getEditor());	
+						Stock c = (Stock)(table.getItem(rowCurrent).getData());
+						String current_brand = c.getBrand();
+						if(current_brand.equals("") || !Utils.checkBrand(current_brand)){
+							combo.removeAll();
+						}else{
+							List<String> list = Utils.getSub_Brands(current_brand);
+							combo.setItems(list.toArray(new String[list.size()]));
+						}
 					}
 				}
 			}
@@ -254,6 +276,13 @@ public class StockContentPart extends ContentPart{
 		composite_scroll.setVisible(true);
 		composite_scroll.setExpandHorizontal(true);  
 		composite_scroll.setExpandVertical(true);  
+		//make the scroll bar move as the mouse wheel
+		composite_scroll.addListener(SWT.Activate, new Listener(){    
+			public void handleEvent(Event e){      
+				composite_scroll.forceFocus();
+//				composite_scroll.setFocus();   
+				}
+		}); 
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
 		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
@@ -461,8 +490,19 @@ public class StockContentPart extends ContentPart{
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","price", "number", "operation"});		
 		cellEditor = new CellEditor[8];
 		cellEditor[0] = null;//ID
-		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
-		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
+//		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
+//		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
+//		cellEditor[1] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getBrands(),SWT.NONE);	
+//		ComboBoxCellEditor comboboxCellEditor = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
+		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands(), true);
+		comboboxCellEditor.setActivationStyle(SWT.Expand);
+		cellEditor[1] = comboboxCellEditor;
+//		ComboBoxCellEditor comboboxCellEditor2 = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
+		
+		GeneralComboCellEditor<String> comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands(), true);
+		comboboxCellEditor2.setActivationStyle(SWT.Expand);
+		cellEditor[2] = comboboxCellEditor2;
+//		cellEditor[2] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getSub_Brands(),SWT.NONE);
 		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
 		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
 		cellEditor[5] = new TextCellEditor(tableViewer.getTable());
@@ -477,13 +517,16 @@ public class StockContentPart extends ContentPart{
 	    editor.grabHorizontal = true;		
 		editorEdit = new TableEditor(table);
 		editorEdit.horizontalAlignment = SWT.CENTER;
-		editorEdit.grabHorizontal = true;	
+		editorEdit.grabHorizontal = true;
+		editorCombo = new TableEditor(table);
+		editorCombo.horizontalAlignment = SWT.CENTER;
+		editorCombo.grabHorizontal = true;	
 
-		ICellModifier modifier = new MyStockCellModifier(tableViewer, stocklist);
+		ICellModifier modifier = new StockCellModifier(tableViewer, stocklist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new MyStockFilter());
+		tableViewer.addFilter(new StockFilter());
 		
 		refreshTable();
 		composite_right.setLayout(new FillLayout());

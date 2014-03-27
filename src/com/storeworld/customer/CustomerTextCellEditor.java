@@ -36,14 +36,45 @@ public class CustomerTextCellEditor extends TextCellEditor {
 	protected void editOccured(ModifyEvent e) {
 		// TODO Auto-generated method stub
 		super.editOccured(e);
+		//in CustomerCellModifier, we have computed the result, can be optimized
+		//bu we assume this is not time consuming, so let it go
 		String val = (String)text.getText();
-        if(val.equals("123")){
-//        	System.out.println("border width: "+text.getBorderWidth());
-        	Point loc = text.getParent().toDisplay(text.getParent().getLocation());
+		boolean valid = false;
+		if(this.col == 1){
+			valid = CustomerValidator.validateName(val);
+			if(!valid){
+			Point loc = text.getParent().toDisplay(text.getParent().getLocation());
             tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
-        	tip.setMessage("wrong");
+        	tip.setMessage("wrong name, the name should obey....");
         	tip.setVisible(true);
-        }
+			}
+		}else if(this.col ==2){
+			valid = CustomerValidator.validateArea(val);
+			if(!valid){
+			Point loc = text.getParent().toDisplay(text.getParent().getLocation());
+            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
+        	tip.setMessage("wrong area, the area should obey....");
+        	tip.setVisible(true);
+			}
+		}else if(this.col ==3){
+			valid = CustomerValidator.validatePhone(val);
+			if(!valid){
+			Point loc = text.getParent().toDisplay(text.getParent().getLocation());
+            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
+        	tip.setMessage("wrong phone number, the area should obey....");
+        	tip.setVisible(true);
+        	}
+		}
+		else if(this.col ==4){
+			valid = CustomerValidator.validateAddress(val);
+			if(!valid){
+			Point loc = text.getParent().toDisplay(text.getParent().getLocation());
+            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
+        	tip.setMessage("wrong address, the address should obey....");
+        	tip.setVisible(true);
+			}
+		}
+		
 	}
 
 }

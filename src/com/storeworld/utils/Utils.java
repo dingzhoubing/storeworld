@@ -36,6 +36,7 @@ public class Utils {
 	private static boolean inputNeedChange = false;
 	private static boolean clickButton = false;
 	private static boolean useSoftKeyBoard = true;
+//	private static int waitForListener = 0;
 	
 	//gray image
 	private static ImageLoader imageLoader = new ImageLoader();

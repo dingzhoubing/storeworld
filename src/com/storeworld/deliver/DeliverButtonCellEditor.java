@@ -71,11 +71,11 @@ public class DeliverButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Deliver c = (Deliver)(table.getItem(index).getData());		
 						deliverlist.removeDeliver(c);
-						MessageBox messageBox =   
-								   new MessageBox(new Shell(),   					     
-								    SWT.ICON_WARNING);   
-						messageBox.setMessage("É¾³ý: "+c);   
-						messageBox.open(); 
+//						MessageBox messageBox =   
+//								   new MessageBox(new Shell(),   					     
+//								    SWT.ICON_WARNING);   
+//						messageBox.setMessage("É¾³ý: "+c);   
+//						messageBox.open(); 
 						button.setVisible(false);
 						Utils.refreshTable(table);											
 								 

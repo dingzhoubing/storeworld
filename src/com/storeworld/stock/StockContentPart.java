@@ -36,8 +36,11 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.common.ComboUtils;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
+import com.storeworld.utils.Constants;
+import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
@@ -71,6 +74,9 @@ public class StockContentPart extends ContentPart{
 	private int priceColumn = 5;
 	private int numberColumn = 6;
 	private int sub_brandColomn = 2;
+	private int brandColomn = 1;
+	private static GeneralComboCellEditor<String> comboboxCellEditor = null;
+	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;
 	
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -78,6 +84,9 @@ public class StockContentPart extends ContentPart{
 		current = parent;		
 		initialization();
 		addListenerForTable();
+	}
+	public static StockList getStockList(){
+		return stocklist;
 	}
 	/**
 	 * call the software keyboard
@@ -127,36 +136,72 @@ public class StockContentPart extends ContentPart{
 					callKeyBoard(text);
 					Stock c = (Stock)(table.getItem(rowCurrent).getData());	
 					if(colCurrent == sizeColumn){
-						if(Utils.getClickButton() && Utils.getInputNeedChange())
-							c.setSize(Utils.getInput()+"kg");
+						String sizelast = c.getSize();
+						if(Utils.getClickButton() && Utils.getInputNeedChange()){
+							c.setSize(Utils.getInput());
+							text.setText(c.getSize());//validate the text
+							if(StockValidator.validateSize(c.getSize()))//table, table.getItem(rowCurrent), colCurrent, 
+							{
+								stocklist.stockChanged(c);	
+								text.setText(c.getSize());
+							}else{
+								c.setSize(sizelast);
+							}
+							//initial the next click
+							Utils.setClickButton(false);
+						}
 					}else if(colCurrent == priceColumn){
-						if(Utils.getClickButton() && Utils.getInputNeedChange())
+						String pricelast = c.getPrice();
+						if(Utils.getClickButton() && Utils.getInputNeedChange()){
 							c.setPrice(Utils.getInput());
+							text.setText(c.getPrice());//validate the text
+							if(StockValidator.validatePrice(c.getPrice()))//table, table.getItem(rowCurrent), colCurrent, 
+							{
+								stocklist.stockChanged(c);	
+								text.setText(c.getPrice());
+							}else{
+								c.setPrice(pricelast);
+							}
+							//initial the next click
+							Utils.setClickButton(false);
+						}
 					}else if(colCurrent == numberColumn){
-						if(Utils.getClickButton() && Utils.getInputNeedChange())
+						String numberlast = c.getNumber();
+						if(Utils.getClickButton() && Utils.getInputNeedChange()){
 							c.setNumber(Utils.getInput());
+							text.setText(c.getNumber());//validate the text
+							if(StockValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
+							{
+								stocklist.stockChanged(c);	
+								text.setText(c.getNumber());
+							}else{
+								c.setNumber(numberlast);
+							}
+							//initial the next click
+							Utils.setClickButton(false);
+						}
 					}
-					
-					if(Utils.getClickButton() && Utils.getInputNeedChange()){
-						stocklist.stockChanged(c);		
-						//initial the next click
-						Utils.setClickButton(false);
+
 					}
-					//add message, no use later
-					MessageBox messageBox =   
-							   new MessageBox(new Shell(),   					     
-							    SWT.ICON_WARNING);   
-					messageBox.setMessage("change product: "+c);   
-					messageBox.open(); 
-					}else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
+					else if(colCurrent == brandColomn){//sub_brand column, then fill the combox
+						StockUtils.setCurrentLine(rowCurrent);
+						Stock c = (Stock)(table.getItem(rowCurrent).getData());
+						StockUtils.setCurrentSub_Brand(c.getSubBrand());
+						
+					}
+					else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-						CCombo combo = (CCombo)(editorCombo.getEditor());	
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
 						String current_brand = c.getBrand();
-						if(current_brand.equals("") || !Utils.checkBrand(current_brand)){
+						if( current_brand == null ||current_brand.equals("") || !Utils.checkBrand(current_brand)){
 							combo.removeAll();
+							c.setSubBrand("");
+							stocklist.stockChanged(c);	
 						}else{
 							List<String> list = Utils.getSub_Brands(current_brand);
+							//set data into objects
+							comboboxCellEditor2.setObjects(list);
 							combo.setItems(list.toArray(new String[list.size()]));
 						}
 					}
@@ -173,7 +218,7 @@ public class StockContentPart extends ContentPart{
 				int ptY = event.y;
 				int index = table.getTopIndex();
 				int row = -1;
-				for (; index < table.getItemCount(); index++) {
+				for (; index < table.getItemCount()-1; index++) {
 					final TableItem item = table.getItem(index);
 					//the width of the line maybe 0
 					int rowY = item.getBounds().y;					
@@ -221,24 +266,6 @@ public class StockContentPart extends ContentPart{
 		});
 	}
 	
-	/**
-	 * after sort of the table column, refresh the table to show it
-	 */
-	public static void refreshTable(){
-//		System.out.println("table size: "+table.getItemCount());
-		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
-		Color color2 = new Color(table.getDisplay(), 255, 250, 250);
-		for(int i=0;i<table.getItemCount();i++){
-			TableItem item = table.getItem(i);
-			if(i%2 == 0){
-//				System.out.println("set row: "+i);
-				item.setBackground(color1);
-			}else{
-				item.setBackground(color2);
-			}
-		}
-		table.redraw();
-	}
 	
 	/**
 	 * initialize the table elements
@@ -253,25 +280,32 @@ public class StockContentPart extends ContentPart{
 		final Color base = new Color(composite.getDisplay(), 255,240,245);
 		composite_left.setBackground(base);
 		composite_left.setBounds(0, 0, (int)(w/5), h);
-
+		//right part		
+		Composite composite_right  = new Composite(composite, SWT.NONE);
+		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
+		composite_shift = (int)(w/5);
+		//define a table
+		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
+		
 		//add a new stock table
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
 		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setText("+   新增进货");
-		
+		//label to show the tips info
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" 当月历史记录(在下方设置日期进行搜索)");
 		label.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
 		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
 		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
 		
-		
+		//the base composite of the left navigator
 		final Composite composite_2 = new Composite(composite_left, SWT.NONE);
         composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
         composite_2.setBackground(new Color(composite.getDisplay(), 255,240,245));
         composite_2.setLayout(new FillLayout());
         
-        
+        //left history part
 		final ScrolledComposite composite_scroll = new ScrolledComposite(composite_2,  SWT.NONE|SWT.V_SCROLL);//
 		composite_scroll.setVisible(true);
 		composite_scroll.setExpandHorizontal(true);  
@@ -279,10 +313,10 @@ public class StockContentPart extends ContentPart{
 		//make the scroll bar move as the mouse wheel
 		composite_scroll.addListener(SWT.Activate, new Listener(){    
 			public void handleEvent(Event e){      
-				composite_scroll.forceFocus();
-//				composite_scroll.setFocus();   
+				composite_scroll.forceFocus();   
 				}
 		}); 
+		//the composite on scroll part
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
 		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
@@ -294,43 +328,23 @@ public class StockContentPart extends ContentPart{
         layout.marginWidth = 0;
         composite_fn.setLayout(layout);
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        final ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();
-        btnNewButton.addListener(SWT.Selection, new Listener() {
-	            public void handleEvent(Event e) {  	  
-	            	ItemComposite ic = new ItemComposite(composite_fn, 0, new Color(composite_fn.getDisplay(), 204, 255, 204),(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
-	            	ic.setValue("123", "234", "456      ");
-	            	itemList.add(ic);
-	                composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-	                composite_fn.layout();  
-	            }  
-	        });
+        //show the history panel
+        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
+        StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
         composite_2.layout();
-        
+        //date picker
         DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
 		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		Button btnSearch = new Button(composite_left, SWT.NONE);
+		//search the history
 		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
 		btnSearch.setText("查找");
-		btnSearch.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event e) {  
-				if (!itemList.isEmpty()) {
-					itemList.get(0).dispose();
-					itemList.remove(0);
-					composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-	                composite_fn.layout();  
-				}
-            }  
-        });
-        
-	 //right part		
-		Composite composite_right  = new Composite(composite, SWT.NONE);
-		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
-		composite_shift = (int)(w/5);
 		
+
+		//show time in the right cmposite
 		DateTime dateTime_stock = new DateTime(composite_right, SWT.BORDER);
 		dateTime_stock.setBounds((int)(4*w/5/100), (int)(4*w/5/100), (int)(6*4*w/5/50), (int)(h/20));
-		
+		//delete or clear the table
 		Button btn_delete = new Button(composite_right, SWT.NONE);
 		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setText("删除");
@@ -349,34 +363,33 @@ public class StockContentPart extends ContentPart{
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_text.widthHint = (int)((int)(4*w/5/2));
 		gd_text.heightHint = (int)(h/10/3);
-		
+		//total text
 		Text total = new Text(composite_sum, SWT.NONE);
 		total.setEnabled(false);
 		total.setText("总计:");
 		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total.setLayoutData(gd_text);
-		
+		//total value
 		Text total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("3000   ");
+		total_val.setText("3000"+Constants.SPACE);
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setLayoutData(gd_text);
-		
+		//indeed text
 		Text indeed = new Text(composite_sum, SWT.NONE);
 		indeed.setEnabled(false);
 		indeed.setText("实付:");
 		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed.setLayoutData(gd_text);		
-		
+		//indeed value
 		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		indeed_val.setEnabled(false);
-		indeed_val.setText("2870   ");
+		indeed_val.setText("2870"+Constants.SPACE);
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_val.setLayoutData(gd_text);
 		composite_sum.layout();
 		
-		//define a table
-		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		
+		//the stock table	
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
@@ -401,7 +414,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.BRAND_ASC:StockSorter.BRAND_DESC);
 				asc = !asc;				
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 
@@ -415,7 +428,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.SUB_BRAND_ASC:StockSorter.SUB_BRAND_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -429,7 +442,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.SIZE_ASC:StockSorter.SIZE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -443,7 +456,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.UNIT_ASC:StockSorter.UNIT_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
@@ -456,7 +469,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.PRICE_ASC:StockSorter.PRICE_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
@@ -469,7 +482,7 @@ public class StockContentPart extends ContentPart{
 			public void widgetSelected(SelectionEvent e){
 				tableViewer.setSorter(asc?StockSorter.NUMBER_ASC:StockSorter.NUMBER_DESC);
 				asc = !asc;
-				refreshTable();
+				Utils.refreshTable(table);
 			}
 		});
 		
@@ -486,29 +499,33 @@ public class StockContentPart extends ContentPart{
 		tableViewer.setContentProvider(new StockContentProvider(tableViewer, stocklist));
 		tableViewer.setLabelProvider(new StockTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
+		Stock stock_new = new Stock(StockUtils.getNewLineID());//dynamic from the database
+		StockValidator.setNewID(StockUtils.getNewLineID());
+		stocklist.addStock(stock_new);
+		
 		tableViewer.setInput(stocklist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","price", "number", "operation"});		
 		cellEditor = new CellEditor[8];
 		cellEditor[0] = null;//ID
-//		cellEditor[1] = new TextCellEditor(tableViewer.getTable());		
-//		cellEditor[2] = new TextCellEditor(tableViewer.getTable());
-//		cellEditor[1] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getBrands(),SWT.NONE);	
-//		ComboBoxCellEditor comboboxCellEditor = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
-		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands(), true);
-		comboboxCellEditor.setActivationStyle(SWT.Expand);
-		cellEditor[1] = comboboxCellEditor;
-//		ComboBoxCellEditor comboboxCellEditor2 = new ComboBoxCellEditor(tableViewer.getTable(), Utils.getBrands(), SWT.None);
 		
-		GeneralComboCellEditor<String> comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands(), true);
-		comboboxCellEditor2.setActivationStyle(SWT.Expand);
+		ComboUtils.setWidth_Col(columnWidth, 1, Constants.STOCK_TYPE_BRAND);
+//		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
+		comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
+//		comboboxCellEditor.setActivationStyle(SWT.Expand);
+		cellEditor[1] = comboboxCellEditor;
+
+		ComboUtils.setWidth_Col(columnWidth, 2, Constants.STOCK_TYPE_SUB_BRAND);
+//		GeneralComboCellEditor<String> comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands());
+		comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands());
+//		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
-//		cellEditor[2] = new ComboBoxCellEditor(tableViewer.getTable(),Utils.getSub_Brands(),SWT.NONE);
-		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[5] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[6] = new TextCellEditor(tableViewer.getTable());				
+
+		cellEditor[3] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 3);
+		cellEditor[4] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 4);
+		cellEditor[5] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 5);
+		cellEditor[6] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 6);				
 		cellEditor[7] = new StockButtonCellEditor(tableViewer.getTable(), stocklist, rowHeight);//ButtonCellEditor
-//		cellEditor[7] = new ItemCompositeEditor(tableViewer.getTable(), 0, new Color(this.getDisplay(), 63,63,63),(int)(columnWidth*6/9)-3, rowHeight);//ButtonCellEditor
+
 		tableViewer.setCellEditors(cellEditor);
 		
 		//initial the editor for hover and set the cell modifier
@@ -526,14 +543,10 @@ public class StockContentPart extends ContentPart{
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new StockFilter());
+//		tableViewer.addFilter(new StockFilter());
 		
-		refreshTable();
+		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
-		
-		
-		
-		
 		
 	}
 }

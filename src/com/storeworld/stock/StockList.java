@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.customer.CustomerUtils;
 
 /**
  * get the data of the stock table
@@ -54,7 +55,8 @@ public class StockList {
 		String number3 = "20";
 		Stock stock3 = new Stock("3", brand3, subbrand3, size3, unit3, price3, number3);
 		stockList.add(stock3);	
-		
+	
+		StockUtils.setNewLineID("4");
 	}
 	
 	public ArrayList<DataInTable> getStocks() {
@@ -64,8 +66,7 @@ public class StockList {
 	/**
 	 * add a stock
 	 */
-	public void addStock() {
-		Stock stock = new Stock();
+	public void addStock(Stock stock) {
 		this.stockList.add(stock);
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())

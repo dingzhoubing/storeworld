@@ -16,6 +16,13 @@ public class CustomerFilter extends ViewerFilter {
 	private static HashSet<Customer> filterout = new HashSet<Customer>();
 	
 	
+	//this is a cache of the chooser
+	private static HashSet<String> areas = new HashSet<String>();
+	private static HashSet<String> firstnames = new HashSet<String>();
+	
+	
+	
+	
 	public static void initialFilterOut(ArrayList<DataInTable> list){
 		for(int i=0;i<list.size();i++){
 			filterout.add((Customer)list.get(i));
@@ -28,7 +35,7 @@ public class CustomerFilter extends ViewerFilter {
 	 */
 	public static void setArea(String ar, String tp){
 		type = tp;
-		area = ar;
+		areas.add(ar);
 	}
 	/**
 	 * set the first name filter
@@ -36,8 +43,22 @@ public class CustomerFilter extends ViewerFilter {
 	 */
 	public static void setFirstName(String fm, String tp){
 		type = tp;
-		firstname = fm;
+		firstnames.add(fm);
 	}
+	
+	public static void removeArea(String ar, String tp){
+		type = tp;
+		areas.remove(ar);
+	}
+	/**
+	 * set the first name filter
+	 * @param fm
+	 */
+	public static void removeFirstName(String fm, String tp){
+		type = tp;
+		firstnames.remove(fm);
+	}
+	
 	/**
 	 * clear the elements meet requirements
 	 */
@@ -47,34 +68,23 @@ public class CustomerFilter extends ViewerFilter {
 	
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		Customer cus = (Customer)element;
-		if(type.equals("area")){
-			if(cus != null && cus.getArea()!=null && cus.getName()!=null){
-				if(cus.getArea().contains(area)){// && filterout.contains(cus)				
-					//if matched, remove it from the filterout
-//					filterout.remove(cus);
-					return true;
-					
-				}
-				else{
-					return false;
-				}
-			}else{
-				//always keep this line
+		//empty row always return
+		if(cus.getArea() == null || cus.getArea().equals(""))
+			return true;
+		if(cus.getName()==null || cus.getName().equals(""))
+			return true;
+		//no check box selected
+		if(areas.isEmpty() && firstnames.isEmpty())
+			return true;
+		else{
+			//selected area check box
+			if(areas.contains(cus.getArea()))
 				return true;
-			}
-		}else{
-			if(cus != null && cus.getArea()!=null && cus.getName()!=null){
-				if(cus.getName().startsWith(firstname)){	
-//					filterout.remove(cus);
-					return true;
-				}
-				else{
-					return false;
-				}
-			}else{
-				//always keep the blank line
+			//selected firstname check box
+			if(firstnames.contains(cus.getName().substring(0, 1)))
 				return true;
-			}
+			return false;
 		}
+		
 	}
 }

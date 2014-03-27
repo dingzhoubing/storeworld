@@ -152,29 +152,29 @@ public class ProductCellModifier implements ICellModifier {
 		if (hasBeenChanged) {
 
 			if (property.equals("brand")) {
-				valid = ProductValidator.validateBrand(tv.getTable(), item, 1, p.getBrand());
+				valid = ProductValidator.validateBrand(p.getBrand());//tv.getTable(), item, 1, 
 				if (!valid) {
 					p.setBrand(brandlast);
 				}
 
 			} else if (property.equals("sub_brand")) {
-				valid = ProductValidator.validateSub_Brand(tv.getTable(), item, 2, p.getSubBrand());
+				valid = ProductValidator.validateSub_Brand(p.getSubBrand());//tv.getTable(), item, 2, 
 				if (!valid) {
 					p.setSubBrand(sub_brandlast);
 				}
 
 			} else if (property.equals("size")) {
-				valid = ProductValidator.validateSize(tv.getTable(), item, 3, p.getSize());
+				valid = ProductValidator.validateSize(p.getSize());//tv.getTable(), item, 3, 
 				if (!valid) {
 					p.setSize(sizelast);
 				}
 			} else if (property.equals("unit")) {
-				valid = ProductValidator.validateUnit(tv.getTable(), item, 4, p.getUnit());
+				valid = ProductValidator.validateUnit(p.getUnit());//tv.getTable(), item, 4, 
 				if (!valid) {
 					p.setUnit(unitlast);
 				}
 			}else if (property.equals("repository")) {
-				valid = ProductValidator.validateRepository(tv.getTable(), item, 5, p.getRepository());
+				valid = ProductValidator.validateRepository(p.getRepository());//tv.getTable(), item, 5, 
 				if (!valid) {
 					p.setUnit(unitlast);
 				}

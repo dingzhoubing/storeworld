@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.stock.StockUtils;
 
 /**
  * produce the data for deliver table
@@ -31,8 +32,8 @@ public class DeliverList {
 		String subbrand = "精一";
 		String size = "50kg";
 		String unit = "包";
-		double price = 50.0;
-		int number = 30;
+		String price = "50.0";
+		String number = "30";
 		Deliver deliver = new Deliver("1",brand, subbrand, size, unit, price, number);
 		deliverList.add(deliver);
 		
@@ -40,8 +41,8 @@ public class DeliverList {
 		String subbrand2 = "特精";
 		String size2 = "50kg";
 		String unit2 = "包";
-		double price2 = 75.0;
-		int number2 = 40;
+		String price2 = "75.0";
+		String number2 = "40";
 		Deliver deliver2 = new Deliver("2",brand2, subbrand2, size2, unit2, price2, number2);
 		deliverList.add(deliver2);
 		
@@ -49,10 +50,12 @@ public class DeliverList {
 		String subbrand3 = "包子粉";
 		String size3 = "50kg";
 		String unit3= "包";
-		double price3 = 72.0;
-		int number3 = 20;
+		String price3 = "72.0";
+		String number3 = "20";
 		Deliver deliver3 = new Deliver("3", brand3, subbrand3, size3, unit3, price3, number3);
 		deliverList.add(deliver3);	
+		
+		DeliverUtils.setNewLineID("4");
 		
 	}
 	
@@ -63,8 +66,7 @@ public class DeliverList {
 	/**
 	 * add a deliver
 	 */
-	public void addDeliver() {
-		Deliver deliver = new Deliver();
+	public void addDeliver(Deliver deliver) {
 		this.deliverList.add(deliver);
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext())

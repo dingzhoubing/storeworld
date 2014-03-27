@@ -40,23 +40,23 @@ public class StockContentProvider implements IStructuredContentProvider, IDataLi
 		@Override
 		public void add(DataInTable stock) {
 			tableviewer.add(stock);
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("add stock: "+stock);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("add stock: "+stock);   
+//			messageBox.open(); 
 //			System.out.println(stock);
 			
 		}
 		@Override
 		public void remove(DataInTable stock) {
 			tableviewer.remove(stock);
-			//no use later
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("remove stock: "+stock);   
-			messageBox.open(); 
+//			//no use later
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("remove stock: "+stock);   
+//			messageBox.open(); 
 			
 		}
 		@Override

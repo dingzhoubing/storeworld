@@ -5,6 +5,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.storeworld.product.Product;
+import com.storeworld.stock.Stock;
+import com.storeworld.stock.StockValidator;
+import com.storeworld.utils.Utils;
 
 /**
  * make the deliver table editable
@@ -27,22 +30,39 @@ public class DeliverCellModifier implements ICellModifier {
 	//when initial the table data
 	public Object getValue(Object element, String property) {
 		Deliver s = (Deliver) element;
-		if(property.equals("id")){
+		if(property.equals("id")){			
 			return String.valueOf(s.getID());
 		}else if (property.equals("brand")) {
-			return String.valueOf(s.getBrand());
+			if(s.getBrand() != null)
+				return String.valueOf(s.getBrand());
+			else
+				return String.valueOf("");			
 		} else if (property.equals("sub_brand")) {
-			return String.valueOf(s.getSubBrand());
-		} else if (property.equals("size")) {
-			return String.valueOf(s.getSize());
-		}else if (property.equals("unit")) {
-			return String.valueOf(s.getUnit());
-		}else if (property.equals("price")) {
-			return String.valueOf(s.getPrice());
-		}else if (property.equals("number")) {
-			return String.valueOf(s.getNumber());
+			if(s.getSubBrand() != null)
+				return String.valueOf(s.getSubBrand());
+			else
+				return String.valueOf("");			
+		} else if (property.equals("size")) {			
+			if(s.getSize() != null)
+				return String.valueOf(s.getSize());
+			else
+				return String.valueOf("");			
+		}else if (property.equals("unit")) {			
+			if(s.getUnit() != null)
+				return String.valueOf(s.getUnit());
+			else
+				return String.valueOf("");			
+		}else if (property.equals("price")) {			
+			if(s.getPrice() != null)
+				return String.valueOf(s.getPrice());
+			else
+				return String.valueOf("");			
+		}else if (property.equals("number")) {			
+			if(s.getNumber() != null)
+				return String.valueOf(s.getNumber());
+			else
+				return String.valueOf("");			
 		}else if(property.equals("operation")){
-//			return String.valueOf("1");
 			return null;// show the operation button
 		}
 		return null;
@@ -53,48 +73,146 @@ public class DeliverCellModifier implements ICellModifier {
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
 		Deliver s = (Deliver) item.getData();		
+		String brandlast = "";
+		String sub_brandlast = "";
+		String sizelast = "";
+		String unitlast = "";
+		String pricelast = "";
+		String numberlast = "";
+		boolean hasBeenChanged = false;
 		if (property.equals("brand")) {
+				
+			brandlast = s.getBrand();
 			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
+			}
+			if (brandlast != null) {
+				if (!brandlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			s.setBrand(newValue);
+			
 		} else if (property.equals("sub_brand")) {
-			String newValue = (String) value;			
+			sub_brandlast = s.getSubBrand();
+			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
+			}
+			if (sub_brandlast != null) {
+				if (!sub_brandlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			s.setSubBrand(newValue);
+
 		} else if (property.equals("size")) {
-			String newValue = (String) value;			
+			sizelast = s.getSize();
+			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
+			}
+			if (sizelast != null) {
+				if (!sizelast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			s.setSize(newValue);
 		} else if (property.equals("unit")) {
-			String newValue = (String) value;			
+			unitlast = s.getUnit();
+			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
+			}
+			if (unitlast != null) {
+				if (!unitlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
 			s.setUnit(newValue);
 		} else if (property.equals("price")) {
-			String newValue = (String) value;			
+			pricelast = s.getPrice();
+			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
-			s.setPrice(Double.valueOf(newValue).doubleValue());
+			}
+			if (pricelast != null) {
+				if (!pricelast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
+			s.setPrice(newValue);
 		} else if (property.equals("number")) {
-			String newValue = (String) value;			
+			numberlast = s.getNumber();
+			String newValue = (String) value;
 			if (newValue.equals("")) {
 				return;
-			}			
-			s.setNumber(Integer.valueOf(newValue).intValue());
+			}
+			if (numberlast != null) {
+				if (!numberlast.equals(newValue))
+					hasBeenChanged = true;
+			} else {
+				hasBeenChanged = true;
+			}
+			s.setNumber(newValue);
 		}else {
 			return;//just return, do nothing
 //			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
-//		System.out.println("change?");
-		deliverlist.deliverChanged(s);
+
+		boolean valid = false;
+		if (hasBeenChanged) {
+
+			if (property.equals("brand")) {
+				valid = DeliverValidator.validateBrand(s.getBrand());//tv.getTable(), item, 1, 
+				if (!valid) {
+					s.setBrand(brandlast);
+				}
+
+			} else if (property.equals("sub_brand")) {
+				valid = DeliverValidator.validateSub_Brand(s.getSubBrand());//tv.getTable(), item, 2, 
+				if (!valid) {
+					s.setSubBrand(sub_brandlast);
+				}
+
+			} else if (property.equals("size")) {
+				valid = DeliverValidator.validateSize(s.getSize());//tv.getTable(), item, 3, 
+				if (!valid) {
+					s.setSize(sizelast);
+				}
+			} else if (property.equals("unit")) {
+				valid = DeliverValidator.validateUnit(s.getUnit());//tv.getTable(), item, 4, 
+				if (!valid) {
+					s.setUnit(unitlast);
+				}				
+			} else if (property.equals("price")) {
+				valid = DeliverValidator.validatePrice(s.getPrice());//tv.getTable(), item, 4, 
+				if (!valid) {
+					s.setPrice(pricelast);
+				}				
+			} else if (property.equals("number")) {
+				valid = DeliverValidator.validateNumber(s.getNumber());//tv.getTable(), item, 4, 
+				if (!valid) {
+					s.setNumber(numberlast);
+				}				
+			}
+			if (valid) {
+				deliverlist.deliverChanged(s);
+				if (DeliverValidator.checkID(s.getID()) && DeliverValidator.rowLegal(s)) {
+					int new_id = Integer.valueOf(s.getID()) + 1;
+					DeliverValidator.setNewID(String.valueOf(new_id));
+					Deliver deliver_new = new Deliver(String.valueOf(new_id));
+					deliverlist.addDeliver(deliver_new);
+					Utils.refreshTable(tv.getTable());
+				}
+			}
+		}
 	}
 
 }

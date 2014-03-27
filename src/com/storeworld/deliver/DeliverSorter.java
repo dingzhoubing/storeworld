@@ -78,23 +78,23 @@ public class DeliverSorter extends ViewerSorter {
 				return i2.compareTo(i1);
 			}
 			case PRICE:{
-				double i1 = p1.getPrice();
-				double i2 = p2.getPrice();
+				double i1 = Double.valueOf(p1.getPrice());
+				double i2 = Double.valueOf(p2.getPrice());
 				return Double.valueOf(i1).compareTo(Double.valueOf(i2));
 			}
 			case -PRICE:{
-				double i1 = p1.getPrice();
-				double i2 = p2.getPrice();
+				double i1 = Double.valueOf(p1.getPrice());
+				double i2 = Double.valueOf(p2.getPrice());
 				return Double.valueOf(i2).compareTo(Double.valueOf(i1));
 			}
 			case NUMBER:{
-				int i1 = p1.getNumber();
-				int i2 = p2.getNumber();
+				int i1 = Integer.valueOf(p1.getNumber());
+				int i2 = Integer.valueOf(p2.getNumber());
 				return Integer.valueOf(i1).compareTo(Integer.valueOf(i2));		
 			}
 			case -NUMBER:{
-				int i1 = p1.getNumber();
-				int i2 = p2.getNumber();
+				int i1 = Integer.valueOf(p1.getNumber());
+				int i2 = Integer.valueOf(p2.getNumber());
 				return Integer.valueOf(i2).compareTo(Integer.valueOf(i1));				
 			}
 

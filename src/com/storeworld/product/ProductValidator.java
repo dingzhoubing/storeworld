@@ -21,7 +21,7 @@ public class ProductValidator {
 	 * @param name
 	 * @return
 	 */
-	public static boolean validateBrand(Table table, TableItem item, int col, String brand){
+	public static boolean validateBrand(String brand){//Table table, TableItem item, int col, 
 		if(brand != null && !brand.equals("") && !brand.equals("123")){
 
 			return true;
@@ -39,8 +39,8 @@ public class ProductValidator {
 	 * @param area
 	 * @return
 	 */
-	public static boolean validateSub_Brand(Table table, TableItem item, int col,String sub_brand){
-		if(sub_brand != null && !sub_brand.equals("")){
+	public static boolean validateSub_Brand(String sub_brand){//Table table, TableItem item, int col,
+		if(sub_brand != null && !sub_brand.equals("") &&!sub_brand.equals("123")){
 
 			return true;
 		}
@@ -58,7 +58,7 @@ public class ProductValidator {
 	 * @param phone
 	 * @return
 	 */
-	public static boolean validateSize(Table table, TableItem item, int col,String size){
+	public static boolean validateSize(String size){//Table table, TableItem item, int col,
 
 		return true;//now, always return true
 //		return false;
@@ -72,14 +72,14 @@ public class ProductValidator {
 	 * @param address
 	 * @return
 	 */
-	public static boolean validateUnit(Table table, TableItem item, int col,String unit){
+	public static boolean validateUnit(String unit){//Table table, TableItem item, int col,
 
 		return true;//now, always return true
 //		return false;
 	}
 		
-	public static boolean validateRepository(Table table, TableItem item, int col,String repo){
-
+	public static boolean validateRepository(String repo){//Table table, TableItem item, int col,
+		
 		return true;//now, always return true
 //		return false;
 	}

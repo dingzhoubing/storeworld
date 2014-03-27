@@ -21,7 +21,7 @@ public class CustomerValidator {
 	 * @param name
 	 * @return
 	 */
-	public static boolean validateName(Table table, TableItem item, int col, String name){
+	public static boolean validateName(String name){//Table table, TableItem item, int col, 
 		if(name != null && !name.equals("") && !name.equals("123")){
 
 			return true;
@@ -39,8 +39,8 @@ public class CustomerValidator {
 	 * @param area
 	 * @return
 	 */
-	public static boolean validateArea(Table table, TableItem item, int col,String area){
-		if(area != null && !area.equals("")){
+	public static boolean validateArea(String area){//Table table, TableItem item, int col,
+		if(area != null && !area.equals("") && !area.equals("123")){
 
 			return true;
 		}
@@ -58,7 +58,7 @@ public class CustomerValidator {
 	 * @param phone
 	 * @return
 	 */
-	public static boolean validatePhone(Table table, TableItem item, int col,String phone){
+	public static boolean validatePhone(String phone){//Table table, TableItem item, int col,
 
 //		return true;//now, always return true
 //		return false;
@@ -80,7 +80,7 @@ public class CustomerValidator {
 	 * @param address
 	 * @return
 	 */
-	public static boolean validateAddress(Table table, TableItem item, int col,String address){
+	public static boolean validateAddress(String address){//Table table, TableItem item, int col,
 
 		return true;//now, always return true
 //		return false;

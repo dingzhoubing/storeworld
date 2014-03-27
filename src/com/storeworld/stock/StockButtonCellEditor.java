@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.utils.Utils;
+
 /**
  * the remove button on stock table
  * once mouse hover on a row of the table, the button appears
@@ -69,13 +71,13 @@ public class StockButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Stock c = (Stock)(table.getItem(index).getData());		
 						stocklist.removeStock(c);
-						MessageBox messageBox =   
-								   new MessageBox(new Shell(),   					     
-								    SWT.ICON_WARNING);   
-						messageBox.setMessage("É¾³ý: "+c);   
-						messageBox.open(); 
+//						MessageBox messageBox =   
+//								   new MessageBox(new Shell(),   					     
+//								    SWT.ICON_WARNING);   
+//						messageBox.setMessage("É¾³ý: "+c);   
+//						messageBox.open(); 
 						button.setVisible(false);
-						StockContentPart.refreshTable();												
+						Utils.refreshTable(table);												
 								 
 						break;
 					}

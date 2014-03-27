@@ -88,12 +88,12 @@ public class AnalyzeContentPart extends ContentPart{
 	         Label lbl_brand = new Label(comp1, SWT.NONE);
 	         lbl_brand.setText("Æ·ÅÆ");
 	         
-	         CCombo combo_brand = new CCombo(comp1, SWT.BORDER);
+	         CCombo combo_brand = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
 	         GridData gd_combo_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 	         gd_combo_brand.widthHint = 171;
 	         combo_brand.setLayoutData(gd_combo_brand);
 	         
-	         final CCombo combo_subbrand = new CCombo(comp1, SWT.BORDER);
+	         final CCombo combo_subbrand = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
 	         GridData gd_combo_sub_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 	         gd_combo_sub_brand.widthHint = 171;
 	         combo_subbrand.setLayoutData(gd_combo_sub_brand);
@@ -113,12 +113,12 @@ public class AnalyzeContentPart extends ContentPart{
 	         Label lbl_area = new Label(comp1, SWT.NONE);
 	         lbl_area.setText("Æ¬Çø");
 	         
-	         CCombo combo_area = new CCombo(comp1, SWT.BORDER);
+	         CCombo combo_area = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
 	         GridData gd_combo_area = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 	         gd_combo_area.widthHint = 171;
 	         combo_area.setLayoutData(gd_combo_area);
 	         
-	         final CCombo combo_customer = new CCombo(comp1, SWT.BORDER);
+	         final CCombo combo_customer = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
 	         GridData gd_combo_customer = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 	         gd_combo_customer.widthHint = 171;
 	         combo_customer.setLayoutData(gd_combo_customer);
@@ -270,7 +270,6 @@ public class AnalyzeContentPart extends ContentPart{
 			public void handleEvent(Event e){
 				//need to forceFocus
 				composite_scroll.forceFocus();
-//				composite_scroll.setFocus(); 
 				}
 		}); 
 		final Composite composite_content = new Composite(composite_scroll, SWT.NONE);

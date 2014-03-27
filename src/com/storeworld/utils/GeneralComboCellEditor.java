@@ -7,11 +7,13 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ToolTip;
+
+import com.storeworld.common.ComboUtils;
 
 
 /** 
@@ -21,7 +23,7 @@ import org.eclipse.swt.widgets.Control;
 public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     private static final int STYLE_DEFAULT = SWT.NONE;
     /** The combo control that is used internally. */
-    protected CCombo comboBox;
+    protected GeneralCCombo comboBox;
     public static final int DROP_DOWN_ON_MOUSE_ACTIVATION = 1;
 
 	/**
@@ -47,49 +49,53 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     protected List<T> objects;
     /** This object determines how to read out the label String from the objects. */
     protected ILabelProvider labelProvider;
+    protected ToolTip tip;
 
-    /** Creates a new cell editor that shows the specified items in its list.
-     * The default LabelProvider (which uses the <code>toString()</code> method)
-     * is used to find the label of each item.
-     * @param parent the parent control
-     * @param items the objects to select from
-     * @param editable if <code>true</code>, the user can type any value into
-     * the combo. In case of such a custom value a <code>String</code> is returned.
-     */
-    public GeneralComboCellEditor(Composite parent, final List<T> items, boolean editable) {
-        this(parent, items, editable, new GeneralComboLabelProvider());
-    }
-
-    /** Creates a new cell editor that shows the specified items in its list.
-     * A custom LabelProvider can be set. 
-     * @param parent the parent control
-     * @param items the objects to select from
-     * @param editable if <code>true</code>, the user can type any value into
-     * the combo. In case of such a custom value a <code>String</code> is returned.
-     * @param labelProvider determines how to read out the label String from the objects.
-     */
-    public GeneralComboCellEditor(Composite parent, final List<T> items,
-            boolean editable, ILabelProvider labelProvider) {
-        this(parent, items, labelProvider, (editable) ? STYLE_DEFAULT : STYLE_DEFAULT
-                | SWT.READ_ONLY);
-    }
-
-    /** Creates a new cell editor that shows the specified items in its list.
-     * A custom LabelProvider and style can be set. 
-     * @param parent the parent control
-     * @param items the objects to select from
-     * @param labelProvider determines how to read out the label String from the objects.
-     * @param style the style bits, such as <code>SWT.READ_ONLY</code>
-     */
-    public GeneralComboCellEditor(Composite parent, final List<T> items,
-            ILabelProvider labelProvider, int style) {
-        super(parent, style);
+//    /** Creates a new cell editor that shows the specified items in its list.
+//     * The default LabelProvider (which uses the <code>toString()</code> method)
+//     * is used to find the label of each item.
+//     * @param parent the parent control
+//     * @param items the objects to select from
+//     * @param editable if <code>true</code>, the user can type any value into
+//     * the combo. In case of such a custom value a <code>String</code> is returned.
+//     */
+//    public GeneralComboCellEditor(Composite parent, final List<T> items, boolean editable, int width, int col) {
+//    	
+//    	this(parent, items, editable, new GeneralComboLabelProvider(), width, col);    	
+//
+//    }
+//
+//    /** Creates a new cell editor that shows the specified items in its list.
+//     * A custom LabelProvider can be set. 
+//     * @param parent the parent control
+//     * @param items the objects to select from
+//     * @param editable if <code>true</code>, the user can type any value into
+//     * the combo. In case of such a custom value a <code>String</code> is returned.
+//     * @param labelProvider determines how to read out the label String from the objects.
+//     */
+//    public GeneralComboCellEditor(Composite parent, final List<T> items,
+//            boolean editable, ILabelProvider labelProvider, int width, int col) {
+//        this(parent, items, labelProvider, (editable) ? STYLE_DEFAULT : STYLE_DEFAULT
+//                | SWT.READ_ONLY, width, col);
+//    }
+//
+//    /** Creates a new cell editor that shows the specified items in its list.
+//     * A custom LabelProvider and style can be set. 
+//     * @param parent the parent control
+//     * @param items the objects to select from
+//     * @param labelProvider determines how to read out the label String from the objects.
+//     * @param style the style bits, such as <code>SWT.READ_ONLY</code>
+//     */
+    // int width, int col
+    public GeneralComboCellEditor(Composite parent, final List<T> items) {
+        super(parent, SWT.NONE);
         this.objects = items;
-        this.labelProvider = labelProvider;
+        this.labelProvider = new GeneralComboLabelProvider();
 
         if (this.comboBox != null) {
             comboBox.setItems(getStrings(items, labelProvider));
         }
+        tip = new ToolTip(parent.getParent().getShell(), SWT.BALLOON);
     }
 
     /*public void setItems(T[] items) {
@@ -116,6 +122,13 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
 //    protected void setActivationStyle(boolean){
 ////    	comboBox.set
 //    }
+    
+    public void setObjects(List<T> list){
+    	objects.clear();
+    	objects.addAll(list);
+    }
+    
+    
     /** Returns the object at the selected index. */
     protected Object doGetValue() {
         if (comboBox == null) return null;
@@ -134,6 +147,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
             }
         }
         comboBox.setText(valueLabel);
+
     }
 
     /**
@@ -181,6 +195,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
 		this.activationStyle = activationStyle;
 	}
 	
+	
 //  Focus and such--------------------------------------------------------------
     protected void doSetFocus() {
         comboBox.setFocus();
@@ -200,18 +215,34 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
             //fireApplyEditorValue();
             deactivate();
         }
+
     }
 
     /**
      * Create control
      */
     protected Control createControl(Composite parent) {
-        comboBox = new CCombo(parent, getStyle());
+    	if(ComboUtils.getType().equals(Constants.STOCK_TYPE_BRAND)){
+    		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Stock_Brand(), ComboUtils.getCol_Stock_Brand(), Constants.STOCK_TYPE);
+    	}
+    	else if(ComboUtils.getType().equals(Constants.STOCK_TYPE_SUB_BRAND)){//deliver
+    		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Stock_Sub_Brand(), ComboUtils.getCol_Stock_Sub_Brand(), Constants.STOCK_TYPE);
+    	}
+    	else if(ComboUtils.getType().equals(Constants.DELIVER_TYPE_BRAND)){//deliver
+    		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Deliver_Brand(), ComboUtils.getCol_Deliver_Brand(), Constants.DELIVER_TYPE);
+    	}
+    	else if(ComboUtils.getType().equals(Constants.DELIVER_TYPE_SUB_BRAND)){//deliver
+    		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Deliver_Sub_Brand(), ComboUtils.getCol_Deliver_Sub_Brand(), Constants.DELIVER_TYPE);
+    	}
+    	else{
+//    		this cannot happed
+    		comboBox = new GeneralCCombo(parent, getStyle(), 0,0,"");
+    	}
         comboBox.setVisibleItemCount(10);
         comboBox.setFont(parent.getFont());
-        
         comboBox.addKeyListener(new KeyAdapter() {
-            // hook key pressed - see PR 14201  
+
+			// hook key pressed - see PR 14201  
             public void keyPressed(KeyEvent e) {
                 keyReleaseOccured(e);
             }
@@ -252,9 +283,11 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
 
         comboBox.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
+//            	tip.setVisible(true);            	
                 GeneralComboCellEditor.this.focusLost();
             }
         });
+        
         return comboBox;
     }
 
@@ -269,4 +302,6 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
         }
         return layoutData;
     }
+    
+    
 }

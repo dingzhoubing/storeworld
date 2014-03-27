@@ -144,24 +144,24 @@ public class CustomerCellModifier implements ICellModifier {
 		if (hasBeenChanged) {
 
 			if (property.equals("name")) {
-				valid = CustomerValidator.validateName(tv.getTable(), item, 1, c.getName());
+				valid = CustomerValidator.validateName(c.getName());//tv.getTable(), item, 1, 
 				if (!valid) {
 					c.setName(namelast);
 				}
 
 			} else if (property.equals("area")) {
-				valid = CustomerValidator.validateArea(tv.getTable(), item, 2, c.getArea());
+				valid = CustomerValidator.validateArea(c.getArea());//tv.getTable(), item, 2, 
 				if (!valid) {
 					c.setArea(arealast);
 				}
 
 			} else if (property.equals("phone")) {
-				valid = CustomerValidator.validatePhone(tv.getTable(), item, 3, c.getPhone());
+				valid = CustomerValidator.validatePhone(c.getPhone());//tv.getTable(), item, 3, 
 				if (!valid) {
 					c.setPhone(phonelast);
 				}
 			} else if (property.equals("address")) {
-				valid = CustomerValidator.validateAddress(tv.getTable(), item, 4, c.getAddress());
+				valid = CustomerValidator.validateAddress(c.getAddress());//tv.getTable(), item, 4, 
 				if (!valid) {
 					c.setAddress(addresslast);
 				}

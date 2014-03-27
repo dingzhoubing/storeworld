@@ -24,6 +24,15 @@ public class Constants {
 	public static final String MIN_OVER_IMAGE = "minOverImage";
 	public static final String MIN_DOWN_IMAGE = "minDownImage";
 	
+	public static final String STOCK_TYPE = "stock";
+	public static final String DELIVER_TYPE = "deliver";
+	public static final String STOCK_TYPE_BRAND = "stock_A";
+	public static final String STOCK_TYPE_SUB_BRAND = "stock_B";
+	public static final String DELIVER_TYPE_BRAND = "deliver_A";
+	public static final String DELIVER_TYPE_SUB_BRAND = "deliver_B";
+	
+	public static final String SPACE = "      ";
+	
 	public static final String USERNAME = "root";//”√ªß√˚
 	public static final String PASSWORD = "";//√‹¬Î
 	public static final String DRIVER = "com.mysql.jdbc.Driver";

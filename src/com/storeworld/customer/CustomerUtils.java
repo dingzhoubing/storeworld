@@ -1,5 +1,6 @@
 package com.storeworld.customer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.eclipse.jface.viewers.TableViewer;
@@ -48,22 +49,24 @@ public class CustomerUtils {
 		
 		@Override
     	public void widgetSelected(SelectionEvent e) {
-    		
-    		if(button.getSelection()){
-    			if(type.equals(AREA)){
-    				CustomerFilter.setArea(button.getText(), AREA);
-    			}else if(type.equals(FIRSTNAME)){
-    				CustomerFilter.setFirstName(button.getText(), FIRSTNAME);
-    			}
-    			tv.addFilter(cf);
+
+    		if(button.getSelection()){					
+					if (type.equals(AREA)) {
+						CustomerFilter.setArea(button.getText(), AREA);
+					} else if (type.equals(FIRSTNAME)) {
+						CustomerFilter
+								.setFirstName(button.getText(), FIRSTNAME);
+					}
+					tv.addFilter(cf);
     		}
     		else{
     			if(type.equals(AREA)){
-    				CustomerFilter.setArea("", AREA);
+    				CustomerFilter.removeArea(button.getText(), AREA);
     			}else if(type.equals(FIRSTNAME)){
-    				CustomerFilter.setFirstName("", FIRSTNAME);
+    				CustomerFilter.removeFirstName(button.getText(), FIRSTNAME);
     			}
-    			tv.removeFilter(cf);
+    			tv.addFilter(cf);
+//    			tv.removeFilter(cf);
     		}
     		Utils.refreshTable(tv.getTable());
     	}
@@ -88,6 +91,12 @@ public class CustomerUtils {
 		//call the database to full fill the areas list
 		areas.add("°ËÀï½Ö");
 		areas.add("°²Â½");
+	}
+	
+	//get the customers of a specified area
+	private static ArrayList<String> customersOfArea(String area){
+		ArrayList<String> customers = new ArrayList<String>();
+		return customers;
 	}
 	
 	private static void getFirstNamesFromDataBase(){

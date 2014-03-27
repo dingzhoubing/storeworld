@@ -40,11 +40,11 @@ public class DeliverContentProvider implements IStructuredContentProvider, IData
 		@Override
 		public void add(DataInTable deliver) {
 			tableviewer.add(deliver);
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("add deliver: "+deliver);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("add deliver: "+deliver);   
+//			messageBox.open(); 
 //			System.out.println(deliver);
 			
 		}
@@ -52,11 +52,11 @@ public class DeliverContentProvider implements IStructuredContentProvider, IData
 		public void remove(DataInTable deliver) {
 			tableviewer.remove(deliver);
 			//no use later
-			MessageBox messageBox =   
-					   new MessageBox(new Shell(),   					     
-					    SWT.ICON_WARNING);   
-			messageBox.setMessage("remove deliver: "+deliver);   
-			messageBox.open(); 
+//			MessageBox messageBox =   
+//					   new MessageBox(new Shell(),   					     
+//					    SWT.ICON_WARNING);   
+//			messageBox.setMessage("remove deliver: "+deliver);   
+//			messageBox.open(); 
 			
 		}
 		@Override

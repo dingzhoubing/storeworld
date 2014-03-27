@@ -8,14 +8,14 @@ import com.storeworld.common.DataInTable;
  *
  */
 public class Product extends DataInTable{
-	private String id;//the identifier of the record
-	private String brand;
-	private String sub_brand;
-	private String size;
-	private String unit;
+	private String id="";//the identifier of the record
+	private String brand="";
+	private String sub_brand="";
+	private String size="";
+	private String unit="";
 //	private double avg_stock_price;
 //	private double avg_deliver_price;
-	private String repository;//make it easy to process
+	private String repository="";//make it easy to process
 	
 	public Product(){
 		

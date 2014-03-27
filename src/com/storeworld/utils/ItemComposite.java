@@ -36,7 +36,7 @@ public class ItemComposite extends Composite {
 	private Text down_left = new Text(this, SWT.NONE);
 	private Text down_right = new Text(this, SWT.RIGHT | SWT.NONE);
 	
-	public ItemComposite(Composite parent, int style, Color color, int width, int height) {
+	public ItemComposite(Composite parent, Color color, int width, int height) {
 		super(parent, SWT.BORDER);		
 		final Color color1 = new Color(parent.getDisplay(), 255, 245, 238);
 		final Color color2 = new Color(parent.getDisplay(), 255, 250, 250);

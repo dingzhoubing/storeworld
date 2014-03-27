@@ -139,7 +139,7 @@ public class CustomerContentPart extends ContentPart{
 					if(Utils.getClickButton() && Utils.getInputNeedChange()){
 						c.setPhone(Utils.getInput());
 						text.setText(c.getPhone());//validate the text
-						if(CustomerValidator.validatePhone(table, table.getItem(rowCurrent), colCurrent, c.getPhone()))
+						if(CustomerValidator.validatePhone(c.getPhone()))//table, table.getItem(rowCurrent), colCurrent, 
 						{
 							customerlist.customerChanged(c);	
 							text.setText(c.getPhone());

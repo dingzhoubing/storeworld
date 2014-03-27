@@ -9,11 +9,11 @@ import com.storeworld.common.DataInTable;
  */
 
 public class Customer extends DataInTable{
-	private String id;//the identifier of the record
-	private String name;
-	private String area;
-	private String phone;
-	private String address;
+	private String id="";//the identifier of the record
+	private String name="";
+	private String area="";
+	private String phone="";
+	private String address="";
 	
 	public Customer(){
 		

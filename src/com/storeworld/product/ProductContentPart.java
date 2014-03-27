@@ -114,7 +114,7 @@ public class ProductContentPart extends ContentPart{
 						if(Utils.getClickButton() && Utils.getInputNeedChange()){
 							p.setSize(Utils.getInput()+"kg");
 							text.setText(p.getSize());
-							if(ProductValidator.validateSize(table, table.getItem(rowCurrent), colCurrent, p.getSize()))
+							if(ProductValidator.validateSize(p.getSize()))//table, table.getItem(rowCurrent), colCurrent, 
 							{
 								productlist.productChanged(p);
 								text.setText(p.getSize());
@@ -129,7 +129,7 @@ public class ProductContentPart extends ContentPart{
 						if(Utils.getClickButton() && Utils.getInputNeedChange()){
 							p.setRepository(Utils.getInput());
 							text.setText(p.getRepository());
-							if(ProductValidator.validateRepository(table, table.getItem(rowCurrent), colCurrent, p.getRepository()))
+							if(ProductValidator.validateRepository(p.getRepository()))//table, table.getItem(rowCurrent), colCurrent, 
 							{
 								productlist.productChanged(p);
 								text.setText(p.getRepository());
@@ -319,11 +319,11 @@ public class ProductContentPart extends ContentPart{
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","repository","operation"});		
 		cellEditor = new CellEditor[7];
 		cellEditor[0] = null;//ID
-		cellEditor[1] = new ProductTextCellEditor(tableViewer.getTable());		
-		cellEditor[2] = new ProductTextCellEditor(tableViewer.getTable());
-		cellEditor[3] = new ProductTextCellEditor(tableViewer.getTable());
-		cellEditor[4] = new ProductTextCellEditor(tableViewer.getTable());
-		cellEditor[5] = new ProductTextCellEditor(tableViewer.getTable());
+		cellEditor[1] = new ProductTextCellEditor(tableViewer.getTable(), columnWidth, 1);		
+		cellEditor[2] = new ProductTextCellEditor(tableViewer.getTable(), columnWidth, 2);
+		cellEditor[3] = new ProductTextCellEditor(tableViewer.getTable(), columnWidth, 3);
+		cellEditor[4] = new ProductTextCellEditor(tableViewer.getTable(), columnWidth, 4);
+		cellEditor[5] = new ProductTextCellEditor(tableViewer.getTable(), columnWidth, 5);
 		cellEditor[6] = new ProductButtonCellEditor(tableViewer.getTable(), productlist, rowHeight);//ButtonCellEditor
 		tableViewer.setCellEditors(cellEditor);
 		

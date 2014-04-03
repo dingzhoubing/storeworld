@@ -225,7 +225,7 @@ public class GoodsInfoService extends BaseAction{
 				GoodsInfoDTO goodsInfoDto=new GoodsInfoDTO();
 				goodsInfoDto.setId((String.valueOf(retMap.get("id"))));
 				goodsInfoDto.setBrand((String) retMap.get("brand"));
-				goodsInfoDto.setRepertory((Integer) retMap.get("repertory"));
+				goodsInfoDto.setRepertory((String) retMap.get("repertory"));
 				goodsInfoDto.setReserve1((String) retMap.get("reserve1"));
 				goodsInfoDto.setReserve2((String) retMap.get("reserve2"));
 				goodsInfoDto.setReserve3((String) retMap.get("reserve3"));
@@ -260,7 +260,7 @@ public class GoodsInfoService extends BaseAction{
 		String sub_brand=(String) map.get("sub_brand");
 		String standard=(String) map.get("standard");
 		String unit=(String) map.get("unit");
-		Integer repertory=(Integer) map.get("repertory");
+		String repertory=(String) map.get("repertory");
 		
 		String sql="select * from goods_info gi where 1=1";
 		//Object[] params=new Object[]{};
@@ -288,7 +288,7 @@ public class GoodsInfoService extends BaseAction{
 			sql=sql+" and gi.unit=?";
 			params.add(unit);
 		}
-		if(Utils.isNotNull(String.valueOf(repertory))){
+		if(Utils.isNotNull(repertory)){
 			sql=sql+" and gi.repertory=?";
 			params.add(repertory);
 		}
@@ -301,7 +301,7 @@ public class GoodsInfoService extends BaseAction{
 				GoodsInfoDTO goodsInfoDto=new GoodsInfoDTO();
 				goodsInfoDto.setId((String.valueOf(retMap.get("id"))));
 				goodsInfoDto.setBrand((String) retMap.get("brand"));
-				goodsInfoDto.setRepertory((Integer) retMap.get("repertory"));
+				goodsInfoDto.setRepertory((String) retMap.get("repertory"));
 				goodsInfoDto.setReserve1((String) retMap.get("reserve1"));
 				goodsInfoDto.setReserve2((String) retMap.get("reserve2"));
 				goodsInfoDto.setReserve3((String) retMap.get("reserve3"));

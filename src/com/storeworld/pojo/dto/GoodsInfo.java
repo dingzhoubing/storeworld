@@ -8,13 +8,13 @@ public class GoodsInfo implements java.io.Serializable{
 	private Float unit_price;
 	private String unit;
 	private String standard;
-	private Integer repertory; 
+	private String repertory; 
 	private String reserve1;
 	private String reserve2;
 	private String reserve3;
 
 	public GoodsInfo(String brand,String sub_brand,Float unit_price,
-	 String unit,String standard,Integer repertory,String reserve1,
+	 String unit,String standard,String repertory,String reserve1,
 	 String reserve2,String reserve3){
 		this.brand=brand;
 		this.sub_brand=sub_brand;
@@ -79,11 +79,11 @@ public class GoodsInfo implements java.io.Serializable{
 		this.standard = standard;
 	}
 
-	public Integer getRepertory() {
+	public String getRepertory() {
 		return repertory;
 	}
 
-	public void setRepertory(Integer repertory) {
+	public void setRepertory(String repertory) {
 		this.repertory = repertory;
 	}
 

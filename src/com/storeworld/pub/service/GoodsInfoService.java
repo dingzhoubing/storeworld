@@ -61,7 +61,7 @@ public class GoodsInfoService extends BaseAction{
 		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
 		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
 		List<Object> params=objectArray2ObjectList(params_tmp);
-		System.out.println(params);
+		//System.out.println(params);
 		List list=null;
 		try{
 			list=tempAction.executeQuery(sql, params);
@@ -73,6 +73,37 @@ public class GoodsInfoService extends BaseAction{
 			return false;
 		}
 
+		return true;
+	}
+	
+	private boolean isKeyFactorModified(Map<String,Object> map) throws Exception{
+		String id=(String) map.get("id");
+		String brand=(String)map.get("brand");
+		String sub_brand=(String)map.get("sub_brand");
+		String standard=(String)map.get("standard");
+		
+		String sql="select * from goods_info gi where gi.id=?";
+		Object[] params_tmp={id};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		List list=null;
+		try{
+			list=executeQuery(sql, params);
+		}catch(Exception e){
+			throw new Exception("修改记录时查询是否修改了该记录的关键字段出现异常"+e.getMessage());
+		}
+		if(list==null||list.size()==0)
+		{
+			throw new Exception("没有找到正在被修改的记录，ID为："+id);
+		}else if(list.size()==1){
+			Map retMap=(Map) list.get(0);
+			String DB_brand=(String) retMap.get("brand");
+			String DB_sub_brand=(String) retMap.get("sub_brand");
+			String DB_standard=(String) retMap.get("standard");
+			if(DB_brand.equals(brand)&&DB_sub_brand.equals(sub_brand)&&DB_standard.equals(standard)){
+				return false;
+			}
+			
+		}
 		return true;
 	}
 
@@ -162,9 +193,11 @@ public class GoodsInfoService extends BaseAction{
 				map.get("unit"),map.get("repertory"),id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
-			boolean isExist=isExistGoodsInfo(map);
-			if(isExist){
-				throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard")+",不允许这样更新！");
+			if(isKeyFactorModified(map)){
+				boolean isExist=isExistGoodsInfo(map);
+				if(isExist){
+					throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard")+",不允许这样更新！");
+				}
 			}
 			int rows=executeUpdate(sql,params);
 			if(rows!=1){

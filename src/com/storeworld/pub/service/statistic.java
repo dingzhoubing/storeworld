@@ -14,6 +14,7 @@ public class statistic extends BaseAction{
 	
 	public ReturnObject deliverQuantityAnalysis(Map<String,Object> params) throws Exception{
 		int flag=0;
+		String type=(String)params.get("type");
 		ReturnObject ro=new ReturnObject();
 		String brand=(String) params.get("brand");
 		String sub_brand=(String) params.get("sub_brand");
@@ -484,5 +485,7 @@ public class statistic extends BaseAction{
 	String calFunc4(String year,String month,String day){
 		return "00000000";
 	}
+	
+	
 
 }

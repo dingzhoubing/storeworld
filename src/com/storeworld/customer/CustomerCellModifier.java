@@ -20,12 +20,12 @@ import com.storeworld.utils.Utils;
  *
  */
 public class CustomerCellModifier implements ICellModifier {
-	private TableViewer tv;//just in case
-	private CustomerList customerlist;
+	private static TableViewer tv;//just in case
+	private static CustomerList customerlist;
 
-	public CustomerCellModifier(TableViewer tv, CustomerList customerlist) {
-		this.tv = tv;		
-		this.customerlist = customerlist;
+	public CustomerCellModifier(TableViewer tv_tmp, CustomerList customerlist_tmp) {
+		tv = tv_tmp;		
+		customerlist = customerlist_tmp;
 	}
 
 	public boolean canModify(Object element, String property) {
@@ -65,7 +65,16 @@ public class CustomerCellModifier implements ICellModifier {
 //		throw new RuntimeException("error column name : " + property);
 	}
 
-	
+
+	public static void addNewTableRow(Customer customer){
+//		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
+			int new_id = Integer.valueOf(customer.getID()) + 1;
+			CustomerValidator.setNewID(String.valueOf(new_id));
+			Customer cus_new = new Customer(String.valueOf(new_id));
+			customerlist.addCustomer(cus_new);
+			Utils.refreshTable(tv.getTable());
+//		}
+	}
 	
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
@@ -167,14 +176,9 @@ public class CustomerCellModifier implements ICellModifier {
 				}
 			}
 			if (valid) {
+				
 				customerlist.customerChanged(c);
-				if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
-					int new_id = Integer.valueOf(c.getID()) + 1;
-					CustomerValidator.setNewID(String.valueOf(new_id));
-					Customer cus_new = new Customer(String.valueOf(new_id));
-					customerlist.addCustomer(cus_new);
-					Utils.refreshTable(tv.getTable());
-				}
+				
 			}
 		}
 	}

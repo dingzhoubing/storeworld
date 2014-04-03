@@ -285,8 +285,8 @@ public class CustomerContentPart extends ContentPart{
         //set the size of the gridlayout
         composite_ar.setLayout(layout);  
         composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        //show the area checkbox button
-        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
+//        //show the area checkbox button
+//        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
            
 		//first name label
 		Label label = new Label(composite_left, SWT.NONE);
@@ -333,8 +333,8 @@ public class CustomerContentPart extends ContentPart{
         composite_fn.setLayout(layout2);  
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));		  
         composite_fn.layout();  
-        //show all the firstname checkbox button
-        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
+//        //show all the firstname checkbox button
+//        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
 		
 	    composite_area.layout();
 	    composite_firstname.layout();
@@ -456,6 +456,14 @@ public class CustomerContentPart extends ContentPart{
 		
 		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
+		
+		//show the area checkbox button
+        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
+        //show all the firstname checkbox button
+        //always under the area call
+        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
+		
+		
 		
 	}
 }

@@ -248,7 +248,7 @@ public class CustomerInfoService extends BaseAction{
 			for(int i=0;i<list.size();i++){
 				Map retMap=(Map) list.get(i);
 				CustomerInfoDTO customerInfoDto=new CustomerInfoDTO();
-				customerInfoDto.setId((String) retMap.get("id"));
+				customerInfoDto.setId(String.valueOf(retMap.get("id")));
 				customerInfoDto.setCustomer_area((String) retMap.get("customer_area"));
 				customerInfoDto.setCustomer_name((String) retMap.get("customer_name"));
 				customerInfoDto.setReserve1((String) retMap.get("reserve1"));

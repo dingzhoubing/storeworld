@@ -14,18 +14,28 @@ import com.storeworld.utils.Utils;
  *
  */
 public class ProductCellModifier implements ICellModifier {
-	private TableViewer tv;//just in case
-	private ProductList productlist;
+	private static TableViewer tv;//just in case
+	private static ProductList productlist;
 
-	public ProductCellModifier(TableViewer tv, ProductList productlist) {
-		this.tv = tv;
-		this.productlist = productlist;
+	public ProductCellModifier(TableViewer tv_tmp, ProductList productlist_tmp) {
+		tv = tv_tmp;
+		productlist = productlist_tmp;
 	}
 
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
 
+	public static void addNewTableRow(Product product){
+//		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
+			int new_id = Integer.valueOf(product.getID()) + 1;
+			ProductValidator.setNewID(String.valueOf(new_id));
+			Product prod_new = new Product(String.valueOf(new_id));
+			productlist.addProduct(prod_new);
+			Utils.refreshTable(tv.getTable());
+//		}
+	}
+	
 	//when initial the table data
 	public Object getValue(Object element, String property) {
 		Product p = (Product) element;
@@ -181,13 +191,7 @@ public class ProductCellModifier implements ICellModifier {
 			}
 			if (valid) {
 				productlist.productChanged(p);
-				if (ProductValidator.checkID(p.getID()) && ProductValidator.rowLegal(p)) {
-					int new_id = Integer.valueOf(p.getID()) + 1;
-					ProductValidator.setNewID(String.valueOf(new_id));
-					Product prod_new = new Product(String.valueOf(new_id));
-					productlist.addProduct(prod_new);
-					Utils.refreshTable(tv.getTable());
-				}
+				
 			}
 		}
 	}

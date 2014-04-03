@@ -286,35 +286,35 @@ public class AnalyzeContentPart extends ContentPart{
         /**
          * add the button listener for the classification
          */
-        btn_month.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		RatioComposite bc = new RatioComposite(composite_content, 0, new RatioBlock());    
-        		alys.add(bc);
-                composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-                composite_content.layout(); 
-        	}
-        });
+//        btn_month.addSelectionListener(new SelectionAdapter() {
+//        	@Override
+//        	public void widgetSelected(SelectionEvent e) {
+//        		RatioComposite bc = new RatioComposite(composite_content, 0, new RatioBlock());    
+//        		alys.add(bc);
+//                composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
+//                composite_content.layout(); 
+//        	}
+//        });
         
-        btn_season.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		TrendComposite tc = new TrendComposite(composite_content, 0, new RatioBlock()); 
-        		alys.add(tc);
-                composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-                composite_content.layout(); 
-        	}
-        });
-        btn_year.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		for(int i=0;i<alys.size();i++){
-        			alys.get(i).remove();
-        		}
-				composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
-				composite_content.layout();  
-        	}
-        });
+//        btn_season.addSelectionListener(new SelectionAdapter() {
+//        	@Override
+//        	public void widgetSelected(SelectionEvent e) {
+//        		TrendComposite tc = new TrendComposite(composite_content, 0, new RatioBlock()); 
+//        		alys.add(tc);
+//                composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
+//                composite_content.layout(); 
+//        	}
+//        });
+//        btn_year.addSelectionListener(new SelectionAdapter() {
+//        	@Override
+//        	public void widgetSelected(SelectionEvent e) {
+//        		for(int i=0;i<alys.size();i++){
+//        			alys.get(i).remove();
+//        		}
+//				composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));  
+//				composite_content.layout();  
+//        	}
+//        });
         composite_main.layout();
         composite_content.layout();
 //        composite_scroll.layout();

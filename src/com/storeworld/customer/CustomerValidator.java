@@ -104,7 +104,7 @@ public class CustomerValidator {
 	 */
 	public static boolean rowLegal(Customer c){
 		if(c.getName() !=null && c.getArea()!=null){
-			if(!c.getName().equals("") && !c.getArea().equals(""))
+			if(!c.getName().equals("") && !c.getArea().equals("") && !c.getPhone().equals(""))
 				return true;
 			else
 				return false;

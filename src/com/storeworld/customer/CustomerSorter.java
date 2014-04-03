@@ -34,12 +34,12 @@ public class CustomerSorter extends ViewerSorter {
 			Customer p2 = (Customer)e2;
 			switch(sortType){
 				case NAME:{
-					if(p1.getName() !=null  && p2.getName() != null){
+					if(!p1.getName().equals("")  && !p2.getName().equals("")){
 					String l1 = p1.getName();
 					String l2 = p2.getName();
 					return l1.compareTo(l2);
 					}else{
-						if(p1.getName() == null){
+						if(p1.getName().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -47,12 +47,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case -NAME:{
-					if(p1.getName() != null && p2.getName() != null){
+					if(!p1.getName().equals("")  && !p2.getName().equals("")){
 					String l1 = p1.getName();
 					String l2 = p2.getName();
 					return l2.compareTo(l1);
 					}else{
-						if(p1.getName() == null){
+						if(p1.getName().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -60,12 +60,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case AREA:{
-					if(p1.getArea()!=null && p2.getArea()!=null){
+					if(!p1.getArea().equals("") && !p2.getArea().equals("")){
 					String s1 = p1.getArea();
 					String s2 = p2.getArea();					
 					return s1.compareTo(s2);
 					}else{
-						if(p1.getArea() == null){
+						if(p1.getArea().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -73,12 +73,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case -AREA:{
-					if(p1.getArea()!=null && p2.getArea()!=null){
+					if(!p1.getArea().equals("") && !p2.getArea().equals("")){
 					String s1 = p1.getArea();
 					String s2 = p2.getArea();
 					return s2.compareTo(s1);
 					}else{
-						if(p1.getArea() == null){
+						if(p1.getArea().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -86,12 +86,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case PHONE:{
-					if(p1.getPhone()!=null && p2.getPhone()!=null){
+					if(!p1.getPhone().equals("") && !p2.getPhone().equals("")){
 					String s1 = p1.getPhone();
 					String s2 = p2.getPhone();
 					return s1.compareTo(s2);
 					}else{
-						if(p1.getPhone() == null){
+						if(p1.getPhone().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -99,12 +99,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case -PHONE:{
-					if(p1.getPhone()!=null && p2.getPhone()!=null){
+					if(!p1.getPhone().equals("") && !p2.getPhone().equals("")){
 					String s1 = p1.getPhone();
 					String s2 = p2.getPhone();
 					return s2.compareTo(s1);
 					}else{
-						if(p1.getPhone() == null){
+						if(p1.getPhone().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -112,12 +112,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case ADDRESS:{
-					if(p1.getAddress()!=null && p2.getAddress()!=null){
+					if(!p1.getAddress().equals("") && !p2.getAddress().equals("")){
 					String i1 = p1.getAddress();
 					String i2 = p2.getAddress();
 					return i1.compareTo(i2);
 					}else{
-						if(p1.getAddress() == null){
+						if(p1.getAddress().equals("")){
 							return 1;
 						}else{
 							return -1;
@@ -125,12 +125,12 @@ public class CustomerSorter extends ViewerSorter {
 					}
 				}
 				case -ADDRESS:{
-					if(p1.getAddress()!=null && p2.getAddress()!=null){
+					if(!p1.getAddress().equals("") && !p2.getAddress().equals("")){
 					String i1 = p1.getAddress();
 					String i2 = p2.getAddress();
 					return i2.compareTo(i1);
 					}else{
-						if(p1.getAddress() == null){
+						if(p1.getAddress().equals("")){
 							return 1;
 						}else{
 							return -1;

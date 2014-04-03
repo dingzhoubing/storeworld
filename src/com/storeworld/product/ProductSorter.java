@@ -35,12 +35,12 @@ public class ProductSorter extends ViewerSorter {
 			Product p2 = (Product)e2;
 			switch(sortType){
 				case BRAND:{	
-					if(p1.getBrand() !=null  && p2.getBrand() != null){
+					if(!p1.getBrand().equals("")  && !p2.getBrand().equals("")){
 						String l1 = p1.getBrand();
 						String l2 = p2.getBrand();
 						return l1.compareTo(l2);
 						}else{
-							if(p1.getBrand() == null){
+							if(p1.getBrand().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -48,12 +48,12 @@ public class ProductSorter extends ViewerSorter {
 						}					
 				}
 				case -BRAND:{
-					if(p1.getBrand() !=null  && p2.getBrand() != null){
+					if(!p1.getBrand().equals("")  && !p2.getBrand().equals("")){
 						String l1 = p1.getBrand();
 						String l2 = p2.getBrand();
 						return l2.compareTo(l1);
 						}else{
-							if(p1.getBrand() == null){
+							if(p1.getBrand().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -61,12 +61,12 @@ public class ProductSorter extends ViewerSorter {
 						}
 				}
 				case SUB_BRAND:{
-					if(p1.getSubBrand() !=null  && p2.getSubBrand() != null){
+					if(!p1.getSubBrand().equals("")  && !p2.getSubBrand().equals("")){
 						String l1 = p1.getSubBrand();
 						String l2 = p2.getSubBrand();
 						return l1.compareTo(l2);
 						}else{
-							if(p1.getSubBrand() == null){
+							if(p1.getSubBrand().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -74,12 +74,12 @@ public class ProductSorter extends ViewerSorter {
 						}					
 				}
 				case -SUB_BRAND:{
-					if(p1.getSubBrand() !=null  && p2.getSubBrand() != null){
+					if(!p1.getSubBrand().equals("")  && !p2.getSubBrand().equals("")){
 						String l1 = p1.getSubBrand();
 						String l2 = p2.getSubBrand();
 						return l2.compareTo(l1);
 						}else{
-							if(p1.getSubBrand() == null){
+							if(p1.getSubBrand().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -87,12 +87,12 @@ public class ProductSorter extends ViewerSorter {
 						}	
 				}
 				case SIZE:{
-					if(p1.getSize() !=null  && p2.getSize() != null){
+					if(!p1.getSize().equals("")  && !p2.getSize().equals("")){
 						String l1 = p1.getSize();
 						String l2 = p2.getSize();
 						return l1.compareTo(l2);
 						}else{
-							if(p1.getSize() == null){
+							if(p1.getSize().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -100,12 +100,12 @@ public class ProductSorter extends ViewerSorter {
 						}						
 				}
 				case -SIZE:{
-					if(p1.getSize() !=null  && p2.getSize() != null){
+					if(!p1.getSize().equals("")  && !p2.getSize().equals("")){
 						String l1 = p1.getSize();
 						String l2 = p2.getSize();
 						return l2.compareTo(l1);
 						}else{
-							if(p1.getSize() == null){
+							if(p1.getSize().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -113,12 +113,12 @@ public class ProductSorter extends ViewerSorter {
 						}	
 				}
 				case UNIT:{
-					if(p1.getUnit() !=null  && p2.getUnit() != null){
+					if(!p1.getUnit().equals("")  && !p2.getUnit().equals("")){
 						String l1 = p1.getUnit();
 						String l2 = p2.getUnit();
 						return l1.compareTo(l2);
 						}else{
-							if(p1.getUnit() == null){
+							if(p1.getUnit().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -126,12 +126,12 @@ public class ProductSorter extends ViewerSorter {
 						}					
 				}
 				case -UNIT:{
-					if(p1.getUnit() !=null  && p2.getUnit() != null){
+					if(!p1.getUnit().equals("")  && !p2.getUnit().equals("")){
 						String l1 = p1.getUnit();
 						String l2 = p2.getUnit();
 						return l2.compareTo(l1);
 						}else{
-							if(p1.getUnit() == null){
+							if(p1.getUnit().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -140,14 +140,14 @@ public class ProductSorter extends ViewerSorter {
 				}
 
 				case REPOSITORY:{
-					if(p1.getRepository() !=null  && p2.getRepository() != null){
+					if(!p1.getRepository().equals("") && !p2.getRepository().equals("")){
 						String d1 = p1.getRepository();
 						String d2 = p2.getRepository();
 						int double_d1 = Integer.valueOf(d1);
 						int double_d2 = Integer.valueOf(d2);
 						return Integer.valueOf(double_d1).compareTo(Integer.valueOf(double_d2));
 						}else{
-							if(p1.getRepository() == null){
+							if(p1.getRepository().equals("")){
 								return 1;
 							}else{
 								return -1;
@@ -155,14 +155,14 @@ public class ProductSorter extends ViewerSorter {
 						}	
 				}
 				case -REPOSITORY:{
-					if(p1.getRepository() !=null  && p2.getRepository() != null){
+					if(!p1.getRepository().equals("") && !p2.getRepository().equals("")){
 						String d1 = p1.getRepository();
 						String d2 = p2.getRepository();
 						int double_d1 = Integer.valueOf(d1);
 						int double_d2 = Integer.valueOf(d2);
 						return Integer.valueOf(double_d2).compareTo(Integer.valueOf(double_d1));
 						}else{
-							if(p1.getRepository() == null){
+							if(p1.getRepository().equals("")){
 								return 1;
 							}else{
 								return -1;

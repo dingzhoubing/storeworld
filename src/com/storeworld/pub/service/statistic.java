@@ -103,7 +103,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
-				deliverInfoDto.setQuantity((Integer)retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);
@@ -136,7 +136,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
-				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
 				deliverInfoAllList.add(deliverInfoDto);
 		}
 		page.setItems((List)deliverInfoAllList);
@@ -158,7 +158,7 @@ public class statistic extends BaseAction{
 		for(int i=0;i<list.size();i++){
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
-				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
 				deliverInfoAllList.add(deliverInfoDto);
 		}
 		page.setItems((List)deliverInfoAllList);
@@ -194,7 +194,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listBrand.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -203,7 +203,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listArea.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -236,7 +236,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listBrand.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -245,7 +245,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listName.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListName.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -271,7 +271,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
-				deliverInfoDto.setQuantity((Integer)retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);
@@ -300,7 +300,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listBrand.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -309,7 +309,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listArea.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -340,7 +340,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listBrand.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -349,7 +349,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) listArea.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
-				deliverInfoDto.setQuantity(Integer.parseInt(String.valueOf(retMap.get("quantity"))));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -374,7 +374,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((Integer)retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);

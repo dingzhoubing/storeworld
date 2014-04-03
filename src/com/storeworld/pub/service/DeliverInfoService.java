@@ -310,7 +310,7 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
 				deliverInfoDto.setBrand((String) retMap.get("brand"));
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
@@ -423,7 +423,7 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
 				deliverInfoDto.setBrand((String) retMap.get("brand"));
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));

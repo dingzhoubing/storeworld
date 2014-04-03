@@ -14,7 +14,7 @@ public class StockInfoDTO extends ObjectExternalizable{
 	private Float unit_price;
 	private String unit;
 	private String standard;
-	private Integer quantity;
+	private String quantity;
 	private String stock_time;
 	private String stock_from;
 	private String reserve1;
@@ -35,7 +35,7 @@ public class StockInfoDTO extends ObjectExternalizable{
 		this.unit_price = readFloat(in);
 		this.unit = readUTF(in);
 		this.standard = readUTF(in);
-		this.quantity = readInteger(in);
+		this.quantity = readUTF(in);
 		this.stock_time=readUTF(in);
 		this.stock_from=readUTF(in);
 		this.reserve1 = readUTF(in);
@@ -56,7 +56,7 @@ public class StockInfoDTO extends ObjectExternalizable{
 		writeFloat(out, this.unit_price);
 		writeUTF(out, this.unit);
 		writeUTF(out, this.standard);
-		writeInteger(out, this.quantity);
+		writeUTF(out, this.quantity);
 		writeUTF(out, this.stock_time);
 		writeUTF(out, this.stock_from);
 		writeUTF(out, this.reserve1);
@@ -112,11 +112,11 @@ public class StockInfoDTO extends ObjectExternalizable{
 		this.standard = standard;
 	}
 
-	public Integer getQuantity() {
+	public String getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(Integer quantity) {
+	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
 

@@ -12,7 +12,7 @@ public class DeliverInfoAll implements java.io.Serializable{
 	private String sub_brand;
 	private Float unit_price;
 	private String unit;
-	private Integer quantity;
+	private String quantity;
 	private Float total_price;
 	private Float real_price;
 	private String deliver_time;
@@ -29,7 +29,7 @@ public class DeliverInfoAll implements java.io.Serializable{
 
 	public DeliverInfoAll(String customer_area,String customer_name,String deliver_addr,
 			String order_num,String brand,String sub_brand,Float unit_price,
-			String unit,Integer quantity,Float total_price,Float real_price,String deliver_time,
+			String unit,String quantity,Float total_price,Float real_price,String deliver_time,
 			String standard,String stock_from,String is_print,String telephone,
 			String uni_reserve1,String uni_reserve2,String uni_reserve3,String common_reserve1,String common_reserve2,String common_reserve3){
 		this.customer_area=customer_area;
@@ -126,11 +126,11 @@ public class DeliverInfoAll implements java.io.Serializable{
 		this.unit = unit;
 	}
 
-	public Integer getQuantity() {
+	public String getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(Integer quantity) {
+	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
 

@@ -8,14 +8,14 @@ public class DeliverInfo implements java.io.Serializable{
 	private String sub_brand;
 	private Float unit_price;
 	private String unit;
-	private Integer quantity;
+	private String quantity;
 	private String standard;
 	private String reserve1;
 	private String reserve2;
 	private String reserve3;
 
 	public DeliverInfo(String order_num,String brand,String sub_brand,Float unit_price,
-			String unit,Integer quantity,String standard,String reserve1,String reserve2,String reserve3){
+			String unit,String quantity,String standard,String reserve1,String reserve2,String reserve3){
 
 		this.order_num=order_num;
 		this.brand=brand;
@@ -82,11 +82,11 @@ public class DeliverInfo implements java.io.Serializable{
 		this.unit = unit;
 	}
 
-	public Integer getQuantity() {
+	public String getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(Integer quantity) {
+	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
 

@@ -247,7 +247,7 @@ public class StockInfoService extends BaseAction{
 				stockInfoDto.setId(String.valueOf(retMap.get("id")));
 				stockInfoDto.setBrand((String) retMap.get("brand"));
 				stockInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				stockInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				stockInfoDto.setQuantity((String) retMap.get("quantity"));
 				
 				/*SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Timestamp date_temp = (Timestamp) retMap.get("stock_time");
@@ -343,7 +343,7 @@ public class StockInfoService extends BaseAction{
 				StockInfoDTO stockInfoDto=new StockInfoDTO();
 				stockInfoDto.setId(String.valueOf(retMap.get("id")) );
 				stockInfoDto.setBrand((String) retMap.get("brand"));
-				stockInfoDto.setQuantity((Integer) retMap.get("quantity"));
+				stockInfoDto.setQuantity((String) retMap.get("quantity"));
 				stockInfoDto.setReserve1((String) retMap.get("reserve1"));
 				stockInfoDto.setReserve2((String) retMap.get("reserve2"));
 				stockInfoDto.setReserve3((String) retMap.get("reserve3"));

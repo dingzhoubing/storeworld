@@ -180,7 +180,15 @@ public class customerMatch {
 	      conn.close();*/
 			Pagination page = new Pagination();
 			ReturnObject ro=new ReturnObject();
-			DeliverInfoService tempService=new DeliverInfoService();
+			GoodsInfoService tempService=new GoodsInfoService();
+			tempService.queryGoodsInfoAll();
+			statistic temp=new statistic();
+			Map map = new HashMap<String,Object>();
+			/*map.put("customer_area", "城东");
+			map.put("brand", "五得利");
+			map.put("sub_brand", "精一");*/
+			map.put("end_time", "20140403");
+			temp.deliverQuantityAnalysis(map);
 			/*Map map = new HashMap<String,Object>();
 			map.put("brand", "五得利");
 			map.put("sub_brand", "精一");
@@ -224,7 +232,7 @@ public class customerMatch {
 			//==================================deliver_info test begin========================//
 			Map<String,Object> commonMap=new HashMap<String,Object>();
 			Map<String,Object> uniMap=new HashMap<String,Object>();
-			Map map=new HashMap<String,Object>();
+			//Map map=new HashMap<String,Object>();
 			/*commonMap.put("customer_area", "城南");
 			commonMap.put("customer_name", "老胡");
 			commonMap.put("deliver_addr", "南大四条街");
@@ -243,7 +251,7 @@ public class customerMatch {
 			//tempService.deleteDeliverInfo((Integer.valueOf((String)map.get("id"))));
 			
 			map.put("customer_area", "城东");
-			tempService.queryDeliverInfo(map);
+			//tempService.queryDeliverInfo(map);
 			
 			//==================================deliver_info test end==========================//
 			

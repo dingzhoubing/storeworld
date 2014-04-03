@@ -118,7 +118,8 @@ public List executeQuery(String sql, List<Object> param) throws Exception {
                       while (rs.next()) {
                                map = new HashMap();
                                for (int i = 1; i <= rsm.getColumnCount(); i++) {
-                                   map.put(rsm.getColumnName(i), rs.getObject(rsm.getColumnName(i)));
+                                   //map.put(rsm.getColumnName(i), rs.getObject(rsm.getColumnName(i)));
+                            	   map.put(rsm.getColumnLabel(i), rs.getObject(rsm.getColumnLabel(i)));
                                }
                                list.add(map);
                       }

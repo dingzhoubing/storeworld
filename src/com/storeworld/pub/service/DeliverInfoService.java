@@ -1,13 +1,20 @@
 package com.storeworld.pub.service;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.database.BaseAction;
+import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
@@ -32,20 +39,31 @@ public class DeliverInfoService extends BaseAction{
 		if(isExist){
 			throw new Exception("对于客户"+commonMap.get("customer_name")+"已经存在相同的送货信息，品牌，子品牌，规格，数量分别为："+uniMap.get("brand")+","+uniMap.get("sub_brand")+","+uniMap.get("standard")+","+uniMap.get("quantity"));
 		}
-		String sql="insert into deliver_info(customer_area,customer_name,deliver_addr,order_num,"
-		+"brand,sub_brand,unit_price,unit,standard,quantity,deliver_time,total_price,real_price,"
-		+"is_print,telephone,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		Object[] params_temp={commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("deliver_addr"),commonMap.get("order_num"),
-				uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
-				commonMap.get("deliver_time"),commonMap.get("total_price"),commonMap.get("real_price"),commonMap.get("is_print"),commonMap.get("telephone"),uniMap.get("reserve1"),uniMap.get("reserve2"),uniMap.get("reserve3")};//来自map
-		List<Object> params=objectArray2ObjectList(params_temp);
+		String sql_uni="insert into deliver_info(order_num,"
+		+"brand,sub_brand,unit_price,unit,standard,quantity,"
+		+"reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?)";
+		
+		/*String sql_common="insert into deliver_common_info(id,customer_area,customer_name,deliver_addr,"
+		+"deliver_time,total_price,real_price,"
+		+"is_print,telephone,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?,?,?)";*/
+		
+		Object[] uni_params_temp={commonMap.get("order_num"),uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
+				uniMap.get("reserve1"),uniMap.get("reserve2"),uniMap.get("reserve3")};//来自map
+		
+		/*Object[] common_params_temp={commonMap.get("order_num"),commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("deliver_addr"),
+				commonMap.get("deliver_time"),commonMap.get("total_price"),commonMap.get("real_price"),commonMap.get("is_print"),commonMap.get("telephone"),commonMap.get("reserve1"),commonMap.get("reserve2"),commonMap.get("reserve3")};*///来自map
+		
+		List<Object> uni_params=objectArray2ObjectList(uni_params_temp);
+		
+		//List<Object> common_params=objectArray2ObjectList(common_params_temp);
 		//2.调用接口执行插入
-		BaseAction tempAction=new BaseAction();
-		int snum=executeUpdate(sql,params);
-		if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+		//BaseAction tempAction=new BaseAction();
+		int suninum=executeUpdate(sql_uni,uni_params);
+		//int scomnum=executeUpdate(sql_common,common_params);
+		if(suninum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
 			throw new Exception("新增送货信息失败，请检查数据!");
 		}
-		else if(snum==1){
+		else if(suninum==1){
 			try{
 				GoodsInfoService tempService=new GoodsInfoService();
 				tempService.addGoodsInfo(uniMap);
@@ -69,12 +87,11 @@ public class DeliverInfoService extends BaseAction{
 	 */
 	private boolean isExistDeliverInfo(Map<String,Object> commonMap,Map<String,Object> uniMap) throws Exception{
 		BaseAction tempAction=new BaseAction();
-		String sql="select * from deliver_info di where di.customer_area=? and di.customer_name=? and di.telephone=? "
-		+" and di.order_num=? and di.deliver_time=? and di.brand=? and di.sub_brand=? and di.standard=?";
+		String sql="select * from deliver_info di where 1=1"
+		+" and di.order_num=?  and di.brand=? and di.sub_brand=? and di.standard=?";
 
 		
-		Object[] params_tmp={commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("telephone"),
-				commonMap.get("order_num"),commonMap.get("deliver_time"),uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard")};
+		Object[] params_tmp={commonMap.get("order_num"),uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard")};
 
 		List<Object> params=objectArray2ObjectList(params_tmp);
 		List list=null;
@@ -112,6 +129,37 @@ public class DeliverInfoService extends BaseAction{
 			throw new Exception("执行批量新增送货信息异常！");
 		}
 		return ret_total;
+	}
+	
+	/**
+	 * description:打印功能，在这里实现对送货单Common部分的修改
+	 */
+	public void print_voucher(Map<String,Object> commonMap,Map<String,Object> uniMap){
+		try {
+			addCommonPart(commonMap);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private boolean addCommonPart(Map<String,Object> commonMap) throws Exception{
+		try{
+			String sql_common="insert into deliver_common_info(id,customer_area,customer_name,deliver_addr,"
+				+"deliver_time,total_price,real_price,"
+				+"is_print,telephone,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+			
+			Object[] common_params_temp={commonMap.get("order_num"),commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("deliver_addr"),
+					commonMap.get("deliver_time"),commonMap.get("total_price"),commonMap.get("real_price"),commonMap.get("is_print"),commonMap.get("telephone"),commonMap.get("reserve1"),commonMap.get("reserve2"),commonMap.get("reserve3")};//来自map
+			List<Object> common_params=objectArray2ObjectList(common_params_temp);
+			int scomnum=executeUpdate(sql_common,common_params);
+			if(scomnum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+				return false;
+			}
+		}catch(Exception e){
+			throw new Exception("新增送货单时，送货单公共部分插入数据异常！");
+		}
+		return true;
 	}
 	
 	/**
@@ -175,12 +223,10 @@ public class DeliverInfoService extends BaseAction{
 			total_price=((Float)uniMap.get("unit_price"))*((Float)uniMap.get("quantity"));
 			commonMap.put("total_price", total_price);
 		}*/
-		String sql="update deliver_info di set di.customer_area=?,di.customer_name=?,di.telephone=?,"
-				+"di.deliver_addr=?,di.order_num=?,di.deliver_time=?,"
-				+"di.brand=?,di.sub_brand=?,di.unit_price=?,"
-				+"di.unit=?,di.standard=?,di.quantity=? where di.id=?";
-		Object[] params_temp={commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("telephone"),commonMap.get("deliver_addr"),commonMap.get("order_num"),
-				commonMap.get("deliver_time"),uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
+		String sql="update deliver_info di set "
+				+" di.brand=?,di.sub_brand=?,di.unit_price=?,"
+				+" di.unit=?,di.standard=?,di.quantity=? where di.id=?";
+		Object[] params_temp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
 				id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
@@ -236,19 +282,25 @@ public class DeliverInfoService extends BaseAction{
 	public ReturnObject queryDeliverInfoAll() throws Exception{
 		//ReturnObject ro=null;
 		List list=null;
-		String sql="select * from deliver_info di";
+		String sql="select dci.id commonId,dci.customer_area,dci.customer_name,dci.deliver_addr,dci.total_price,"
+		+"dci.real_price,dci.deliver_time,dci.is_print,dci.telephone,dci.reserve1 commonReserve1,dci.reserve2 commonReserve2,dci.reserve3 commonReserve3,"
+		+"di.id uniId,di.order_num,di.brand,di.sub_brand,di.unit_price,di.unit,di.quantity,di.standard,"
+		+"di.reserve1 uniReserve1,di.reserve2 uniReserve2,di.reserve3 uniReserve3 from deliver_common_info dci,deliver_info di where dci.id=di.order_num";
 		//Object[] params={};
 		List<Object> params=null;
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
-		List<DeliverInfoDTO> deliverInfoList = new ArrayList<DeliverInfoDTO>();
+		List<DeliverInfoAllDTO> deliverInfoList = new ArrayList<DeliverInfoAllDTO>();
 		try {
-			list=executeQuery(sql, params);
-			for(int i=0;i<list.size();i++){
-				Map retMap=(Map) list.get(i);
-				DeliverInfoDTO deliverInfoDto=new DeliverInfoDTO();
-				deliverInfoDto.setId(String.valueOf(retMap.get("id")));
-				deliverInfoDto.setCustomer_area((String) retMap.get("customer_area"));
+			list=executeQuery4Deliver(sql, params);
+			
+            for(int i=0;i<list.size();i++){
+            	
+            	Map retMap=(Map) list.get(i);
+            	DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
+            	deliverInfoDto.setUni_id(String.valueOf(retMap.get("uniId")));
+            	deliverInfoDto.setCommon_id((String)retMap.get("commonId"));
+				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setCustomer_name((String) retMap.get("customer_name"));
 				deliverInfoDto.setDeliver_addr((String) retMap.get("deliver_addr"));
 				deliverInfoDto.setOrder_num((String) retMap.get("order_num"));
@@ -260,9 +312,12 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
-				deliverInfoDto.setReserve1((String) retMap.get("reserve1"));
-				deliverInfoDto.setReserve2((String) retMap.get("reserve2"));
-				deliverInfoDto.setReserve3((String) retMap.get("reserve3"));
+				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
+				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
+				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
+				deliverInfoDto.setUni_reserve1((String) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
+				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
 				deliverInfoDto.setStandard((String) retMap.get("standard"));
 				deliverInfoDto.setUnit((String) retMap.get("unit"));
 				deliverInfoDto.setUnit_price((Float) retMap.get("unit_price"));
@@ -288,36 +343,41 @@ public class DeliverInfoService extends BaseAction{
 		List list=null;
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
-		List<DeliverInfoDTO> deliverInfoList = new ArrayList<DeliverInfoDTO>();
-		String id=(String) map.get("id");
+		List<DeliverInfoAllDTO> deliverInfoList = new ArrayList<DeliverInfoAllDTO>();
+		String uniId=(String) map.get("uniId");
+		String commonId=(String) map.get("commonId");
 		String customer_area=(String) map.get("customer_area");
 		String customer_name=(String) map.get("customer_name");
 		String brand=(String) map.get("brand");
 		String sub_brand=(String) map.get("sub_brand");
 		String standard=(String) map.get("standard");
+		String order_num=(String) map.get("order_num");
 		String deliver_time=(String) map.get("deliver_time");
-		String reserve1=(String) map.get("reserve1");
-		String reserve2=(String) map.get("reserve2");
-		String reserve3=(String) map.get("reserve3");
+		String uniReserve1=(String) map.get("uniReserve1");
+		String uniReserve2=(String) map.get("uniReserve2");
+		String uniReserve3=(String) map.get("uniReserve3");
 		
-		String sql="select * from deliver_info di where 1=1";
+		String sql="select dci.id commonId,dci.customer_area,dci.customer_name,dci.deliver_addr,dci.total_price,"
+		+"dci.real_price,dci.deliver_time,dci.is_print,dci.telephone,dci.reserve1 commonReserve1,dci.reserve2 commonReserve2,dci.reserve3 commonReserve3,"
+		+"di.id uniId,di.order_num,di.brand,di.sub_brand,di.unit_price,di.unit,di.quantity,di.standard,"
+		+"di.reserve1 uniReserve1,di.reserve2 uniReserve2,di.reserve3 uniReserve3 from deliver_common_info dci,deliver_info di where dci.id=di.order_num";
 		//Object[] params=new Object[]{};
 		List<Object> params = new ArrayList<Object>();
 		int p_num=0;
-		if(Utils.isNotNull(id)){
-			sql=sql+" and di.id=?";
-			params.add(id);
+		if(Utils.isNotNull(commonId)){
+			sql=sql+" and commonId=?";
+			params.add(commonId);
 		}
 		if(Utils.isNotNull(customer_area)){
-			sql=sql+" and di.customer_area=?";
+			sql=sql+" and dci.customer_area=?";
 			params.add(customer_area);
 		}
 		if(Utils.isNotNull(customer_name)){
-			sql=sql+" and di.customer_name=?";
+			sql=sql+" and dci.customer_name=?";
 			params.add(customer_name);
 		}
 		if(Utils.isNotNull(deliver_time)){
-			sql=sql+" and di.deliver_time=?";
+			sql=sql+" and dci.deliver_time=?";
 			params.add(deliver_time);
 		}
 		if(Utils.isNotNull(brand)){
@@ -332,27 +392,28 @@ public class DeliverInfoService extends BaseAction{
 			sql=sql+" and di.standard=?";
 			params.add(standard);
 		}
-		if(Utils.isNotNull(reserve1)){
-			sql=sql+" and di.reserve1=?";
-			params.add(reserve1);
+		if(Utils.isNotNull(uniReserve1)){
+			sql=sql+" and uniReserve1=?";
+			params.add(uniReserve1);
 		}
-		if(Utils.isNotNull(reserve2)){
-			sql=sql+" and di.reserve2=?";
-			params.add(reserve2);
+		if(Utils.isNotNull(uniReserve2)){
+			sql=sql+" and uniReserve2=?";
+			params.add(uniReserve2);
 		}
-		if(Utils.isNotNull(reserve3)){
-			sql=sql+" and di.reserve3=?";
-			params.add(reserve3);
+		if(Utils.isNotNull(uniReserve3)){
+			sql=sql+" and uniReserve3s=?";
+			params.add(uniReserve3);
 		}
 		
 		
 		try {
-			list=executeQuery(sql, params);
+			list=executeQuery4Deliver(sql, params);
 			for(int i=0;i<list.size();i++){
 				Map retMap=(Map) list.get(i);
-				DeliverInfoDTO deliverInfoDto=new DeliverInfoDTO();
-				deliverInfoDto.setId(String.valueOf(retMap.get("id")));
-				deliverInfoDto.setCustomer_area((String) retMap.get("customer_area"));
+				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
+            	deliverInfoDto.setUni_id(String.valueOf(retMap.get("uniId")));
+            	deliverInfoDto.setCommon_id((String)retMap.get("commonId"));
+				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setCustomer_name((String) retMap.get("customer_name"));
 				deliverInfoDto.setDeliver_addr((String) retMap.get("deliver_addr"));
 				deliverInfoDto.setOrder_num((String) retMap.get("order_num"));
@@ -364,9 +425,12 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((Integer) retMap.get("quantity"));
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
-				deliverInfoDto.setReserve1((String) retMap.get("reserve1"));
-				deliverInfoDto.setReserve2((String) retMap.get("reserve2"));
-				deliverInfoDto.setReserve3((String) retMap.get("reserve3"));
+				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
+				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
+				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
+				deliverInfoDto.setUni_reserve1((String) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
+				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
 				deliverInfoDto.setStandard((String) retMap.get("standard"));
 				deliverInfoDto.setUnit((String) retMap.get("unit"));
 				deliverInfoDto.setUnit_price((Float) retMap.get("unit_price"));
@@ -380,6 +444,50 @@ public class DeliverInfoService extends BaseAction{
 			throw new Exception("查询货品信息失败！");
 		}
 		return ro;
+	}
+	
+	public List executeQuery4Deliver(String sql, List<Object> param) throws Exception{
+		ResultSet rs = null;
+        List list = null;
+        Connection connection=null;
+        PreparedStatement preparedStatement = null;
+        ReturnObject ro=new ReturnObject();
+        Pagination page=new Pagination();
+		try {
+			connection = this.getConnection();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			throw new Exception("建立数据库连接失败！");
+		}
+       try {
+       	 preparedStatement = connection.prepareStatement(sql);
+       	 if(param!=null){
+           	 int len=param.size();
+           	 if(len>0){
+                     for (int i = 0; i < len; i++) {
+                   	  preparedStatement.setObject(i+1, param.get(i));
+                     }
+           	 }
+       	 }
+                 rs = preparedStatement.executeQuery();
+                 list = new ArrayList();
+                 ResultSetMetaData rsm = rs.getMetaData();
+                 Map map = null;
+                 while (rs.next()) {
+                          map = new HashMap();
+                          for (int i = 1; i <= rsm.getColumnCount(); i++) {
+                              map.put(rsm.getColumnLabel(i), rs.getObject(rsm.getColumnLabel(i)));
+                          }
+                          list.add(map);
+                 }
+        } catch (SQLException e) {
+                 e.printStackTrace();
+                 throw new Exception("执行数据库查询操作失败！");
+        }finally{
+                 this.closeAll(connection, preparedStatement, null);
+        }
+       return list;
 	}
 
 }

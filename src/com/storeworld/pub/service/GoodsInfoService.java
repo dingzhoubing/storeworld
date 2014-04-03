@@ -223,6 +223,7 @@ public class GoodsInfoService extends BaseAction{
 			for(int i=0;i<list.size();i++){
 				Map retMap=(Map) list.get(i);
 				GoodsInfoDTO goodsInfoDto=new GoodsInfoDTO();
+				goodsInfoDto.setId((String.valueOf(retMap.get("id"))));
 				goodsInfoDto.setBrand((String) retMap.get("brand"));
 				goodsInfoDto.setRepertory((Integer) retMap.get("repertory"));
 				goodsInfoDto.setReserve1((String) retMap.get("reserve1"));
@@ -254,6 +255,7 @@ public class GoodsInfoService extends BaseAction{
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
 		List<GoodsInfoDTO> goodsInfoList = new ArrayList<GoodsInfoDTO>();
+		Integer id=(Integer) map.get("id");
 		String brand=(String) map.get("brand");
 		String sub_brand=(String) map.get("sub_brand");
 		String standard=(String) map.get("standard");
@@ -264,6 +266,11 @@ public class GoodsInfoService extends BaseAction{
 		//Object[] params=new Object[]{};
 		List<Object> params = new ArrayList<Object>();
 		int p_num=0;
+		if(Utils.isNotNull(String.valueOf(id))){
+			sql=sql+" and gi.id=?";
+			params.add(id);
+			
+		}
 		if(Utils.isNotNull(brand)){
 			sql=sql+" and gi.brand=?";
 			params.add(brand);
@@ -292,6 +299,7 @@ public class GoodsInfoService extends BaseAction{
 			for(int i=0;i<list.size();i++){
 				Map retMap=(Map) list.get(i);
 				GoodsInfoDTO goodsInfoDto=new GoodsInfoDTO();
+				goodsInfoDto.setId((String.valueOf(retMap.get("id"))));
 				goodsInfoDto.setBrand((String) retMap.get("brand"));
 				goodsInfoDto.setRepertory((Integer) retMap.get("repertory"));
 				goodsInfoDto.setReserve1((String) retMap.get("reserve1"));

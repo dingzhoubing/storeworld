@@ -8,6 +8,7 @@ import com.storeworld.framework.ObjectExternalizable;
 
 public class GoodsInfoDTO extends ObjectExternalizable{
 
+	private String id;
 	private String brand;
 	private String sub_brand;
 	private Float unit_price;
@@ -26,6 +27,7 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 	 */
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
+		this.id=readUTF(in);
 		this.brand = readUTF(in);
 		this.sub_brand = readUTF(in);
 		this.unit_price = readFloat(in);
@@ -43,7 +45,7 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 	 * @throws IOException
 	 */
 	public void writeExternal(ObjectOutput out) throws IOException {
-
+		writeUTF(out, this.id);
 		writeUTF(out, this.brand);
 		writeUTF(out, this.sub_brand);
 		writeFloat(out, this.unit_price);
@@ -54,6 +56,15 @@ public class GoodsInfoDTO extends ObjectExternalizable{
 		writeUTF(out, this.reserve2);
 		writeUTF(out, this.reserve3);
 	}
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getBrand() {
 		return brand;
 	}

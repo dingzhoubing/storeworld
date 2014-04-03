@@ -32,6 +32,9 @@ public class Pagination extends ObjectExternalizable{
 	protected int currentPage = 1;
 	/** 当前页面记录集 */
 	protected List<Object> items;
+	
+	/** 当前页面辅助记录集 */
+	protected List<Object> otherItems;
 	/** 查询排序条件数组,按照index先后顺序进行排序 */
 	protected String[] orders = null;
 
@@ -119,6 +122,12 @@ public class Pagination extends ObjectExternalizable{
 		}
 	}
 
+	public List<Object> getOtherItems() {
+		return otherItems;
+	}
+	public void setOtherItems(List<Object> otherItems) {
+		this.otherItems = otherItems;
+	}
 	public List<Object> getItems() {
 		return items;
 	}
@@ -191,6 +200,7 @@ public class Pagination extends ObjectExternalizable{
 		pageSize = in.readInt();
 		currentPage = in.readInt();
 		items = readArrayList(in);
+		otherItems = readArrayList(in);
 		orders = (String[])in.readObject();
 	}
 
@@ -205,6 +215,7 @@ public class Pagination extends ObjectExternalizable{
 		out.writeInt(pageSize);
 		out.writeInt(currentPage);
 		writeArrayList(out,items);
+		writeArrayList(out,otherItems);
 		out.writeObject(orders);
 	}
 }

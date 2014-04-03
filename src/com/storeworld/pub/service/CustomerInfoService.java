@@ -70,6 +70,36 @@ public class CustomerInfoService extends BaseAction{
 		return true;
 	}
 	
+	private boolean isKeyFactorModified(Map<String,Object> map) throws Exception{
+		String id_temp=(String) map.get("id");
+		String customer_area=(String)map.get("customer_area");
+		String customer_name=(String)map.get("customer_name");
+		String telephone=(String)map.get("telephone");
+		Integer id=Integer.parseInt(id_temp);
+		String sql="select * from customer_info ci where ci.id=?";
+		Object[] params_tmp={id};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		List list=null;
+		try{
+			list=executeQuery(sql, params);
+		}catch(Exception e){
+			throw new Exception("修改客户记录时查询是否修改了该记录的关键字段出现异常"+e.getMessage());
+		}
+		if(list==null||list.size()==0)
+		{
+			throw new Exception("没有找到正在被修改的客户记录，ID为："+id);
+		}else if(list.size()==1){
+			Map retMap=(Map) list.get(0);
+			String DB_customer_area=(String) retMap.get("customer_area");
+			String DB_customer_name=(String) retMap.get("customer_name");
+			String DB_telephone=(String) retMap.get("telephone");
+			if(DB_customer_area.equals(customer_area)&&DB_customer_name.equals(customer_name)&&DB_telephone.equals(telephone)){
+				return false;
+			}
+			
+		}
+		return true;
+	}
 	/**
 	 * 批量新增客户信息
 	 * @param listMap 装的是多条客户信息
@@ -155,9 +185,11 @@ public class CustomerInfoService extends BaseAction{
 				map.get("customer_addr"),id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
-			boolean isExist=isExistCustomerInfo(map);
-			if(isExist){
-				throw new Exception("已经存在相同的客户，片区，姓名，电话，分别为："+map.get("customer_area")+","+map.get("customer_name")+","+map.get("telephone"));
+			if(isKeyFactorModified(map)){
+				boolean isExist=isExistCustomerInfo(map);
+				if(isExist){
+					throw new Exception("已经存在相同的客户，片区，姓名，电话，分别为："+map.get("customer_area")+","+map.get("customer_name")+","+map.get("telephone"));
+				}
 			}
 			int rows=executeUpdate(sql,params);
 			if(rows!=1){

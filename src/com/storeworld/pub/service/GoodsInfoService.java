@@ -75,13 +75,18 @@ public class GoodsInfoService extends BaseAction{
 
 		return true;
 	}
-	
+	/**
+	 * description:判断货品信息的一条记录的关键字段是否被修改
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
 	private boolean isKeyFactorModified(Map<String,Object> map) throws Exception{
-		String id=(String) map.get("id");
+		String id_temp=(String) map.get("id");
 		String brand=(String)map.get("brand");
 		String sub_brand=(String)map.get("sub_brand");
 		String standard=(String)map.get("standard");
-		
+		Integer id=Integer.parseInt(id_temp);
 		String sql="select * from goods_info gi where gi.id=?";
 		Object[] params_tmp={id};
 		List<Object> params=objectArray2ObjectList(params_tmp);

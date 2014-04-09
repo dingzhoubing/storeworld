@@ -281,7 +281,7 @@ public class CustomerUtils {
 					button.setText(fm);
 					button.setBackground(base);
 					button.addSelectionListener(new CheckBoxFilterAdapter(button,
-							AREA, cf, tv));
+							FIRSTNAME, cf, tv));
 					// add the Button into the button list
 					firstnameButtons.add(button);
 					composite_scrollarea.setMinSize(composite_ar.computeSize(

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.common.ComboUtils;
+import com.storeworld.common.DataInTable;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Constants;
@@ -184,10 +185,15 @@ public class StockContentPart extends ContentPart{
 
 					}
 					else if(colCurrent == brandColomn){//sub_brand column, then fill the combox
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
 						StockUtils.setCurrentLine(rowCurrent);
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
 						StockUtils.setCurrentSub_Brand(c.getSubBrand());
-						
+						List<String> list = Utils.getBrands();
+						//set data into objects
+						comboboxCellEditor.setObjects(list);
+						combo.setItems(list.toArray(new String[list.size()]));
 					}
 					else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
@@ -292,6 +298,27 @@ public class StockContentPart extends ContentPart{
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
 		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setText("+   新增进货");
+		//if click, record the time, put the current into history(if exist), clear all the stock table
+		btnNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+//				StockUtils.setTime();//record the time
+				//TODO: check if has history
+				if(StockList.getStocks().size() > 1){
+					StockUtils.addToHistory();
+					
+					//clear table
+					//and add a new line
+					table.removeAll();
+					StockList.removeAllStocks();
+				}
+				//after we add to history, initial the time 
+				StockUtils.setTime("");//initial
+
+			}
+		});
+		
+		
 		//label to show the tips info
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" 当月历史记录(在下方设置日期进行搜索)");

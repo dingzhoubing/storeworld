@@ -11,6 +11,11 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.storeworld.common.History;
+import com.storeworld.stock.StockHistory;
+import com.storeworld.stock.StockList;
+import com.storeworld.stock.StockUtils;
+
 /**
  * the item in left navigate part
  * the history items
@@ -24,6 +29,7 @@ public class ItemComposite extends Composite {
 	private int width;
 	private int height;
 	private ItemComposite self ; 
+	private History his;
 	public void setID(int id){
 		this.id = id;
 	}
@@ -36,10 +42,11 @@ public class ItemComposite extends Composite {
 	private Text down_left = new Text(this, SWT.NONE);
 	private Text down_right = new Text(this, SWT.RIGHT | SWT.NONE);
 	
-	public ItemComposite(Composite parent, Color color, int width, int height) {
+	public ItemComposite(Composite parent, Color color, int width, int height, History his) {
 		super(parent, SWT.BORDER);		
 		final Color color1 = new Color(parent.getDisplay(), 255, 245, 238);
 		final Color color2 = new Color(parent.getDisplay(), 255, 250, 250);
+		this.his = his;
 		self = this;
 		GridLayout gd = new GridLayout(2, false);
 		gd.horizontalSpacing = 0;
@@ -63,11 +70,18 @@ public class ItemComposite extends Composite {
 
 			@Override
 			public void handleEvent(Event event) {
-				MessageBox messageBox =   
-						   new MessageBox(new Shell(),   					     
-						    SWT.ICON_WARNING);   
-				messageBox.setMessage("显示进货信息");   
-				messageBox.open(); 
+//				MessageBox messageBox =   
+//						   new MessageBox(new Shell(),   					     
+//						    SWT.ICON_WARNING);   
+//				messageBox.setMessage("显示进货信息");   
+//				messageBox.open(); 
+				History history = getHistory();
+				if(history instanceof StockHistory){
+					StockList.showHistory((StockHistory)history);
+					StockUtils.recordItemComposite(getSelf());
+				}else{//DeliverHistory
+					
+				}
 				
 			}
 			
@@ -125,5 +139,12 @@ public class ItemComposite extends Composite {
 		this.up.setText(u);
 		this.down_left.setText(dl);
 		this.down_right.setText(dr);
+		
+	}
+	public History getHistory(){
+		return this.his;
+	}
+	public ItemComposite getSelf(){
+		return this.self;
 	}
 }

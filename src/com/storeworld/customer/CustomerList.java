@@ -192,6 +192,8 @@ public class CustomerList{
 				//update the database here				
 				try {
 					cusinfo.updateCustomerInfo(customer.getID(), cus);
+					//need?
+					CustomerUtils.refreshAreas_FirstName();
 				} catch (Exception e) {
 					System.out.println("update customer failed");
 				}
@@ -204,8 +206,7 @@ public class CustomerList{
 					System.out.println("add customer failed");
 				}
 			}
-			//need?
-			CustomerUtils.refreshAreas_FirstName();
+			
 		}
 		
 	}

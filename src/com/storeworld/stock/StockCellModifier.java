@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.TableItem;
 import com.storeworld.customer.Customer;
 import com.storeworld.customer.CustomerValidator;
 import com.storeworld.product.Product;
+import com.storeworld.product.ProductValidator;
 import com.storeworld.utils.Utils;
 
 /**
@@ -15,8 +16,8 @@ import com.storeworld.utils.Utils;
  *
  */
 public class StockCellModifier implements ICellModifier {
-	private TableViewer tv;//just in case
-	private StockList stocklist;	
+	private static TableViewer tv;//just in case
+	private static StockList stocklist;	
 
 	public StockCellModifier(TableViewer tv, StockList stocklist) {
 		this.tv = tv;
@@ -27,6 +28,22 @@ public class StockCellModifier implements ICellModifier {
 		return true;
 	}
 	
+	public static StockList getStockList(){
+		return stocklist;
+	}
+	public static TableViewer getTableViewer(){
+		return tv;
+	}
+	public static void addNewTableRow(Stock stock){
+//		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
+			int new_id = Integer.valueOf(stock.getID()) + 1;
+			StockValidator.setNewID(String.valueOf(new_id));
+			Stock stock_new = new Stock(String.valueOf(new_id));
+			stocklist.addStock(stock_new);
+			Utils.refreshTable(tv.getTable());
+//		}
+	}
+		
 	//when initial the table data
 	public Object getValue(Object element, String property) {
 		Stock s = (Stock) element;		
@@ -204,13 +221,7 @@ public class StockCellModifier implements ICellModifier {
 			}
 			if (valid) {
 				stocklist.stockChanged(s);
-				if (StockValidator.checkID(s.getID()) && StockValidator.rowLegal(s)) {
-					int new_id = Integer.valueOf(s.getID()) + 1;
-					StockValidator.setNewID(String.valueOf(new_id));
-					Stock stock_new = new Stock(String.valueOf(new_id));
-					stocklist.addStock(stock_new);
-					Utils.refreshTable(tv.getTable());
-				}
+				
 			}
 		}
 	}

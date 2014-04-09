@@ -15,7 +15,7 @@ public class Stock extends DataInTable{
 	private String unit="";//the unit of the stock
 	private String price="";
 	private String number="";
-
+	private String time = "";
 	
 	public Stock(){
 		
@@ -41,6 +41,12 @@ public class Stock extends DataInTable{
 	}
 	public void setID(String ID){
 		this.id = ID;
+	}
+	public String getTime(){
+		return time;
+	}
+	public void setTime(String time){
+		this.time = time;
 	}
 	public String getBrand() {
 		return this.brand;

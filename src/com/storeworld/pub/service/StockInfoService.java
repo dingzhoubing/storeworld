@@ -247,7 +247,8 @@ public class StockInfoService extends BaseAction{
 				stockInfoDto.setId(String.valueOf(retMap.get("id")));
 				stockInfoDto.setBrand((String) retMap.get("brand"));
 				stockInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+//				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+				stockInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
 				
 				/*SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Timestamp date_temp = (Timestamp) retMap.get("stock_time");

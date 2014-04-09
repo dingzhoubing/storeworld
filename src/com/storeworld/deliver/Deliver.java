@@ -15,6 +15,7 @@ public class Deliver extends DataInTable{
 	private String unit="";
 	private String price="";
 	private String number="";
+	private String time = "";
 	
 	public Deliver(){
 		
@@ -43,6 +44,14 @@ public class Deliver extends DataInTable{
 	public void setID(String ID){
 		this.id = ID;
 	}
+	
+	public String getTime(){
+		return time;
+	}
+	public void setTime(String time){
+		this.time = time;
+	}
+	
 	public String getBrand() {
 		return this.brand;
 	}

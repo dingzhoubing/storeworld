@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.storeworld.customer.CustomerContentPart;
+import com.storeworld.stock.StockUtils;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -54,8 +55,8 @@ public class Utils {
 	private static HashMap<FUNCTION, Button> func_button = new HashMap<FUNCTION, Button>();
 	
 	//get the brands and sub_brands for ccomboBox
-	private static List<String> brands;
-	private static List<String> sub_brands;
+	private static List<String> brands = new ArrayList<String>();
+	private static List<String> sub_brands = new ArrayList<String>();
 	
 	private static String comboValue = "";
 		
@@ -85,13 +86,16 @@ public class Utils {
 		//get from database
 //		brands = new String[]{"五得利","五联","金龙"};
 		brands = new ArrayList<String>();
-		brands.add("五得利");
-		brands.add("五联");
-		brands.add("金龙");
+//		brands.add("五得利");
+//		brands.add("五联");
+//		brands.add("金龙");
+//		brands.clear();
+		brands.addAll(StockUtils.getBrand2Sub().keySet());
 		return brands;
 	}
 	//to check if it's a new brand
-	public static boolean checkBrand(String brand){
+	public static boolean checkBrand(String brand){	
+		brands = getBrands();//??is this needed
 		for(int i=0;i<brands.size();i++){
 			if(brands.get(i).equals(brand)){
 				return true;
@@ -106,18 +110,22 @@ public class Utils {
 	
 	//get the sub brands
 	public static List<String> getSub_Brands(String brand){
+		//always need to new, if not, cause wrong
 		sub_brands  = new ArrayList<String>();
-		if(brand.equals("五得利")){
-			sub_brands.add("特精");
-			sub_brands.add("包子粉");
-			sub_brands.add("精一");
-			sub_brands.add("普粉");
-		}else{
-			sub_brands.add("精粉");
-			sub_brands.add("馒头粉");
-			sub_brands.add("精二");
-			sub_brands.add("普粉");	
-		}
+//		if(brand.equals("五得利")){
+//			sub_brands.add("特精");
+//			sub_brands.add("包子粉");
+//			sub_brands.add("精一");
+//			sub_brands.add("普粉");
+//		}
+//		else{
+//			sub_brands.add("精粉");
+//			sub_brands.add("馒头粉");
+//			sub_brands.add("精二");
+//			sub_brands.add("普粉");	
+//		}
+//		sub_brands.clear();
+		sub_brands.addAll(StockUtils.getBrand2Sub().get(brand));
 		return sub_brands;
 	}
 	

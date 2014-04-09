@@ -97,7 +97,7 @@ private static String current_id = "";
 	public static boolean rowLegal(Stock p){
 		if(p.getBrand() !=null && p.getSubBrand()!=null){
 			
-			if(!p.getBrand().equals("") && !p.getSubBrand().equals(""))
+			if(!p.getBrand().equals("") && !p.getSubBrand().equals("") && !p.getSize().equals(""))
 				return true;
 			else
 				return false;

@@ -15,37 +15,7 @@ public class DeliverUtils {
 	private static String newLineID = "";
 	private static int currentBrandLine=0;
 	private static String current_sub_brand = "";
-	
-	static class History{
-		String title;
-		String time;
-		String number;
-		
-		History(String title, String time, String number){
-			this.title = title;
-			this.time = time;
-			this.number = number;
-		}
-		
-		public void setTitle(String title){
-			this.title = title;
-		}
-		public void setTime(String time){
-			this.time = time;
-		}
-		public void setNumber(String number){
-			this.number = number;
-		}
-		public String getTitle(){
-			return this.title;
-		}
-		public String getTime(){
-			return this.time;
-		}
-		public String getNumber(){
-			return this.number;
-		}
-	}
+
 	
 	/**
 	 * the item composite list
@@ -55,7 +25,7 @@ public class DeliverUtils {
 	/**
 	 * the item content is the history panel
 	 */
-	private static ArrayList<History> historyList = new ArrayList<History>();
+	private static ArrayList<DeliverHistory> historyList = new ArrayList<DeliverHistory>();
 //	private static ArrayList<History> areas = new ArrayList<History>();
 	
 	
@@ -66,7 +36,7 @@ public class DeliverUtils {
 	private static void getHistoryFromDataBase(String option){
 		
 		for(int i=0;i<5;i++){
-			History his = new History("123","456","789"+Constants.SPACE);
+			DeliverHistory his = new DeliverHistory("123","456","789"+Constants.SPACE);
 			historyList.add(his);
 		}
 	}
@@ -79,8 +49,8 @@ public class DeliverUtils {
 		getHistoryFromDataBase("");
 		
 		for (int i = 0; i < historyList.size(); i++) {
-			History his = historyList.get(i);
-			ItemComposite ic = new ItemComposite(composite_fn, color, width, height);
+			DeliverHistory his = historyList.get(i);
+			ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
 			ic.setValue(his.getTitle(), his.getTime(), his.getNumber());
 			itemList.add(ic);
 			composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
@@ -100,11 +70,11 @@ public class DeliverUtils {
 	 */
 	public static void addToHistoryPanel(ScrolledComposite composite_scroll,
 			Composite composite_fn, Color color, int width, int height,
-			History his) {
+			DeliverHistory his) {
 		// search the database
 		addToHistory();
 
-		ItemComposite ic = new ItemComposite(composite_fn, color, width, height);
+		ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
 		ic.setValue(his.getTitle(), his.getTime(), his.getNumber());
 		itemList.add(ic);
 		composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,

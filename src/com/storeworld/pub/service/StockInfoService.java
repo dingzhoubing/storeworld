@@ -48,6 +48,7 @@ public class StockInfoService extends BaseAction{
 			try{
 				GoodsInfoService tempService=new GoodsInfoService();
 				tempService.addGoodsInfo(map);
+				addBatch(map);
 			}catch(Exception e){
 				System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
 			}
@@ -96,6 +97,31 @@ public class StockInfoService extends BaseAction{
 		return true;
 	}
 	
+	public boolean addBatch(Map<String,Object> map) throws Exception{
+		String sql_query="select count(*) bactnNo from goods_batch_info where brand=? and sub_brand=? and standard=?";
+		String sql_insert="insert into goods_batch_info values(?,?,?,?,?,?)";
+		Object[] params_query={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		
+		try {
+			list=executeQuery(sql_query, sql_insert);
+			Map retMap=(Map) list.get(0);
+			int batchNo=(Integer)retMap.get("batchNo");
+			
+			
+			List<Object> paramsQuery=objectArray2ObjectList(params_query);
+			Object[] params_insert={map.get("brand"),map.get("sub_brand"),map.get("standard"),map.get("unit_price"),map.get("quantity"),batchNo};
+			List<Object> paramsInsert=objectArray2ObjectList(params_insert);
+			
+			int snum=executeUpdate(sql_insert,params);
+			if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+				throw new Exception("新增货品批次失败，请检查数据!");
+			}
+		}catch(Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("新增货品批次失败!"+e.getMessage());
+		}
+	}
 	
 	/**
 	 * 批量新增进货信息

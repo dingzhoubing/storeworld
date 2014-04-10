@@ -178,17 +178,21 @@ public class customerMatch {
 	      }
 	      rs.close();//关闭数据库
 	      conn.close();*/
-			Pagination page = new Pagination();
+			/*Pagination page = new Pagination();
 			ReturnObject ro=new ReturnObject();
 			GoodsInfoService tempService=new GoodsInfoService();
 			tempService.queryGoodsInfoAll();
-			statistic temp=new statistic();
+			statistic temp=new statistic();*/
 			Map map = new HashMap<String,Object>();
 			/*map.put("customer_area", "城东");
 			map.put("brand", "五得利");
 			map.put("sub_brand", "精一");*/
 			map.put("end_time", "20140403");
-			temp.deliverQuantityAnalysis(map);
+			String tt=(String)map.get("tt");
+			if(tt==null){
+				int i=10;
+			}
+			//temp.deliverQuantityAnalysis(map);
 			/*Map map = new HashMap<String,Object>();
 			map.put("brand", "五得利");
 			map.put("sub_brand", "精一");

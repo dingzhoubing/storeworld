@@ -121,6 +121,7 @@ public class StockInfoService extends BaseAction{
 			e.printStackTrace();
 			throw new Exception("新增货品批次失败!"+e.getMessage());
 		}
+		return true;
 	}
 	
 	/**

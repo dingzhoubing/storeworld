@@ -16,7 +16,7 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	private String unit;
 	private String quantity;
 	private String standard;
-	private String reserve1;
+	private Float reserve1;
 	private String reserve2;
 	private String reserve3;
 
@@ -36,7 +36,7 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 		this.unit = readUTF(in);
 		this.quantity = readUTF(in);
 		this.standard = readUTF(in);
-		this.reserve1 = readUTF(in);
+		this.reserve1 = readFloat(in);
 		this.reserve2 = readUTF(in);
 		this.reserve3 = readUTF(in);
 	}
@@ -55,7 +55,7 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 		writeUTF(out, this.unit);
 		writeUTF(out, this.quantity);
 		writeUTF(out, this.standard);
-		writeUTF(out, this.reserve1);
+		writeFloat(out, this.reserve1);
 		writeUTF(out, this.reserve2);
 		writeUTF(out, this.reserve3);
 	}
@@ -111,10 +111,10 @@ public class DeliverInfoDTO extends ObjectExternalizable{
 	public void setStandard(String standard) {
 		this.standard = standard;
 	}
-	public String getReserve1() {
+	public Float getReserve1() {
 		return reserve1;
 	}
-	public void setReserve1(String reserve1) {
+	public void setReserve1(Float reserve1) {
 		this.reserve1 = reserve1;
 	}
 	public String getReserve2() {

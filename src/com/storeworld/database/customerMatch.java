@@ -183,15 +183,15 @@ public class customerMatch {
 			GoodsInfoService tempService=new GoodsInfoService();
 			tempService.queryGoodsInfoAll();
 			statistic temp=new statistic();*/
-			Map map = new HashMap<String,Object>();
+			//Map map = new HashMap<String,Object>();
 			/*map.put("customer_area", "城东");
 			map.put("brand", "五得利");
 			map.put("sub_brand", "精一");*/
-			map.put("end_time", "20140403");
+			/*map.put("end_time", "20140403");
 			String tt=(String)map.get("tt");
 			if(tt==null){
 				int i=10;
-			}
+			}*/
 			//temp.deliverQuantityAnalysis(map);
 			/*Map map = new HashMap<String,Object>();
 			map.put("brand", "五得利");
@@ -218,13 +218,17 @@ public class customerMatch {
 			GoodsInfoDTO goodsInfoDTO=(GoodsInfoDTO)page.getItems().get(0);
 			System.out.println(goodsInfoDTO.getBrand()+goodsInfoDTO.getRepertory()+goodsInfoDTO.getStandard());*/
 			//==================================stock_info test begin======================//
-			/*Map map = new HashMap<String,Object>();
+			StockInfoService tempService=new StockInfoService();
+			Map map = new HashMap<String,Object>();
 			map.put("brand", "五得利");
-			map.put("sub_brand", "精一");
+			map.put("sub_brand", "精三");
 			map.put("standard", "60KG");
 			map.put("stock_from", "美帝");
-			map.put("stock_time", "2014-03-26");
-			tempService.updateStockInfo("12", map);*/
+			map.put("stock_time", "20140326");
+			map.put("unit_price", 54);
+			Object temp=(Object)map.get("unit_price");
+			map.put("quantity", 99);
+			tempService.addStockInfo(map);
 			//tempService.addStockInfo(map);
 			
 			//ro=tempService.queryStockInfo(map);

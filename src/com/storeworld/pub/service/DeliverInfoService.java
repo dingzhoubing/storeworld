@@ -4,10 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +12,8 @@ import java.util.Map;
 import com.mysql.jdbc.Connection;
 import com.storeworld.database.BaseAction;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
-import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
-import com.storeworld.pojo.dto.DeliverInfoDTO;
 import com.storeworld.utils.Utils;
 
 public class DeliverInfoService extends BaseAction{
@@ -34,6 +29,25 @@ public class DeliverInfoService extends BaseAction{
 	public boolean addDeliverInfo(Map<String,Object> commonMap,Map<String,Object> uniMap) throws Exception{
 
 	 try{
+		 //0.输入参数校验：
+		 Float unit_price=(Float)uniMap.get("unit_price");
+		 String brand=(String)uniMap.get("brand");
+		 String sub_brand=(String)uniMap.get("sub_brand");
+		 String standard=(String)uniMap.get("standard");
+		 Integer quantity=(Integer)uniMap.get("quantity");
+		 List<Object> paramList = null;
+		 paramList.add(unit_price);
+		 paramList.add(brand);
+		 paramList.add(sub_brand);
+		 paramList.add(standard);
+		 paramList.add(quantity);
+		 
+		 if(!inputCheck(paramList)){
+			 throw new Exception("参数校验不通过，有部分重要参数为空，不能提交送货信息！");
+		 }
+		 if(!queryRepertory4Deliver(uniMap)){
+			 throw new Exception("库存的该商品数量少于送货单中该商品数量，库存不足，请修改送货单中该商品数量！");
+		 }
 		//1.获得输入的用户信息值，放入param中，ADD your code below:
 		boolean isExist=isExistDeliverInfo(commonMap,uniMap);
 		if(isExist){
@@ -69,6 +83,8 @@ public class DeliverInfoService extends BaseAction{
 				tempService.addGoodsInfo(uniMap);
 			}catch(Exception e){
 				//System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
+			}finally{
+				boolean rest=updateBatchInfoAndDeliverInfo(uniMap);
 			}
 		}
 		}catch (Exception e) {
@@ -77,6 +93,144 @@ public class DeliverInfoService extends BaseAction{
 			throw new Exception("新增送货信息失败!"+e.getMessage());
 		}
 	 return true;
+	}
+	
+	/**
+	 * 输入参数校验
+	 * @param list
+	 * @return
+	 */
+	private boolean inputCheck(List<Object> list){
+		int j=list.size();
+		for(int i=0;i<j;i++){
+			if(list.get(i)==null||list.get(i).toString().length()==0){
+				return false;
+			}
+		}
+		return true;
+	}
+	private boolean updateBatchInfoAndDeliverInfo(Map<String,Object> uniMap) throws Exception{
+		String sql_query_batch="select * from goods_batch_info where brand=? and sub_brand=?"
+				+" and standard=? order by batch_no";
+		Object[] params_tmp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard")};
+
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		List list=null;
+		try{
+			Integer quantity4Deliver=(Integer)(uniMap.get("quantity"));
+			list=executeQuery(sql_query_batch, params);
+			Integer sum=0;
+			Integer lastSecondSum=0;
+			int last_index=0;
+			int last_index_quantity=0;//最后批次剩余的数量
+			int last_index_deliver=0;//最后批次送出去的数量
+			float stock_total_price=0;
+			for(int i=0;i<list.size();i++){
+				
+            	Map retMap=(Map) list.get(i);
+            	Integer quantity=(Integer)retMap.get("quantity");
+            	lastSecondSum=sum;
+            	sum=sum+quantity;
+            	if(sum>quantity4Deliver){
+            		last_index=i;
+            		last_index_quantity=sum-quantity4Deliver;
+            		last_index_deliver=quantity4Deliver-lastSecondSum;
+            		break;
+            	}
+			}
+			for(int i=0;i<last_index;i++){
+				Map retMap=(Map) list.get(i);
+				Float unit_price=(Float)retMap.get("unit_price");
+				Integer quantity=(Integer)retMap.get("quantity");
+				String batchNo=(String)retMap.get("batch_no");
+				stock_total_price+=unit_price*quantity;
+				//删除已经被送掉的货品批次，以便滚动批次号
+				deleteGoodsBatchInfo(uniMap,batchNo);
+			}
+			if(last_index_deliver>0){
+				Map retMap=(Map) list.get(last_index);
+				Float unit_price=(Float)retMap.get("unit_price");
+				//Integer quantity=(Integer)retMap.get("quantity");
+				String batchNo=(String)retMap.get("batch_no");
+				stock_total_price+=unit_price*last_index_deliver;
+				//更新最后一个批次货品的剩余数量
+				updateLastBatchQuantity(uniMap,batchNo,last_index_quantity);
+			}
+			
+			//剩余批次货品的批次号前移
+			for(int i=last_index;i<list.size();i++){
+				Map retMap=(Map) list.get(last_index);
+				String batchNo=(String)retMap.get("batch_no");
+				String newBatchNo=String.valueOf(Integer.parseInt(batchNo)-last_index);
+				updateGoodsBatchInfo(uniMap,batchNo,newBatchNo);
+			}
+			//更新该条送货记录所对应的进货的总价，也就是更新货品批次表。
+			updateDeliverInfo4TotalStockPrice(uniMap,stock_total_price);
+		}catch(Exception e){
+			throw new Exception("送货时查询所送货品批次表出现异常"+e.getMessage());
+		}
+		if(list==null||list.size()==0)
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean updateDeliverInfo4TotalStockPrice(Map<String,Object> uniMap,float stock_total_price) throws Exception{
+		String sql="update deliver_info di set "
+				+" di.reserve1=? where di.brand=? and di.sub_brand=? "
+				+" and di.standard=? and di.order_num=?";
+		Object[] params_temp={stock_total_price,uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),uniMap.get("order_num")};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			int rows=executeUpdate(sql,params);
+			if(rows!=1){
+				throw new Exception("更新一条送货信息对应的总价信息失败");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("更新一条送货信息对应的总价信息失败"+":"+e.getMessage());
+		}
+		return true;
+	}
+	/**
+	 * description:判断库存数量是否充足，已完成该笔送货
+	 * @param uniMap
+	 * @return
+	 */
+	private boolean queryRepertory4Deliver(Map<String,Object> uniMap){
+		String sql_query_batch="select sum(quantity) quantity from goods_batch_info where brand=? and sub_brand=?"
+				+" and standard=?";
+		Object[] params_tmp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard")};
+
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		List list=null;
+		Map retMap=(Map) list.get(0);
+		Integer repertory=(Integer)(retMap.get("quantity"));
+		Integer quantity=(Integer)(uniMap.get("quantity"));
+		if(repertory<quantity){
+			return false;
+		}
+		return true;
+	}
+	private boolean updateLastBatchQuantity(Map<String,Object> uniMap,String batchNo,Integer quantity) throws Exception{
+		String sql="update goods_batch_info set quantity=?"
+				+" where brand=? and sub_brand=? and standard=? and batch_no=?";
+		Object[] params_temp={quantity,uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),batchNo};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			int rows=executeUpdate(sql,params);
+			if(rows!=1){
+				throw new Exception("更新货品批次表中最后一个送货批次的的剩余货品量记录失败，更新操作的返回条目数不为1！");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("更新货品批次表中最后一个送货批次的的剩余货品量记录失败！"+e.getMessage());
+		}
+		return true;
+		
 	}
 
 	/**
@@ -181,6 +335,50 @@ public class DeliverInfoService extends BaseAction{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new Exception("执行删除记录的操作失败！"+e.getMessage());
+		}
+		return true;
+	}
+	/**
+	 * 删除一条goodsBatch信息，用batchNo标识。
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean deleteGoodsBatchInfo(Map<String,Object> uniMap,String batchNo) throws Exception{
+		String sql="delete from goods_batch_info  where brand=? and sub_brand=? and standard=? and batch_no=?";
+		Object[] params_temp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),batchNo};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			int rows=executeUpdate(sql,params);
+			if(rows!=1){
+				throw new Exception("删除一条指定记录失败，删除操作的返回条目数不为1！");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("执行删除记录的操作失败！"+e.getMessage());
+		}
+		return true;
+	}
+	
+	/**
+	 * @throws Exception 
+	 * 
+	 */
+	private boolean updateGoodsBatchInfo(Map<String,Object> uniMap,String batchNo,String newBatchNo) throws Exception{
+		String sql="update goods_batch_info set batch_no=?"
+				+" where brand=? and sub_brand=? and standard=? and batch_no=?";
+		Object[] params_temp={batchNo,uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),newBatchNo};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			int rows=executeUpdate(sql,params);
+			if(rows!=1){
+				throw new Exception("更新一条指定货品批次记录失败，更新操作的返回条目数不为1！");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("执行更新货品批次记录的操作失败！"+e.getMessage());
 		}
 		return true;
 	}
@@ -315,7 +513,7 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
 				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
-				deliverInfoDto.setUni_reserve1((String) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve1((Float) retMap.get("uniReserve1"));
 				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
 				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
 				deliverInfoDto.setStandard((String) retMap.get("standard"));
@@ -428,7 +626,7 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
 				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
-				deliverInfoDto.setUni_reserve1((String) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve1((Float) retMap.get("uniReserve1"));
 				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
 				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
 				deliverInfoDto.setStandard((String) retMap.get("standard"));
@@ -445,7 +643,13 @@ public class DeliverInfoService extends BaseAction{
 		}
 		return ro;
 	}
-	
+	/**
+	 * 因为两个表有相同字段需要取别名，所以换了一种数据库查询方法。
+	 * @param sql
+	 * @param param
+	 * @return
+	 * @throws Exception
+	 */
 	public List executeQuery4Deliver(String sql, List<Object> param) throws Exception{
 		ResultSet rs = null;
         List list = null;

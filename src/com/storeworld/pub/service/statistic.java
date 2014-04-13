@@ -430,9 +430,9 @@ public class statistic extends BaseAction{
 	 */
 	private ReturnObject funcPro1(String brand,String sub_brand,String start_time,String end_time) throws Exception{
 		List list=null;
-		String sql_area="select dci.customer_area,sum(di.quantity) quantity,sum(di.quantity*di.unit_price) t_price from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_area,sum(di.quantity) quantity,sum(di.quantity*di.unit_price) t_price,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and di.sub_brand=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_area";
-		Float stock_price=queryStockPrice(end_time);
+		//Float stock_price=queryStockPrice(end_time);
 		Object[] params_temp={brand,sub_brand,start_time,end_time};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		
@@ -445,7 +445,9 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
+				
 			}
 			page.setItems((List)deliverInfoAllList);
 			ro.setReturnDTO(page);
@@ -463,7 +465,7 @@ public class statistic extends BaseAction{
 	 */
 	private ReturnObject funcPro2(String brand,String sub_brand,String customer_area,String start_time,String end_time) throws Exception{
 		List list=null;
-		String sql_area="select dci.customer_name,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_name,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and di.sub_brand=? and dci.customer_area=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_name";
 		
 		Object[] params_temp={brand,sub_brand,customer_area,start_time,end_time};
@@ -478,6 +480,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
 				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 		}
 		page.setItems((List)deliverInfoAllList);
@@ -486,7 +489,7 @@ public class statistic extends BaseAction{
 	}
 	private ReturnObject funcPro3(String brand,String sub_brand,String customer_area,String customer_name,String start_time,String end_time) throws Exception{
 		List list=null;
-		String sql_area="select dci.customer_name,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_name,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and di.sub_brand=? and dci.customer_area=? and dci.customer_name=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_name";
 		
 		Object[] params_temp={brand,sub_brand,customer_area,customer_name,start_time,end_time};
@@ -500,6 +503,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 		}
 		page.setItems((List)deliverInfoAllList);
@@ -516,10 +520,10 @@ public class statistic extends BaseAction{
 	private ReturnObject funcPro4(String start_time,String end_time) throws Exception{
 		List listBrand=null;
 		List listArea=null;
-		String sql_brand="select di.brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.brand";
 		
-		String sql_area="select dci.customer_area,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_area,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 				" where dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_area";
 		
 		Object[] params_temp={start_time,end_time};
@@ -536,6 +540,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -545,6 +550,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -558,10 +564,10 @@ public class statistic extends BaseAction{
 	
 		List listBrand=null;
 		List listName=null;
-		String sql_brand="select di.brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where dci.customer_area=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.brand";
 		
-		String sql_name="select dci.customer_name,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_name="select dci.customer_name,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 				" where dci.customer_area=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_name";
 		
 		Object[] params_temp={customer_area,start_time,end_time};
@@ -578,6 +584,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -587,6 +594,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListName.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -598,7 +606,7 @@ public class statistic extends BaseAction{
 	private ReturnObject funcPro6(String customer_area,String customer_name,String start_time,String end_time) throws Exception{
 	
 		List list=null;
-		String sql_brand="select di.brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price  from deliver_info di,deliver_common_info dci "+
 	" where dci.customer_area=? and dci.customer_name=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.brand";
 		
 		Object[] params_temp={customer_area,customer_name,start_time,end_time};
@@ -613,6 +621,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);
@@ -622,10 +631,10 @@ public class statistic extends BaseAction{
 	private ReturnObject funcPro7(String brand,String start_time,String end_time) throws Exception{
 		List listBrand=null;
 		List listArea=null;
-		String sql_brand="select di.sub_brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.sub_brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price   from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.sub_brand";
 		
-		String sql_area="select dci.customer_area,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_area,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price   from deliver_info di,deliver_common_info dci "+
 				" where di.brand=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_area";
 		
 		Object[] params_temp={brand,start_time,end_time};
@@ -642,6 +651,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -651,6 +661,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -662,10 +673,10 @@ public class statistic extends BaseAction{
 	private ReturnObject funcPro8(String brand,String customer_area,String start_time,String end_time) throws Exception{
 		List listBrand=null;
 		List listArea=null;
-		String sql_brand="select di.sub_brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.sub_brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and dci.customer_area=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.sub_brand";
 		
-		String sql_area="select dci.customer_name,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_area="select dci.customer_name,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and dci.customer_area=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_name";
 		
 		Object[] params_temp={brand,customer_area,start_time,end_time};
@@ -682,6 +693,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -691,6 +703,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -701,7 +714,7 @@ public class statistic extends BaseAction{
 	}
 	private ReturnObject funcPro9(String brand,String customer_area,String customer_name,String start_time,String end_time) throws Exception{
 		List list=null;
-		String sql_brand="select di.sub_brand,sum(di.quantity) quantity from deliver_info di,deliver_common_info dci "+
+		String sql_brand="select di.sub_brand,sum(di.quantity) quantity,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where dci.customer_area=? and dci.customer_name=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by di.sub_brand";
 		
 		Object[] params_temp={brand,customer_area,customer_name,start_time,end_time};
@@ -716,6 +729,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);
@@ -826,8 +840,8 @@ public class statistic extends BaseAction{
 		return "00000000";
 	}
 	
-	private String queryStockPrice(String end_time){
-		String sql="select unit_price from stock_info si where si.stock_time=(select max(b.stock_time) from stock_info b where b.brand=? and b.sub_brand=?)";
-	}
+	//private String queryStockPrice(String end_time){
+		//String sql="select unit_price from stock_info si where si.stock_time=(select max(b.stock_time) from stock_info b where b.brand=? and b.sub_brand=?)";
+	//}
 
 }

@@ -23,7 +23,7 @@ public class DeliverInfoAll implements java.io.Serializable{
 	private String common_reserve1;
 	private String common_reserve2;
 	private String common_reserve3;
-	private String uni_reserve1;
+	private Float uni_reserve1;
 	private String uni_reserve2;
 	private String uni_reserve3;
 
@@ -31,7 +31,7 @@ public class DeliverInfoAll implements java.io.Serializable{
 			String order_num,String brand,String sub_brand,Float unit_price,
 			String unit,String quantity,Float total_price,Float real_price,String deliver_time,
 			String standard,String stock_from,String is_print,String telephone,
-			String uni_reserve1,String uni_reserve2,String uni_reserve3,String common_reserve1,String common_reserve2,String common_reserve3){
+			Float uni_reserve1,String uni_reserve2,String uni_reserve3,String common_reserve1,String common_reserve2,String common_reserve3){
 		this.customer_area=customer_area;
 		this.customer_name=customer_name;
 		this.deliver_addr=deliver_addr;
@@ -230,11 +230,11 @@ public class DeliverInfoAll implements java.io.Serializable{
 		this.common_reserve3 = common_reserve3;
 	}
 
-	public String getUni_reserve1() {
+	public Float getUni_reserve1() {
 		return uni_reserve1;
 	}
 
-	public void setUni_reserve1(String uni_reserve1) {
+	public void setUni_reserve1(Float uni_reserve1) {
 		this.uni_reserve1 = uni_reserve1;
 	}
 

@@ -10,12 +10,12 @@ public class DeliverInfo implements java.io.Serializable{
 	private String unit;
 	private String quantity;
 	private String standard;
-	private String reserve1;
+	private Float reserve1;
 	private String reserve2;
 	private String reserve3;
 
 	public DeliverInfo(String order_num,String brand,String sub_brand,Float unit_price,
-			String unit,String quantity,String standard,String reserve1,String reserve2,String reserve3){
+			String unit,String quantity,String standard,Float reserve1,String reserve2,String reserve3){
 
 		this.order_num=order_num;
 		this.brand=brand;
@@ -98,11 +98,11 @@ public class DeliverInfo implements java.io.Serializable{
 		this.standard = standard;
 	}
 
-	public String getReserve1() {
+	public Float getReserve1() {
 		return reserve1;
 	}
 
-	public void setReserve1(String reserve1) {
+	public void setReserve1(Float reserve1) {
 		this.reserve1 = reserve1;
 	}
 

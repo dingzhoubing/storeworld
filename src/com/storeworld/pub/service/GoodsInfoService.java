@@ -45,7 +45,7 @@ public class GoodsInfoService extends BaseAction{
 		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new Exception("新增用户信息失败!"+e.getMessage());
+			throw new Exception("新增货品信息失败!"+e.getMessage());
 		}
 	 return true;
 	}

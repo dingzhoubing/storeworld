@@ -124,7 +124,7 @@ public class DeliverInfoService extends BaseAction{
 			int last_index=0;
 			int last_index_quantity=0;//最后批次剩余的数量
 			int last_index_deliver=0;//最后批次送出去的数量
-			float stock_total_price=0;
+			float deliver_total_price=0;
 			for(int i=0;i<list.size();i++){
 				
             	Map retMap=(Map) list.get(i);
@@ -143,7 +143,7 @@ public class DeliverInfoService extends BaseAction{
 				Float unit_price=(Float)retMap.get("unit_price");
 				Integer quantity=(Integer)retMap.get("quantity");
 				String batchNo=(String)retMap.get("batch_no");
-				stock_total_price+=unit_price*quantity;
+				deliver_total_price+=unit_price*quantity;
 				//删除已经被送掉的货品批次，以便滚动批次号
 				deleteGoodsBatchInfo(uniMap,batchNo);
 			}
@@ -152,7 +152,7 @@ public class DeliverInfoService extends BaseAction{
 				Float unit_price=(Float)retMap.get("unit_price");
 				//Integer quantity=(Integer)retMap.get("quantity");
 				String batchNo=(String)retMap.get("batch_no");
-				stock_total_price+=unit_price*last_index_deliver;
+				deliver_total_price+=unit_price*last_index_deliver;
 				//更新最后一个批次货品的剩余数量
 				updateLastBatchQuantity(uniMap,batchNo,last_index_quantity);
 			}
@@ -165,7 +165,7 @@ public class DeliverInfoService extends BaseAction{
 				updateGoodsBatchInfo(uniMap,batchNo,newBatchNo);
 			}
 			//更新该条送货记录所对应的进货的总价，也就是更新货品批次表。
-			updateDeliverInfo4TotalStockPrice(uniMap,stock_total_price);
+			updateDeliverInfo4TotaldeliverPrice(uniMap,deliver_total_price);
 		}catch(Exception e){
 			throw new Exception("送货时查询所送货品批次表出现异常"+e.getMessage());
 		}
@@ -176,11 +176,11 @@ public class DeliverInfoService extends BaseAction{
 		return true;
 	}
 	
-	private boolean updateDeliverInfo4TotalStockPrice(Map<String,Object> uniMap,float stock_total_price) throws Exception{
+	private boolean updateDeliverInfo4TotaldeliverPrice(Map<String,Object> uniMap,float deliver_total_price) throws Exception{
 		String sql="update deliver_info di set "
 				+" di.reserve1=? where di.brand=? and di.sub_brand=? "
 				+" and di.standard=? and di.order_num=?";
-		Object[] params_temp={stock_total_price,uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),uniMap.get("order_num")};
+		Object[] params_temp={deliver_total_price,uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard"),uniMap.get("order_num")};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
 			int rows=executeUpdate(sql,params);
@@ -640,6 +640,147 @@ public class DeliverInfoService extends BaseAction{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new Exception("查询货品信息失败！");
+		}
+		return ro;
+	}
+	/**
+	 * 默认的送货记录查询：查询当天
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public ReturnObject queryDeliverInfoByDefaultDelivertime(Map<String,Object> map) throws Exception{
+		List list=null;
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<DeliverInfoAllDTO> deliverInfoList = new ArrayList<DeliverInfoAllDTO>();
+	
+		String deliver_time_temp=(String) map.get("deliver_time");
+		String deliver_time=deliver_time_temp.substring(0, 8);
+		String start_time=deliver_time+"000000";
+		String end_time=deliver_time+"235959";
+		
+		String sql="select dci.id commonId,dci.customer_area,dci.customer_name,dci.deliver_addr,dci.total_price,"
+		+"dci.real_price,dci.deliver_time,dci.is_print,dci.telephone,dci.reserve1 commonReserve1,dci.reserve2 commonReserve2,dci.reserve3 commonReserve3,"
+		+"di.id uniId,di.order_num,di.brand,di.sub_brand,di.unit_price,di.unit,di.quantity,di.standard,"
+		+"di.reserve1 uniReserve1,di.reserve2 uniReserve2,di.reserve3 uniReserve3 from deliver_common_info dci,deliver_info di where dci.id=di.order_num";
+		//Object[] params=new Object[]{};
+		List<Object> params = new ArrayList<Object>();
+		int p_num=0;
+		if(Utils.isNotNull(deliver_time)){
+			sql=sql+" and dci.deliver_time>? and dci.deliver_time<?";
+			params.add(start_time);
+			params.add(end_time);
+		}
+		
+		
+		try {
+			list=executeQuery4Deliver(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
+            	deliverInfoDto.setUni_id(String.valueOf(retMap.get("uniId")));
+            	deliverInfoDto.setCommon_id((String)retMap.get("commonId"));
+				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
+				deliverInfoDto.setCustomer_name((String) retMap.get("customer_name"));
+				deliverInfoDto.setDeliver_addr((String) retMap.get("deliver_addr"));
+				deliverInfoDto.setOrder_num((String) retMap.get("order_num"));
+				deliverInfoDto.setTotal_price((Float)retMap.get("total_price"));
+				deliverInfoDto.setReal_price((Float)retMap.get("real_price"));
+				deliverInfoDto.setIs_print((String) retMap.get("is_print"));
+				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
+				deliverInfoDto.setBrand((String) retMap.get("brand"));
+				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
+				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
+				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
+				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
+				deliverInfoDto.setUni_reserve1((Float) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
+				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
+				deliverInfoDto.setStandard((String) retMap.get("standard"));
+				deliverInfoDto.setUnit((String) retMap.get("unit"));
+				deliverInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				deliverInfoList.add(deliverInfoDto);
+			}
+			page.setItems((List)deliverInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("查询送货信息失败！");
+		}
+		return ro;
+	}
+	
+	/**
+	 * 查询具体某一天的送货记录，时间界面输入，精确到天？还是支持月份？
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public ReturnObject queryDeliverInfoByInputDelivertime(Map<String,Object> map) throws Exception{
+		List list=null;
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<DeliverInfoAllDTO> deliverInfoList = new ArrayList<DeliverInfoAllDTO>();
+	
+		String deliver_time_temp=(String) map.get("deliver_time");
+		String deliver_time=deliver_time_temp.substring(0, 8);
+		String start_time=deliver_time+"000000";
+		String end_time=deliver_time+"235959";
+		
+		String sql="select dci.id commonId,dci.customer_area,dci.customer_name,dci.deliver_addr,dci.total_price,"
+		+"dci.real_price,dci.deliver_time,dci.is_print,dci.telephone,dci.reserve1 commonReserve1,dci.reserve2 commonReserve2,dci.reserve3 commonReserve3,"
+		+"di.id uniId,di.order_num,di.brand,di.sub_brand,di.unit_price,di.unit,di.quantity,di.standard,"
+		+"di.reserve1 uniReserve1,di.reserve2 uniReserve2,di.reserve3 uniReserve3 from deliver_common_info dci,deliver_info di where dci.id=di.order_num";
+		//Object[] params=new Object[]{};
+		List<Object> params = new ArrayList<Object>();
+		int p_num=0;
+		if(Utils.isNotNull(deliver_time)){
+			sql=sql+" and dci.deliver_time>? and dci.deliver_time<?";
+			params.add(start_time);
+			params.add(end_time);
+		}
+		
+		
+		try {
+			list=executeQuery4Deliver(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
+            	deliverInfoDto.setUni_id(String.valueOf(retMap.get("uniId")));
+            	deliverInfoDto.setCommon_id((String)retMap.get("commonId"));
+				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
+				deliverInfoDto.setCustomer_name((String) retMap.get("customer_name"));
+				deliverInfoDto.setDeliver_addr((String) retMap.get("deliver_addr"));
+				deliverInfoDto.setOrder_num((String) retMap.get("order_num"));
+				deliverInfoDto.setTotal_price((Float)retMap.get("total_price"));
+				deliverInfoDto.setReal_price((Float)retMap.get("real_price"));
+				deliverInfoDto.setIs_print((String) retMap.get("is_print"));
+				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
+				deliverInfoDto.setBrand((String) retMap.get("brand"));
+				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
+				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
+				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
+				deliverInfoDto.setCommon_reserve3((String) retMap.get("commonReserve3"));
+				deliverInfoDto.setUni_reserve1((Float) retMap.get("uniReserve1"));
+				deliverInfoDto.setUni_reserve2((String) retMap.get("uniReserve2"));
+				deliverInfoDto.setUni_reserve3((String) retMap.get("uniReserve3"));
+				deliverInfoDto.setStandard((String) retMap.get("standard"));
+				deliverInfoDto.setUnit((String) retMap.get("unit"));
+				deliverInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				deliverInfoList.add(deliverInfoDto);
+			}
+			page.setItems((List)deliverInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("查询送货信息失败！");
 		}
 		return ro;
 	}

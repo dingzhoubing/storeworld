@@ -14,7 +14,7 @@ public class statistic extends BaseAction{
 	
 	public ReturnObject deliverQuantityAnalysis(Map<String,Object> params) throws Exception{
 		int flag=0;
-		String type=(String)params.get("type");//分为quantity和profit
+		String type=(String)params.get("type");
 		ReturnObject ro=new ReturnObject();
 		String brand=(String) params.get("brand");
 		String sub_brand=(String) params.get("sub_brand");
@@ -45,67 +45,31 @@ public class statistic extends BaseAction{
 		try{
 			switch(flag){
 				case 1:
-					if("quantity".equals(type)){
-						ro=func1(brand,sub_brand,start_time,end_time);
-					}else{
-						ro=funcPro1(brand,sub_brand,start_time,end_time);
-					}
+					ro=func1(brand,sub_brand,start_time,end_time);
 					break;
 				case 2:
-					if("quantity".equals(type)){
-						ro=func2(brand,sub_brand,customer_area,start_time,end_time);
-					}else{
-						ro=funcPro2(brand,sub_brand,customer_area,start_time,end_time);
-					}
+					ro=func2(brand,sub_brand,customer_area,start_time,end_time);
 					break;
 				case 3:
-					if("quantity".equals(type)){
-						ro=func3(brand,sub_brand,customer_area,customer_name,start_time,end_time);
-					}else{
-						ro=funcPro3(brand,sub_brand,customer_area,customer_name,start_time,end_time);
-					}
+					ro=func3(brand,sub_brand,customer_area,customer_name,start_time,end_time);
 					break;
 				case 4:
-					if("quantity".equals(type)){
-						ro=func4(start_time,end_time);
-					}else{
-						ro=funcPro4(start_time,end_time);
-					}
+					ro=func4(start_time,end_time);
 					break;
 				case 5:
-					if("quantity".equals(type)){
-						ro=func5(customer_area,start_time,end_time);
-					}else{
-						ro=funcPro5(customer_area,start_time,end_time);
-					}
+					ro=func5(customer_area,start_time,end_time);
 					break;
 				case 6:
-					if("quantity".equals(type)){
-						ro=func6(customer_area,customer_name,start_time,end_time);
-					}else{
-						ro=funcPro6(customer_area,customer_name,start_time,end_time);
-					}
+					ro=func6(customer_area,customer_name,start_time,end_time);
 					break;
 				case 7:
-					if("quantity".equals(type)){
-						ro=func7(brand,start_time,end_time);
-					}else{
-						ro=funcPro7(brand,start_time,end_time);
-					}
+					ro=func7(brand,start_time,end_time);
 					break;
 				case 8:
-					if("quantity".equals(type)){
-						ro=func8(brand,customer_area,start_time,end_time);
-					}else{
-						ro=funcPro8(brand,customer_area,start_time,end_time);
-					}
+					ro=func8(brand,customer_area,start_time,end_time);
 					break;
 				case 9:
-					if("quantity".equals(type)){
-						ro=func9(brand,customer_area,customer_name,start_time,end_time);
-					}else{
-						ro=funcPro9(brand,customer_area,customer_name,start_time,end_time);
-					}
+					ro=func9(brand,customer_area,customer_name,start_time,end_time);
 					break;
 				default:
 					break;
@@ -419,6 +383,7 @@ public class statistic extends BaseAction{
 			return ro;
 	}
 	
+//<<<<<<< HEAD
 	//=====================================利润统计===========================================//
 	/**
 	 * description:片区与客户均为空，则只按片区的维度统计
@@ -737,6 +702,8 @@ public class statistic extends BaseAction{
 			return ro;
 	}
 	
+//=======
+//>>>>>>> refs/remotes/origin/master
 	public String calculateStartTimeByEndTime(String end_time, int flag){
 		String year=end_time.substring(0, 4);
 		String month=end_time.substring(4, 6);
@@ -840,8 +807,12 @@ public class statistic extends BaseAction{
 		return "00000000";
 	}
 	
+/*<<<<<<< HEAD
 	//private String queryStockPrice(String end_time){
 		//String sql="select unit_price from stock_info si where si.stock_time=(select max(b.stock_time) from stock_info b where b.brand=? and b.sub_brand=?)";
 	//}
+=======
+	
+>>>>>>> refs/remotes/origin/master*/
 
 }

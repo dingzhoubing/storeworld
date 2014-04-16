@@ -94,6 +94,7 @@ public class StockInfoService extends BaseAction{
 		return true;
 	}
 	
+//<<<<<<< HEAD
 	public boolean addBatch(Map<String,Object> map) throws Exception{
 		String sql_query="select count(*) batchNo from goods_batch_info where brand=? and sub_brand=? and standard=?";
 		String sql_insert="insert into goods_batch_info values(?,?,?,?,?,?,?,?,?)";
@@ -366,7 +367,8 @@ public class StockInfoService extends BaseAction{
 				StockInfoDTO stockInfoDto=new StockInfoDTO();
 				stockInfoDto.setId(String.valueOf(retMap.get("id")) );
 				stockInfoDto.setBrand((String) retMap.get("brand"));
-				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+//				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+				stockInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
 				stockInfoDto.setReserve1((String) retMap.get("reserve1"));
 				stockInfoDto.setReserve2((String) retMap.get("reserve2"));
 				stockInfoDto.setReserve3((String) retMap.get("reserve3"));
@@ -387,5 +389,134 @@ public class StockInfoService extends BaseAction{
 		}
 		return ro;
 	}
+	/**
+	 * description:默认查一个月的历史记录，从今天算
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public ReturnObject queryStockInfoByDefaultStocktime(Map<String,Object> map) throws Exception{
+		List list=null;
+		statistic tempService=new statistic();
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<StockInfoDTO> stockInfoList = new ArrayList<StockInfoDTO>();
+		
+		String stock_time_temp=(String) map.get("stock_time");
+		String stock_time=stock_time_temp.substring(0, 8);
+		String start_time=tempService.calculateStartTimeByEndTime(stock_time,1);
+		start_time=start_time+"000000";
+		stock_time=stock_time_temp;
+		
+
+		
+		String sql="select * from stock_info si where 1=1";
+		//Object[] params=new Object[]{};
+		List<Object> params = new ArrayList<Object>();
+		int p_num=0;
+		
+		if(Utils.isNotNull(stock_time)){
+			sql=sql+" and si.stock_time>? and si.stock_time<";
+			params.add(start_time);
+			params.add(stock_time);
+		}
+		
+		
+		try {
+			list=executeQuery(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				StockInfoDTO stockInfoDto=new StockInfoDTO();
+				stockInfoDto.setId(String.valueOf(retMap.get("id")) );
+				stockInfoDto.setBrand((String) retMap.get("brand"));
+//				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+				stockInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				stockInfoDto.setReserve1((String) retMap.get("reserve1"));
+				stockInfoDto.setReserve2((String) retMap.get("reserve2"));
+				stockInfoDto.setReserve3((String) retMap.get("reserve3"));
+				stockInfoDto.setStandard((String) retMap.get("standard"));
+				stockInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				stockInfoDto.setUnit((String) retMap.get("unit"));
+				stockInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				stockInfoDto.setStock_from((String) retMap.get("stock_from"));
+				stockInfoDto.setStock_time((String) retMap.get("stock_time"));
+				stockInfoList.add(stockInfoDto);
+			}
+			page.setItems((List)stockInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("查询进货信息的历史记录失败！");
+		}
+		return ro;
+	} 
+	
+	/**
+	 * 输入一个月份，供查询。日期格式要限制一下
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public ReturnObject queryStockInfoByInputStocktime(Map<String,Object> map) throws Exception{
+		List list=null;
+		statistic tempService=new statistic();
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<StockInfoDTO> stockInfoList = new ArrayList<StockInfoDTO>();
+		
+		String stock_time_temp=(String) map.get("stock_time");
+		String year=stock_time_temp.substring(0, 4);
+		String month=stock_time_temp.substring(4);
+		if(month.length()<2){
+			month="0"+month;
+		}
+		String stock_time=year+month;
+		String start_time=stock_time+"00000000";
+		String end_time=stock_time+"31"+"235959";
+		
+
+		
+		String sql="select * from stock_info si where 1=1";
+		//Object[] params=new Object[]{};
+		List<Object> params = new ArrayList<Object>();
+		int p_num=0;
+		
+		if(Utils.isNotNull(stock_time)){
+			sql=sql+" and si.stock_time>? and si.stock_time<";
+			params.add(start_time);
+			params.add(end_time);
+		}
+		
+		
+		try {
+			list=executeQuery(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				StockInfoDTO stockInfoDto=new StockInfoDTO();
+				stockInfoDto.setId(String.valueOf(retMap.get("id")) );
+				stockInfoDto.setBrand((String) retMap.get("brand"));
+//				stockInfoDto.setQuantity((String) retMap.get("quantity"));
+				stockInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				stockInfoDto.setReserve1((String) retMap.get("reserve1"));
+				stockInfoDto.setReserve2((String) retMap.get("reserve2"));
+				stockInfoDto.setReserve3((String) retMap.get("reserve3"));
+				stockInfoDto.setStandard((String) retMap.get("standard"));
+				stockInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				stockInfoDto.setUnit((String) retMap.get("unit"));
+				stockInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				stockInfoDto.setStock_from((String) retMap.get("stock_from"));
+				stockInfoDto.setStock_time((String) retMap.get("stock_time"));
+				stockInfoList.add(stockInfoDto);
+			}
+			page.setItems((List)stockInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("查询进货信息的历史记录失败！");
+		}
+		return ro;
+	} 
 
 }

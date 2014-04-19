@@ -36,6 +36,21 @@ public class Stock extends DataInTable{
 		this.price = price;
 		this.number = number;
 	}
+	public Stock(String ID, String brand,String sub_brand,String size,String unit, String price, String number, String time){
+		if(ID != null)		
+			this.id = ID;
+		this.brand = brand;
+		this.sub_brand = sub_brand;
+		this.size = size;
+		this.unit = unit;
+		this.price = price;
+		this.number = number;
+		this.time = time;
+	}
+	/**
+	 * all getters, setters
+	 * @return
+	 */
 	public String getID(){
 		return this.id;
 	}
@@ -93,7 +108,8 @@ public class Stock extends DataInTable{
 		sb.append(this.size+" ");
 		sb.append(this.unit+" ");
 		sb.append(this.price+" ");
-		sb.append(this.number);
+		sb.append(this.number+" ");
+		sb.append(this.time);
 		return sb.toString();
 	}
 	

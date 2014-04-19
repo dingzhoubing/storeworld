@@ -3,10 +3,6 @@ package com.storeworld.product;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
 
@@ -40,23 +36,11 @@ public class ProductContentProvider implements IStructuredContentProvider, IData
 		@Override
 		public void add(DataInTable product) {
 			tableviewer.add(product);
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("add product: "+product);   
-//			messageBox.open(); 
-//			System.out.println(product);
 			
 		}
 		@Override
 		public void remove(DataInTable product) {
 			tableviewer.remove(product);
-			//no use later
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("remove product: "+product);   
-//			messageBox.open(); 
 			
 		}
 		@Override

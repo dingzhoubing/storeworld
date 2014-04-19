@@ -9,10 +9,10 @@ import org.eclipse.jface.viewers.ViewerSorter;
  *
  */
 public class CustomerSorter extends ViewerSorter {
-		private static final int NAME = 1;
-		private static final int AREA = 2;
-		private static final int PHONE = 3;
-		private static final int ADDRESS = 4;
+		private static final int NAME = 2;
+		private static final int AREA = 3;
+		private static final int PHONE = 4;
+		private static final int ADDRESS = 5;
 
 		
 		public static final CustomerSorter NAME_ASC = new CustomerSorter(NAME);
@@ -28,7 +28,13 @@ public class CustomerSorter extends ViewerSorter {
 		private CustomerSorter(int sortType){
 			this.sortType = sortType;
 		}
-		//is null, then the largest, cus of the new row
+		
+		/**
+		 * is null, then the largest customer of the new row
+		 * @param viewer
+		 * @param e1
+		 * @param e2
+		 */
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			Customer p1 = (Customer)e1;
 			Customer p2 = (Customer)e2;

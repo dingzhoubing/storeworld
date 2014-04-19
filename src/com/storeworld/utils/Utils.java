@@ -4,10 +4,10 @@ import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -18,8 +18,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.storeworld.customer.CustomerContentPart;
-import com.storeworld.stock.StockUtils;
+import com.storeworld.pojo.dto.GoodsInfoDTO;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pub.service.GoodsInfoService;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.LOGIN_TYPE;
@@ -37,6 +39,7 @@ public class Utils {
 	private static boolean inputNeedChange = false;
 	private static boolean clickButton = false;
 	private static boolean useSoftKeyBoard = true;
+	private static GoodsInfoService goodsinfo = new GoodsInfoService();
 //	private static int waitForListener = 0;
 	
 	//gray image
@@ -52,11 +55,7 @@ public class Utils {
 	private static FUNCTION func = FUNCTION.NONE;
 	private static FUNCTION func_last = FUNCTION.NONE;
 	//map the function with the button ,to get the current disable button
-	private static HashMap<FUNCTION, Button> func_button = new HashMap<FUNCTION, Button>();
-	
-	//get the brands and sub_brands for ccomboBox
-	private static List<String> brands = new ArrayList<String>();
-	private static List<String> sub_brands = new ArrayList<String>();
+	private static HashMap<FUNCTION, Button> func_button = new HashMap<FUNCTION, Button>();	
 	
 	private static String comboValue = "";
 		
@@ -84,49 +83,74 @@ public class Utils {
 	//get the brands
 	public static List<String> getBrands(){
 		//get from database
-//		brands = new String[]{"五得利","五联","金龙"};
-		brands = new ArrayList<String>();
-//		brands.add("五得利");
-//		brands.add("五联");
-//		brands.add("金龙");
-//		brands.clear();
-		brands.addAll(StockUtils.getBrand2Sub().keySet());
+		List<String> brands = new ArrayList<String>();
+		//get the data from cache
+		brands.addAll(DataCachePool.getBrand2Sub().keySet());
 		return brands;
 	}
 	//to check if it's a new brand
 	public static boolean checkBrand(String brand){	
-		brands = getBrands();//??is this needed
-		for(int i=0;i<brands.size();i++){
-			if(brands.get(i).equals(brand)){
+		Set<String> brands = DataCachePool.getBrand2Sub().keySet();		
+		for(String bd: brands){
+			if(bd.equals(brand)){
 				return true;
 			}
 		}
-		return false;
+		return false;		
 	}
-	//return an empty sub brands list
-	public static List<String> getSub_Brands(){
-		return sub_brands = new ArrayList<String>();
+	//to check if it's new sub
+	public static boolean checkSubBrand(String subbrand){	
+		Set<String> brands = DataCachePool.getBrand2Sub().keySet();		
+		for(String bd: brands){
+			for(String sub: DataCachePool.getBrand2Sub().get(bd)){
+				if(sub.equals(subbrand)){
+					return true;
+				}	
+			}			
+		}
+		return false;		
 	}
 	
-	//get the sub brands
+	//return an empty sub brands list
+	public static List<String> getSub_Brands(){
+		return new ArrayList<String>();
+	}
+	//return an empty size list
+	public static List<String> getSizes(){
+		return new ArrayList<String>();
+	}	
+	
+	//get the sub brands by brand from cache
 	public static List<String> getSub_Brands(String brand){
 		//always need to new, if not, cause wrong
-		sub_brands  = new ArrayList<String>();
-//		if(brand.equals("五得利")){
-//			sub_brands.add("特精");
-//			sub_brands.add("包子粉");
-//			sub_brands.add("精一");
-//			sub_brands.add("普粉");
-//		}
-//		else{
-//			sub_brands.add("精粉");
-//			sub_brands.add("馒头粉");
-//			sub_brands.add("精二");
-//			sub_brands.add("普粉");	
-//		}
-//		sub_brands.clear();
-		sub_brands.addAll(StockUtils.getBrand2Sub().get(brand));
+		List<String> sub_brands  = new ArrayList<String>();
+		if(DataCachePool.getBrand2Sub().get(brand)!=null)
+			sub_brands.addAll(DataCachePool.getBrand2Sub().get(brand));
+		
 		return sub_brands;
+	}
+	
+	//get the sizes by brand & sub from cache
+	public static List<String> getSizes(String brand, String sub){
+		//always need to new, if not, cause wrong
+		List<String> sizes  = new ArrayList<String>();
+		//now there is no cache, just get it from database
+		Map<String, Object> prod = new HashMap<String, Object>();
+		prod.put("brand", brand);
+		prod.put("sub_brand", sub);
+		ReturnObject ret;
+		try {
+			ret = goodsinfo.queryGoodsInfo(prod);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			for(int i=0;i<list.size();i++){
+				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
+				sizes.add(cDTO.getStandard());
+			}			
+		} catch (Exception e) {
+			System.out.println("query the sizes with brand&sub failed");
+		}
+		return sizes;		
 	}
 	
 	
@@ -136,7 +160,8 @@ public class Utils {
 	 * @return
 	 */
 	public static boolean getUseSoftKeyBoard(){
-		return useSoftKeyBoard;
+//		return useSoftKeyBoard;
+		return false;
 	}
 	public static void settUseSoftKeyBoard(boolean use){
 		useSoftKeyBoard = use;

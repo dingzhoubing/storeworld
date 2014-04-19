@@ -1,7 +1,5 @@
 package com.storeworld.customer;
 
-import java.util.ArrayList;
-
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
@@ -15,7 +13,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -23,8 +20,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -44,13 +39,15 @@ import com.storeworld.utils.Utils;
 public class CustomerContentPart extends ContentPart{
 	
 	private static Table table;
+	private static TableViewer tv;
 	//the product list
 	private static CustomerList customerlist = new CustomerList();
 	//the row height of the table
 	final int rowHeight = 30;
 	//define the cell Editor of each column
-	private static CellEditor[] cellEditor = new CellEditor[6];
+	private static CellEditor[] cellEditor = new CellEditor[7];
 	private static TableEditor editor = null;
+	private static TableEditor editorDel = null;
 	private static TableEditor editorEdit = null;//software number keyboard	
 	
 	private Composite current = null;
@@ -61,8 +58,14 @@ public class CustomerContentPart extends ContentPart{
 	//the shift width of the table, determine the location of the soft keyboard
 	private int composite_shift = 0;
 	
-	private int phoneColumn = 3;
+	//since there is a column: deliver button, the tooltip need to shift
+	private int column_shift = 0;
 	
+	private int phoneColumn = 4;
+	private int deliverButtonColumn = 1;
+	private int deleteButtonColumn = 6;
+	
+	private static Listener listener = null;
 	
 
 	
@@ -84,7 +87,18 @@ public class CustomerContentPart extends ContentPart{
 	public static CellEditor[] getCellEditor(){
 		return cellEditor;
 	}
-	
+	public static TableEditor getEditor(){
+		return editor;
+	}
+	public static TableEditor getEditorDel(){
+		return editorDel;
+	}
+	public static TableViewer getTableViewer(){
+		return tv;
+	}
+	public static void removeMouseDownListener(){
+		table.removeListener(SWT.MouseDown, listener);
+	}
 	/**
 	 * call the software keyboard
 	 */
@@ -92,19 +106,26 @@ public class CustomerContentPart extends ContentPart{
 		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, 0);
 		skb.open();
 	}
+	
+	
+	
 	/**
 	 * add all kinds of listener of the table
 	 * @param event
 	 */
 	public void addListenerForTable(){
 		
-		//click to show the soft keyboard
+//		click to show the soft keyboard
+//		table.addListener(SWT.MouseDown, listener);
 		table.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
-				//if use the soft keyboard
-				if(Utils.getUseSoftKeyBoard()){
+				//no matter use the software keyboard or not, we need to catch the mouse point
+//				long t1 = System.currentTimeMillis();
+//				long t2=0;
+//				long t3=0;
+//				long t4=0;
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
@@ -114,7 +135,7 @@ public class CustomerContentPart extends ContentPart{
 				boolean found = false;
 				for (; index < rowCount; index++) {
 					TableItem item = table.getItem(index);
-					for(int col=0; col<colCount-1; col++){
+					for(int col=0; col<colCount; col++){
 						Rectangle rect = item.getBounds(col);
 						if(rect.contains(pt)){	
 							rowCurrent = index;
@@ -126,35 +147,75 @@ public class CustomerContentPart extends ContentPart{
 					if(found){
 						break;
 					}
-				}						
-				if(found){
-					if(colCurrent == phoneColumn){
-					//cannot reuse the editor, make cause unstable
-					editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-					Text text = (Text)(editorEdit.getEditor());	
-					callKeyBoard(text);
-					Customer c = (Customer)(table.getItem(rowCurrent).getData());					
-					String phonelast = c.getPhone();
-					////
-					if(Utils.getClickButton() && Utils.getInputNeedChange()){
-						c.setPhone(Utils.getInput());
-						text.setText(c.getPhone());//validate the text
-						if(CustomerValidator.validatePhone(c.getPhone()))//table, table.getItem(rowCurrent), colCurrent, 
-						{
-							customerlist.customerChanged(c);	
-							text.setText(c.getPhone());
-						}else{
-							c.setPhone(phonelast);
+				}
+//				t2 = System.currentTimeMillis();
+//				System.out.println("1 cost time: "+(t2-t1)/1000);
+				//if use the soft keyboard
+				if(Utils.getUseSoftKeyBoard()){											
+					if(found){
+						if(colCurrent == phoneColumn){
+							//cannot reuse the editor, make cause unstable
+							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+							Text text = (Text)(editorEdit.getEditor());	
+							callKeyBoard(text);
+							Customer c = (Customer)(table.getItem(rowCurrent).getData());					
+							String phonelast = c.getPhone();
+							////
+							if(Utils.getClickButton() && Utils.getInputNeedChange()){
+								c.setPhone(Utils.getInput());
+								text.setText(c.getPhone());//validate the text
+								if(CustomerValidator.validatePhone(c.getPhone())){
+									customerlist.customerChanged(c);	
+									text.setText(c.getPhone());
+								}else{
+									c.setPhone(phonelast);
+								}
+								//initial the next click
+								Utils.setClickButton(false);
+							}
+						}else if(colCurrent == deliverButtonColumn){
+							if(rowCurrent == table.getItemCount()-1){
+								editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(rowCurrent), deliverButtonColumn);
+								if(!editor.getEditor().isDisposed()){
+									editor.getEditor().setVisible(false);
+								}
+							}
+						}else if(colCurrent == deleteButtonColumn){
+							if(rowCurrent == table.getItemCount()-1){
+								editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+								if(!editorDel.getEditor().isDisposed()){
+									editorDel.getEditor().setVisible(false);
+								}
+							}
 						}
-						//initial the next click
-						Utils.setClickButton(false);
-					}
+				}
+//				t3 = System.currentTimeMillis();
+//				System.out.println("2 cost time: "+(t3-t2)/1000);
+			}else{//do not use the software keyboard
+
+				if(found){
+					//if the deliver Button column, we disable the click
+					if(colCurrent == deliverButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(rowCurrent), deliverButtonColumn);
+							if(!editor.getEditor().isDisposed()){
+								editor.getEditor().setVisible(false);
+							}
+						}
+					}else if(colCurrent == deleteButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editorDel.getEditor().isDisposed()){
+								editorDel.getEditor().setVisible(false);
+							}
+						}
 					}
 				}
+//				t4 = System.currentTimeMillis();
+//				System.out.println("3 cost time: "+(t4-t2)/1000);
 			}
-			}
-			
-		});
+		}			
+	});
 		
 		
 		//hover to show the delete button
@@ -173,15 +234,38 @@ public class CustomerContentPart extends ContentPart{
 						break;
 					}
 				}								
-				if(row >= 0){			
-					editor.setEditor(cellEditor[5].getControl(), table.getItem(row), 5);
-					if(!editor.getEditor().isDisposed())
+				if(row >= 0){
+//					if(editor.getEditor()!=null){
+//						if(!editor.getEditor().isDisposed()){
+//							editor.getEditor().setVisible(false);
+//						}
+//					}
+					editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(row), deliverButtonColumn);
+					if(!editor.getEditor().isDisposed()){
 						editor.getEditor().setVisible(true);
-				}else{
-					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
-						editor.setEditor(cellEditor[5].getControl(), table.getItem(visibleButton_last), 5);
-						if(!editor.getEditor().isDisposed())
+					}
+					
+//					if(editorDel.getEditor()!=null){
+//						if(!editorDel.getEditor().isDisposed()){
+//							editorDel.getEditor().setVisible(false);
+//						}
+//					}
+					editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
+					if(!editorDel.getEditor().isDisposed()){
+						editorDel.getEditor().setVisible(true);
+					}
+					
+				}
+				else{
+					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()-1){
+						editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(visibleButton_last), deliverButtonColumn);
+						if(!editor.getEditor().isDisposed()){
 							editor.getEditor().setVisible(false);//false
+						}
+						editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
+						if(!editorDel.getEditor().isDisposed()){
+							editorDel.getEditor().setVisible(false);
+						}
 					}
 				}
 			}
@@ -193,23 +277,6 @@ public class CustomerContentPart extends ContentPart{
 		    }
 		});
 		
-//		//control the verify
-//		Text text = (Text)cellEditor[3].getControl();
-//		text.addVerifyListener(new VerifyListener(){
-//			public void verifyText(VerifyEvent e){
-//				String inStr = e.text;
-//				if (inStr.length() > 0){
-//					try{
-//						if(!inStr.equals(""))
-//							e.doit = true;
-//						else
-//							e.doit=false;
-//					}catch(Exception ep){
-//						e.doit = false;
-//					}
-//				}
-//			}
-//		});
 	}	
 	
 	
@@ -226,7 +293,7 @@ public class CustomerContentPart extends ContentPart{
 		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
 		composite_shift = (int)(w/5);
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
-		
+		tv=tableViewer;
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 255,240,245);
@@ -237,9 +304,23 @@ public class CustomerContentPart extends ContentPart{
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
 		btnNewButton.setBounds((int)(w/5/20), (int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
 		btnNewButton.setText("搜");
+	
 		//search text
-		Text text = new Text(composite_left, SWT.BORDER);
+		final Text text = new Text(composite_left, SWT.BORDER);
 		text.setBounds((int)(w/5/20)+(int)(2*3*w/5/10/3), (int)(w/5/10/2), (int)(5*w/5/10), (int)(2*w/5/10/2));		
+		//click search button
+		btnNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//set key word
+				CustomerFilter.setKeyword(text.getText());
+				//set clicked
+				CustomerUtils.setSearchButtonClicked(true);
+				//add filter
+				CustomerUtils.showSearchedCustomers();
+			}
+		});	
+		
 		//area label		
 		Label lblNewLabel = new Label(composite_left, SWT.NONE);
 		lblNewLabel.setBounds((int)(w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
@@ -255,11 +336,7 @@ public class CustomerContentPart extends ContentPart{
 		link_1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MessageBox messageBox =   
-						new MessageBox(new Shell(),   					     
-							   SWT.ICON_WARNING);   
-						messageBox.setMessage("显示所有客户"); 
-						messageBox.open(); 
+					CustomerUtils.showAllCustomers();
 				}
 		});		
 		
@@ -302,12 +379,8 @@ public class CustomerContentPart extends ContentPart{
 		link.setBackground(base);   
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				MessageBox messageBox =   
-						   new MessageBox(new Shell(),   					     
-						    SWT.ICON_WARNING);   
-				messageBox.setMessage("显示所有客户"); 
-				messageBox.open(); 				
+			public void widgetSelected(SelectionEvent e) {	
+				CustomerUtils.showAllCustomers();
 			}
 		});
 		
@@ -347,11 +420,20 @@ public class CustomerContentPart extends ContentPart{
 		table.setBounds(0, 0, (int)(4*w/5), h);
 		
 		//set the columns of the table
-		int columnWidth = (int)(4*9*w/40/5);		
+		int columnWidth = (int)(4*9*w/40/5- 4*w/40/5);		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
 		newColumnTableColumn_ID.setResizable(false);
+		
+		//the new column for delivering 
+		final TableColumn newColumnTableColumn_Deliver = new TableColumn(table, SWT.NONE);
+		newColumnTableColumn_Deliver.setWidth((int)(4*4*w/40/5));
+//		buttonWidth = (int)(columnWidth*5/9/2);
+		newColumnTableColumn_Deliver.setText("");
+		newColumnTableColumn_Deliver.setMoveable(false);
+		newColumnTableColumn_Deliver.setResizable(false);	
+		column_shift = (int)(4*4*w/40/5);
 		
 		final TableColumn newColumnTableColumn_1 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_1.setWidth(columnWidth);
@@ -413,7 +495,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_5.setWidth((int)(columnWidth*4/9)-3);//columnWidth*5/9)
+		newColumnTableColumn_5.setWidth((int)((int)(4*9*w/40/5)*4/9)-3);//columnWidth*5/9)
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_5.setText("");
 		newColumnTableColumn_5.setMoveable(false);
@@ -430,23 +512,29 @@ public class CustomerContentPart extends ContentPart{
 		Customer cus_new = new Customer(CustomerUtils.getNewLineID());//dynamic from the database
 		
 		//always keep a new line in the last of the table 
-		CustomerValidator.setNewID(CustomerUtils.getNewLineID());
+//		CustomerValidator.setNewID(CustomerUtils.getNewLineID());
 		customerlist.addCustomer(cus_new);
 		tableViewer.setInput(customerlist);		
-		tableViewer.setColumnProperties(new String[]{"id","name","area","phone","address","operation"});		
-		cellEditor = new CellEditor[6];
+		tableViewer.setColumnProperties(new String[]{"id","deliver","name","area","phone","address","operation"});		
+		cellEditor = new CellEditor[7];
 		cellEditor[0] = null;//ID
-		cellEditor[1] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 1);		
-		cellEditor[2] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 2);
-		cellEditor[3] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 3);
-		cellEditor[4] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 4);
-		cellEditor[5] = new CustomerButtonCellEditor(tableViewer.getTable(), customerlist, rowHeight);//ButtonCellEditor
+		cellEditor[1] = new CustomerDeliverButtonCellEditor(tableViewer.getTable(), customerlist, rowHeight);
+		cellEditor[2] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 2, column_shift);		
+		cellEditor[3] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 3, column_shift);
+		cellEditor[4] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 4, column_shift);
+		cellEditor[5] = new CustomerTextCellEditor(tableViewer.getTable(), columnWidth, 5, column_shift);
+		cellEditor[6] = new CustomerButtonCellEditor(tableViewer.getTable(), customerlist, rowHeight);//ButtonCellEditor
 		tableViewer.setCellEditors(cellEditor);
 		
 		//initial the editor for hover and set the cell modifier
 		editor = new TableEditor(table);
 	    editor.horizontalAlignment = SWT.CENTER;
-	    editor.grabHorizontal = true;		
+	    editor.grabHorizontal = true;	
+	    
+		editorDel = new TableEditor(table);
+	    editorDel.horizontalAlignment = SWT.CENTER;
+	    editorDel.grabHorizontal = true;
+	    
 		editorEdit = new TableEditor(table);
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	

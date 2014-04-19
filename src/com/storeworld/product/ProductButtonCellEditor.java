@@ -25,10 +25,7 @@ public class ProductButtonCellEditor extends CellEditor {
     protected Table table;
     protected ProductList productlist;
     protected int rowHeight = 0;
-    
-//    private static final int defaultStyle = SWT.SINGLE;
 
-    
     public ProductButtonCellEditor() {
         setStyle(0);
     }
@@ -69,9 +66,6 @@ public class ProductButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Product p = (Product)(table.getItem(index).getData());		
-//						System.out.println(p.toString());
-//						System.out.println("row y: "+ptY);
-//						System.out.println("row: "+(index));
 						productlist.removeProduct(p);
 						button.setVisible(false);
 						Utils.refreshTable(table);											

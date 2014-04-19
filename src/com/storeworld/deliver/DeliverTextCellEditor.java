@@ -1,4 +1,4 @@
-package com.storeworld.stock;
+package com.storeworld.deliver;
 
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
@@ -9,7 +9,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolTip;
 
-public class StockTextCellEditor extends TextCellEditor {
+public class DeliverTextCellEditor extends TextCellEditor {
 	protected ToolTip tip;
 	private static final int ADJUST_X = 30;
 	private static final int ADJUST_Y = 20;
@@ -28,7 +28,7 @@ public class StockTextCellEditor extends TextCellEditor {
 	private static final String PRICE_MESSAGE="单价应该为整数或小数";
 	private static final String NUMBER_MESSAGE="数量应该为正数";
 	
-	public StockTextCellEditor(Composite parent, int width, int col) {
+	public DeliverTextCellEditor(Composite parent, int width, int col) {
         super(parent, 0);
         this.width = width;
         this.col = col;
@@ -37,7 +37,7 @@ public class StockTextCellEditor extends TextCellEditor {
             public void focusLost(FocusEvent e) {
             	if(tip!=null && !tip.isDisposed())
             		tip.setVisible(false);
-            	StockTextCellEditor.this.focusLost();
+            	DeliverTextCellEditor.this.focusLost();
             }
         });
     }
@@ -53,7 +53,7 @@ public class StockTextCellEditor extends TextCellEditor {
 		String val = (String)text.getText();
 		boolean valid = false;
 		if(this.col == SIZE_COLUMN){
-			valid = StockValidator.validateSize(val);
+			valid = DeliverValidator.validateSize(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
             tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
@@ -61,7 +61,7 @@ public class StockTextCellEditor extends TextCellEditor {
         	tip.setVisible(true);
 			}
 		}else if(this.col == UNIT_COLUMN){
-			valid = StockValidator.validateUnit(val);
+			valid = DeliverValidator.validateUnit(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
             tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
@@ -69,7 +69,7 @@ public class StockTextCellEditor extends TextCellEditor {
         	tip.setVisible(true);
 			}
 		}else if(this.col == PRICE_COLUMN){
-			valid = StockValidator.validatePrice(val);
+			valid = DeliverValidator.validatePrice(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
             tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
@@ -78,7 +78,7 @@ public class StockTextCellEditor extends TextCellEditor {
         	}
 		}
 		else if(this.col == NUMBER_COLUMN){
-			valid = StockValidator.validateNumber(val);
+			valid = DeliverValidator.validateNumber(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
             tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//

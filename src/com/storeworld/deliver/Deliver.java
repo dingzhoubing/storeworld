@@ -16,6 +16,7 @@ public class Deliver extends DataInTable{
 	private String price="";
 	private String number="";
 	private String time = "";
+	private String orderNumber = "";
 	
 	public Deliver(){
 		
@@ -38,6 +39,18 @@ public class Deliver extends DataInTable{
 		this.price = price;
 		this.number = number;
 	}
+	public Deliver(String ID, String brand,String sub_brand,String size,String unit, String price, String number, String time, String ordernumber){
+		if(ID != null)		
+			this.id = ID;
+		this.brand = brand;
+		this.sub_brand = sub_brand;
+		this.size = size;
+		this.unit = unit;
+		this.price = price;
+		this.number = number;
+		this.time = time;
+		this.orderNumber = ordernumber;
+	}
 	public String getID(){
 		return this.id;
 	}
@@ -45,11 +58,26 @@ public class Deliver extends DataInTable{
 		this.id = ID;
 	}
 	
+	/**
+	 * getter, setter of time
+	 * @return
+	 */
 	public String getTime(){
 		return time;
 	}
 	public void setTime(String time){
 		this.time = time;
+	}
+	
+	/**
+	 * getter, setter of ordernumber
+	 * @return
+	 */
+	public String getOrderNumber(){
+		return orderNumber;
+	}
+	public void setOrderNumber(String ordernumber){
+		this.orderNumber = ordernumber;
 	}
 	
 	public String getBrand() {
@@ -97,7 +125,9 @@ public class Deliver extends DataInTable{
 		sb.append(this.size+" ");
 		sb.append(this.unit+" ");
 		sb.append(this.price+" ");
-		sb.append(this.number);
+		sb.append(this.number+" ");
+		sb.append(this.orderNumber+" ");
+		sb.append(this.time);
 		return sb.toString();
 	}
 	

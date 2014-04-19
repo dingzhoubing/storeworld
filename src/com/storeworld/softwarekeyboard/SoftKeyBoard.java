@@ -13,9 +13,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.storeworld.customer.CustomerList;
+import com.storeworld.customer.CustomerUtils;
+import com.storeworld.deliver.DeliverUtils;
+import com.storeworld.product.ProductUtils;
 import com.storeworld.softwarekeyboard.SoftKeyBoard.KeyBoardAdapter;
+import com.storeworld.stock.StockUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Utils;
+import com.storeworld.utils.Constants.FUNCTION;
 
 /**
  * the popup software keyboard
@@ -45,6 +51,7 @@ public class SoftKeyBoard extends Dialog {
 	//composite_updown means: the right part itself has a up/down shift, like the stock page
 	private int composite_updown = 0;
 	private Text text_1;
+	private Button btnCheckButton;
 	
 	public static void setNumber(Text text, String number) {
 		String cur_str = text.getText();
@@ -161,6 +168,32 @@ public class SoftKeyBoard extends Dialog {
 					Utils.setInputNeedChange(false);
 				}
 				Utils.setClickButton(true);
+				if(btnCheckButton.getSelection()){
+					Utils.settUseSoftKeyBoard(false);
+					//do this to make the text cell editor works better
+					switch(Utils.getFunction()){
+					case STOCK:
+						StockUtils.refreshTableData();
+						break;
+					case DELIVER:
+						DeliverUtils.refreshTableData();
+						break;
+					case ANALYZE:
+						//do nothing now
+						break;
+					case PRODUCT:
+						ProductUtils.refreshTableData();
+						break;
+					case CUSTOMER:
+						CustomerUtils.refreshTableData();
+						break;
+					default:
+						break;
+					}
+					
+				}
+				else
+					Utils.settUseSoftKeyBoard(true);
 				shell.dispose();
 			}
 		});
@@ -234,14 +267,17 @@ public class SoftKeyBoard extends Dialog {
 		text_1 = new Text(shell, SWT.BORDER);
 		text_1.setBounds(5, 140, 88, 27);
 		
-		final Button btnCheckButton = new Button(shell, SWT.CHECK);
+		btnCheckButton = new Button(shell, SWT.CHECK);
 		btnCheckButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(btnCheckButton.getSelection())
-					Utils.settUseSoftKeyBoard(false);
-				else
-					Utils.settUseSoftKeyBoard(true);
+//				if(btnCheckButton.getSelection()){
+//					Utils.settUseSoftKeyBoard(false);
+//					CustomerList.refreshTableData();
+////					CustomerUtils
+//				}
+//				else
+//					Utils.settUseSoftKeyBoard(true);
 			}
 		});
 		btnCheckButton.setBounds(5, 171, 98, 17);

@@ -2,6 +2,7 @@ package com.storeworld.customer;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -9,8 +10,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -26,6 +25,8 @@ public class CustomerButtonCellEditor extends CellEditor {
     protected Table table;
     protected CustomerList customerlist;
     protected int rowHeight = 0;
+    private static TableEditor editor = null;
+    private static final int deliverButtonColumn = 1;
     
     public CustomerButtonCellEditor() {
         setStyle(0);
@@ -37,6 +38,9 @@ public class CustomerButtonCellEditor extends CellEditor {
         this.table = (Table)parent;
         this.customerlist = customerlist;
         this.rowHeight = rowHeight;
+        editor = new TableEditor(table);
+	    editor.horizontalAlignment = SWT.CENTER;
+	    editor.grabHorizontal = true;	
     }
 
     public CustomerButtonCellEditor(Composite parent, int style) {
@@ -65,13 +69,13 @@ public class CustomerButtonCellEditor extends CellEditor {
 					TableItem item = table.getItem(index);
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
-//						Customer c = (Customer)(table.getItem(index).getData());		
-//						customerlist.removeCustomer(c);
-						MessageBox messageBox =   
-								   new MessageBox(new Shell(),   					     
-								    SWT.ICON_WARNING);   
-						messageBox.setMessage("跳转进货页面");   
-						messageBox.open(); 
+						Customer c = (Customer)(table.getItem(index).getData());	
+						CellEditor[] cellEditor = CustomerContentPart.getCellEditor();
+						editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(index), deliverButtonColumn);
+						if(!editor.getEditor().isDisposed()){
+							editor.getEditor().setVisible(false);//false
+						}
+						customerlist.removeCustomer(c);
 						button.setVisible(false);
 						Utils.refreshTable(table);											
 								 
@@ -81,7 +85,7 @@ public class CustomerButtonCellEditor extends CellEditor {
 			}
 		});
         button.setFont(parent.getFont());
-        button.setText("送貨");
+        button.setText("删除");
         return button;
 	}
 

@@ -1,23 +1,25 @@
 package com.storeworld.customer;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
 
-import com.storeworld.common.DataInTable;
+import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
 
 /**
- * the utils class of customer page
+ * the Util class of customer page
  * @author dingyuanxiong
  *
  */
@@ -28,18 +30,45 @@ public class CustomerUtils {
 	//when initial the table, set the new line id
 	private static String newLineID = "";
 	private static CustomerFilter cf = new CustomerFilter();
+	private static boolean firstTime = true;
+	//record if clicked the search button
+	private static boolean searchButtonClicked = false;
+	//record the number of visible line of table
+//	private static int visibleLine = 0;
+//	private static int deliverButtonColumn = 1;
+//	private static int deleteButtonColumn = 6;
+//	/**
+//	 * initial the visible line before showing the filtered table
+//	 */
+//	public static void resetVisibleLine(){
+//		visibleLine = 0;
+//	} 
+//	
+//	/**
+//	 * visible line number +1
+//	 */
+//	public static void increaseVisibleLine(){
+//		visibleLine++;
+//	}
+//	
+//	/**
+//	 * get the visible line number
+//	 * @return
+//	 */
+//	public static int getVisibleLine(){
+//		return visibleLine;
+//	}
+	
 	
 	/**
-	 * 
-	 * @author dingyuanxiong
-	 *
+	 * inner class to add a listener for each checkbox of customer left navigator
 	 */
 	static class CheckBoxFilterAdapter extends SelectionAdapter{
 		
-		Button button;//which button 
-		String type; //area or firstname
+		Button button;    //which button 
+		String type;      //area or firstname
 		CustomerFilter cf;//filter type
-		TableViewer tv; //tableviewer
+		TableViewer tv;   //tableviewer
 		
 		CheckBoxFilterAdapter(Button b, String type, CustomerFilter cf, TableViewer tv){
 			this.button = b;
@@ -50,7 +79,7 @@ public class CustomerUtils {
 		
 		@Override
     	public void widgetSelected(SelectionEvent e) {
-
+//			resetVisibleLine();
     		if(button.getSelection()){					
 					if (type.equals(AREA)) {
 						CustomerFilter.setArea(button.getText(), AREA);
@@ -67,21 +96,46 @@ public class CustomerUtils {
     				CustomerFilter.removeFirstName(button.getText(), FIRSTNAME);
     			}
     			tv.addFilter(cf);
-//    			tv.removeFilter(cf);
+    		}
+    		//set invisible of the button do not in current table
+//    		CellEditor[] cellEditor = CustomerContentPart.getCellEditor();
+//    		int start = getVisibleLine()-1;
+//    		Table table = CustomerContentPart.getTable();
+    		TableEditor editor = CustomerContentPart.getEditor();
+    		TableEditor editorDel = CustomerContentPart.getEditorDel();
+//    		for(int i=start; i<table.getItemCount()-1;i++){
+//    			editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(i), deliverButtonColumn);
+//    			if(!editor.getEditor().isDisposed()){
+//    				editor.getEditor().setVisible(false);
+//    			}
+//    			editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(i), deleteButtonColumn);
+//    			if(!editorDel.getEditor().isDisposed()){
+//    				editorDel.getEditor().setVisible(false);
+//    			}
+//    		}
+    		if(editor!=null && editor.getEditor()!=null){
+    			if(!editor.getEditor().isDisposed()){
+    				editor.getEditor().setVisible(false);
+    			}
+    		}
+    		if(editorDel!=null && editorDel.getEditor()!=null){
+    			if(!editorDel.getEditor().isDisposed()){
+    				editorDel.getEditor().setVisible(false);
+    			}
     		}
     		Utils.refreshTable(tv.getTable());
     	}
 	}
 
 	
-	//check box list of area
+	//record the areas of customers info at first time initial the page
 	private static HashSet<String> areas = new HashSet<String>();
-	//check box list of firstname
+	//record the first names of customers info at first time initial the page
 	private static HashSet<String> firstnames = new HashSet<String>();
 	
-	//if the we change the table, we change the filter
+	//if the we change the table, we count the new areas list
 	private static HashSet<String> areas_current = new HashSet<String>();
-	//if the we change the table, we change the filter
+	//if the we change the table, we count the new first name list
 	private static HashSet<String> firstnames_current = new HashSet<String>();
 		
 	//check box list of area
@@ -89,73 +143,146 @@ public class CustomerUtils {
 	//check box list of firstname
 	private static HashSet<Button> firstnameButtons = new HashSet<Button>();
 	
-	//the class is Damn now, a mass....
+	//record the useful component in customer page
 	private static Composite composite_ar_record; 
 	private static int width_record;
-	private static ScrolledComposite composite_scrollarea_record; 
-	
+	private static ScrolledComposite composite_scrollarea_record; 	
 	private static Composite composite_fm_record; 	
-	private static ScrolledComposite composite_scrollfm_record; 
-	
+	private static ScrolledComposite composite_scrollfm_record; 	
 	private static TableViewer tv_record;
 	private static Color base_record;
-	private static boolean firstTime = true;
-	
+
+	public static void setSearchButtonClicked(boolean clicked){
+		searchButtonClicked = clicked;
+	}
+	public static boolean getSearchButtonClicked(){
+		return searchButtonClicked;
+	}	
 	/**
-	 * fill the areas_current, and call the showXX
+	 * refresh the left navigator of customer page
+	 * 1. reset the values in areas list and first name list
+	 * 2. refresh the left navigator panel
 	 */
 	public static void refreshAreas_FirstName(){
+		
 		areas_current.clear();
 		firstnames_current.clear();
-		for(DataInTable dt : CustomerList.getCustomerList()){
-			Customer cus = (Customer)dt;
-			//there is an empty row,
-			//TODO:if the user change the row to make the row illegal, prevent the action
-			if(!CustomerValidator.checkID(cus.getID())){
-				//initial the two set
-				areas_current.add(cus.getArea());
-				String fm = cus.getName().substring(0, 1);
-				firstnames_current.add(fm);
-			}
+		//1. we can parse the data from customer list
+//		for(DataInTable dt : CustomerList.getCustomers()){
+//			Customer cus = (Customer)dt;
+//			//there is an empty row,
+//			//TODO:if the user change the row to make the row illegal, prevent the action
+//			if(!CustomerValidator.checkID(cus.getID())){
+//				//initial the two set
+//				areas_current.add(cus.getArea());
+//				String fm = cus.getName().substring(0, 1);
+//				firstnames_current.add(fm);
+//			}
+//		}
+		//2. directly get it from the DataCachePool
+		//by this way, we do not need to judge if the row is empty, all data in cache is valid
+		areas_current.addAll(DataCachePool.getArea2Names().keySet());
+		for(String area: areas_current){
+			HashSet<String> names = DataCachePool.getArea2Names().get(area);
+			for(String name : names)
+				firstnames_current.add(name.substring(0, 1));
 		}
+		
 		showAreaCheckBoxes(composite_ar_record,width_record,composite_scrollarea_record,tv_record,base_record);
 		showFirstNameCheckBoxes(composite_fm_record,width_record,composite_scrollfm_record,tv_record,base_record);
+		
+	}	
+	
+	/**
+	 * if click the all link, show all the customers
+	 */
+	public static void showAllCustomers(){
+		for(Button btn : areaButtons){
+			btn.setSelection(false);
+			CustomerFilter.removeArea(btn.getText(), AREA);
+		}
+		for(Button btn : firstnameButtons){
+			btn.setSelection(false);
+			CustomerFilter.removeFirstName(btn.getText(), FIRSTNAME);
+		}
+		tv_record.addFilter(cf);
+		Utils.refreshTable(tv_record.getTable());
 	}
 	
 	/**
-	 * need a cache or not? determine this by processing time
+	 * show the result if user click the search button
+	 */
+	public static void showSearchedCustomers(){
+
+		for(Button btn : areaButtons){
+			btn.setSelection(false);
+		}
+		for(Button btn : firstnameButtons){
+			btn.setSelection(false);
+		}
+		tv_record.addFilter(cf);
+		Utils.refreshTable(tv_record.getTable());
+		//after show the searched result, make the seatch button clear 
+		setSearchButtonClicked(false);		
+		
+	}
+	
+	/**
+	 * if the user select do not use the soft keyboard, we need to do this
+	 * to make the text cell editor works better
+	 */
+	public static void refreshTableData(){
+		for(Button btn : areaButtons){
+			CustomerFilter.setArea(btn.getText(), AREA);
+			CustomerContentPart.getTableViewer().addFilter(cf);
+			CustomerFilter.removeArea(btn.getText(), AREA);
+			CustomerContentPart.getTableViewer().addFilter(cf);
+			Utils.refreshTable(CustomerContentPart.getTableViewer().getTable());
+			break;
+		}
+	}
+	
+	/**
+	 * get the areas from the cache
 	 */
 	private static void getAreasFromDataBase(){
-		//call the database to full fill the areas list
-//		areas.add("八里街");
-//		areas.add("安陆");
-		for(DataInTable dt : CustomerList.getCustomerList()){
-			Customer cus = (Customer)dt;
-			//there is an empty row
-			if(CustomerValidator.rowLegal(cus))
-				areas.add(cus.getArea());
-		}
+		//just get if from cache
+		//1. parse data from customer list		
+//		for(DataInTable dt : CustomerList.getCustomers()){
+//			Customer cus = (Customer)dt;
+//			//there is an empty row
+//			if(CustomerValidator.rowLegal(cus))
+//				areas.add(cus.getArea());
+//		}
+		//2. directly get it from cache
+		areas.addAll(DataCachePool.getArea2Names().keySet());
 	}
 	
 	//get the customers of a specified area
-	private static ArrayList<String> customersOfArea(String area){
-		ArrayList<String> customers = new ArrayList<String>();
-		return customers;
-	}
+//	private static ArrayList<String> customersOfArea(String area){
+//		ArrayList<String> customers = new ArrayList<String>();
+//		return customers;
+//	}
 	
+	/**
+	 * get all the first names from cache
+	 */
 	private static void getFirstNamesFromDataBase(){
-		//call the database to full fill the firstname list
-//		firstnames.add("老");
-//		firstnames.add("小");
-//		firstnames.add("胡");
-//		firstnames.add("李");
-		for(DataInTable dt : CustomerList.getCustomerList()){
-			Customer cus = (Customer)dt;
-			//the fist character, and remove the new line
-			if(CustomerValidator.rowLegal(cus)){
-				String fm = cus.getName().substring(0, 1);
-				firstnames.add(fm);
-			}
+		//just get it from cache
+		//1. parse the data from customer list
+//		for(DataInTable dt : CustomerList.getCustomers()){
+//			Customer cus = (Customer)dt;
+//			//the fist character, and remove the new line
+//			if(CustomerValidator.rowLegal(cus)){
+//				String fm = cus.getName().substring(0, 1);
+//				firstnames.add(fm);
+//			}
+//		}
+		//2. directly get it from cache
+		for(String area: DataCachePool.getArea2Names().keySet()){
+			HashSet<String> names = DataCachePool.getArea2Names().get(area);
+			for(String name : names)
+				firstnames.add(name.substring(0, 1));
 		}
 	}
 	
@@ -166,13 +293,13 @@ public class CustomerUtils {
 	 * @param composite_scrollarea
 	 */
 	public static void showAreaCheckBoxes(Composite composite_ar, int width, ScrolledComposite composite_scrollarea, TableViewer tv, Color base){
+		//if first time at initial stage, show the areas of "areas"
 		if(firstTime){
 			composite_ar_record = composite_ar;
 			width_record = width;
 			composite_scrollarea_record = composite_scrollarea;
 			tv_record = tv;
 			base_record = base;
-//			firstTime = false;
 			areas.clear();
 			getAreasFromDataBase();
 			for (String area : areas) {				
@@ -190,6 +317,7 @@ public class CustomerUtils {
 				composite_ar.layout();
 			}
 		}
+		//if not the first time, we need to check if the areas_current changed, not the same as areas
 		else{
 		for (String area : areas_current) {
 			//if not in areas, means new
@@ -211,6 +339,8 @@ public class CustomerUtils {
 				areas.add(area);
 			}			
 		}
+		//if in areas, but do not in areas_current, means we removed the area
+		//then remove the check box
 		HashSet<String> tmp_remove = new HashSet<String>();
 		Button btn_tmp = null;
 		for (String area : areas) {
@@ -235,19 +365,19 @@ public class CustomerUtils {
 				SWT.DEFAULT, SWT.DEFAULT));
 			composite_ar.layout();
 		}
-		}
-		
-		System.out.println("areas: "+areas);
+		}		
+//		System.out.println("areas: "+areas);
 	}
 	
 	/**
-	 * show the firstname check boxes
+	 * show the firstname check boxes,
+	 * the logic is quite the same as the area part
 	 * @param composite_ar
 	 * @param width (int)(4*w/5/10)
 	 * @param composite_scrollarea
 	 * @param base the parent color of the button
-	 */
-	public static void showFirstNameCheckBoxes(Composite composite_ar, int width, ScrolledComposite composite_scrollarea, TableViewer tv, Color base){
+	 */	
+	public static void showFirstNameCheckBoxes(Composite composite_ar, int width, ScrolledComposite composite_scrollarea, TableViewer tv, Color base){		
 		if(firstTime){
 			composite_fm_record = composite_ar;
 			composite_scrollfm_record = composite_scrollarea;
@@ -315,7 +445,7 @@ public class CustomerUtils {
 				composite_ar.layout();
 			}
 		}
-		System.out.println("firstnames: "+firstnames);
+//		System.out.println("firstnames: "+firstnames);
 	}
 	
 	/**
@@ -326,6 +456,10 @@ public class CustomerUtils {
 		newLineID = id;
 	}
 	
+	/**
+	 * get the new ID of the table
+	 * @return
+	 */
 	public static String getNewLineID(){
 		return newLineID;
 	}

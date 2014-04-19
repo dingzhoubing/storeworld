@@ -76,6 +76,9 @@ public class Customer extends DataInTable{
 		sb.append(this.address+" ");
 		return sb.toString();
 	}
+	/**
+	 * override this method to judge if two customers are the same one
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Customer){

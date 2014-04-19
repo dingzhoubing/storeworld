@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -12,8 +14,14 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import com.storeworld.common.DataInTable;
-import com.storeworld.utils.Constants;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pojo.dto.StockInfoDTO;
+import com.storeworld.product.ProductContentPart;
+import com.storeworld.product.ProductFilter;
+import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.utils.ItemComposite;
+import com.storeworld.utils.Utils;
 
 public class StockUtils {
 	
@@ -23,7 +31,11 @@ public class StockUtils {
 	//the time when click add a new stock
 	private static String time_record = "";
 	private static boolean firstTime = true;
+	private static StockFilter sf = new StockFilter();
 	
+	/**
+	 *  record the composite or property for refreshing the left navigator
+	 */
 	private static ScrolledComposite composite_scroll_record;
 	private static Composite composite_fn_record;
 	private static Color color_record;
@@ -33,25 +45,11 @@ public class StockUtils {
 	//item composite
 	private static ItemComposite ic_record;
 	
-	
-	private static HashMap<String, HashSet<String>> brand2sub = new HashMap<String, HashSet<String>>();
-	
-	public static void addBrand2Sub(String brand, String sub_brand){
-		//before adding into database, we check the validation
-		if(brand2sub.keySet().contains(brand)){
-			if(!brand2sub.get(brand).contains(sub_brand)){
-				brand2sub.get(brand).add(sub_brand);
-			}
-		}else{//do not contain this brand
-			HashSet<String> sub_tmp = new HashSet<String>();
-			sub_tmp.add(sub_brand);
-			brand2sub.put(brand, sub_tmp);
-		}
-	}
-	public static HashMap<String, HashSet<String>> getBrand2Sub(){
-		return brand2sub;
-	}
-	//once click the add new stock table, record the time
+	/**
+	 * 1. if add a new stock record, time_record = ""
+	 * 2. if change the table, set the time_record="yyyyMMddHHmmss"
+	 * @param time
+	 */
 	public static void setTime(String time){
 		if(time==null){
 			//return the data as 2014 03 05 16 36 24
@@ -72,6 +70,7 @@ public class StockUtils {
 	public static ItemComposite getItemCompositeRecord(){
 		return ic_record;
 	}
+	
 	/**
 	 * the item composite list
 	 */
@@ -82,18 +81,102 @@ public class StockUtils {
 	 */
 	private static ArrayList<StockHistory> historyList = new ArrayList<StockHistory>();
 	
+	
 	/**
-	 * the option to search the history
+	 * make multi-stocks into a history item
+	 * @param stocks
+	 */
+	public static void addToHistory(ArrayList<Stock> stocks){
+		String title = "";
+		double total = 0.000;
+		String time_tmp = "";
+		for(int i=0;i<stocks.size()-1;i++){
+			Stock st = stocks.get(i);
+			title+=(st.getBrand()+",");
+			time_tmp = st.getTime();
+			String price = st.getPrice();
+			String number = st.getNumber();
+			double p = Double.valueOf(price);
+			int n = Integer.valueOf(number);
+			total+=(p * n);	
+		}
+		Stock st = stocks.get(stocks.size()-1);
+		String price = st.getPrice();
+		String number = st.getNumber();
+		time_tmp = st.getTime();
+		double p = Double.valueOf(price);
+		int n = Integer.valueOf(number);
+		total+=(p * n);	
+		
+		title+=(st.getBrand());//title
+		
+		
+		String number_total = String.valueOf(total);
+		
+		StockHistory his = new StockHistory(title,time_tmp,number_total);
+		historyList.add(his);		
+	}
+	
+	
+	
+	/**
+	 * the option to search the history, time threshold
 	 * @param option
 	 */
 	private static void getHistoryFromDataBase(String option){
+		Map<String, Object> map = new HashMap<String ,Object>();
+		map.put("stock_time", option);
+		StockInfoService stockinfo = new StockInfoService();
+		try {
+			ReturnObject ret = stockinfo.queryStockInfoByDefaultStocktime(map);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			String last_time = "";
+			ArrayList<Stock> stocks = new ArrayList<Stock>();
+			if(list.size()>0){
+				StockInfoDTO cDTO = (StockInfoDTO) list.get(0);
+				Stock stock = new Stock();
+				stock.setBrand(cDTO.getBrand());
+				stock.setPrice(String.valueOf(cDTO.getUnit_price()));
+				stock.setNumber(cDTO.getQuantity());
+				stock.setTime(cDTO.getStock_time());
+				stocks.add(stock);
+				last_time = stock.getTime();
+				for(int i=1;i<list.size();i++){
+					StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
+					Stock st_tmp = new Stock();
+					String tmp_time = cDTO_tmp.getStock_time();
+					st_tmp.setBrand(cDTO_tmp.getBrand());
+					st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
+					st_tmp.setNumber(cDTO_tmp.getQuantity());
+					st_tmp.setTime(cDTO_tmp.getStock_time());
+					if(tmp_time.equals(last_time)){						
+						stocks.add(st_tmp);//if still the same stock, add to array list
+					}else{//a new stock
+						addToHistory(stocks);
+						stocks.clear();
+						stocks.add(st_tmp);
+						last_time = tmp_time;
+					}				
+				}
+				//the last stock
+				if(!stocks.isEmpty()){
+					addToHistory(stocks);//finish
+				}
+			}
+			
+		} catch (Exception e) {
+			System.out.println("query the stocks by default time failed");
+		}	
 		
-//		for(int i=0;i<5;i++){
-//			History his = new History("123","456","789"+Constants.SPACE);
-//			historyList.add(his);
-//		}
+		
 	}
 	
+	/**
+	 * add the current table into the history panel
+	 * this happened when: there is something in stock table, and user click the 
+	 * "add a new stock table" button
+	 */
 	public static void addToHistory(){
 		ArrayList<DataInTable> stockList = StockList.getStocks();
 		String title = "";
@@ -105,7 +188,8 @@ public class StockUtils {
 		title+=(st.getBrand());//title
 		String time_tmp = getTime();
 //		int num = queryItemsFromDataBase(time_tmp);
-		String number="50000";//fake data
+//		String number="50000";//fake data
+		String number = StockContentPart.getTotal().trim();
 		
 		StockHistory his = new StockHistory(title,time_tmp,number);
 		
@@ -117,6 +201,16 @@ public class StockUtils {
 		composite_fn_record.layout();
 		
 	}
+	
+	/**
+	 * show the history panel, when first into the stock panel
+	 * get the data(today, this month etc.) from database
+	 * @param composite_scroll
+	 * @param composite_fn
+	 * @param color
+	 * @param width
+	 * @param height
+	 */
 	public static void showHistoryPanel(ScrolledComposite composite_scroll, Composite composite_fn, Color color, int width, int height){
 		//search the database
 		if(firstTime){
@@ -125,7 +219,9 @@ public class StockUtils {
 			color_record = color;
 			width_record = width;
 			height_record = height;
-		getHistoryFromDataBase("");
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			String time_current = formatter.format(new Date());
+		    getHistoryFromDataBase(time_current);
 		
 		for (int i = 0; i < historyList.size(); i++) {
 			StockHistory his = historyList.get(i);
@@ -141,29 +237,83 @@ public class StockUtils {
 			//??
 		}
 	}
+	
+	public static void showSearchHistory(String dateSearch){
+		//remove the navigator panel, clear all the result
+		for(int i=0;i<itemList.size();i++)
+			itemList.get(i).dispose();
+		itemList.clear();
+		historyList.clear();
+		
+		//add search result
+		Map<String, Object> map = new HashMap<String ,Object>();
+		map.put("stock_time", dateSearch);
+		StockInfoService stockinfo = new StockInfoService();
+		try {
+			ReturnObject ret = stockinfo.queryStockInfoByInputStocktime(map);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			String last_time = "";
+			ArrayList<Stock> stocks = new ArrayList<Stock>();
+			if(list.size()>0){
+				StockInfoDTO cDTO = (StockInfoDTO) list.get(0);
+				Stock stock = new Stock();
+				stock.setBrand(cDTO.getBrand());
+				stock.setPrice(String.valueOf(cDTO.getUnit_price()));
+				stock.setNumber(cDTO.getQuantity());
+				stock.setTime(cDTO.getStock_time());
+				stocks.add(stock);
+				last_time = stock.getTime();
+				for(int i=1;i<list.size();i++){
+					StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
+					Stock st_tmp = new Stock();
+					String tmp_time = cDTO_tmp.getStock_time();
+					st_tmp.setBrand(cDTO_tmp.getBrand());
+					st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
+					st_tmp.setNumber(cDTO_tmp.getQuantity());
+					st_tmp.setTime(cDTO_tmp.getStock_time());
+					if(tmp_time.equals(last_time)){						
+						stocks.add(st_tmp);//if still the same stock, add to array list
+					}else{//a new stock
+						addToHistory(stocks);
+						stocks.clear();
+						stocks.add(st_tmp);
+						last_time = tmp_time;
+					}				
+				}
+				//the last stock
+				if(!stocks.isEmpty()){
+					addToHistory(stocks);//finish
+				}
+			}
+			
+		} catch (Exception e) {
+			System.out.println("query the stocks by default time failed");
+		}	
+		for (int i = 0; i < historyList.size(); i++) {
+			StockHistory his = historyList.get(i);
+			ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
+			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			itemList.add(ic);
+			composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
+					SWT.DEFAULT));
+			composite_fn_record.layout();
+		}
+		
+	}
+	
+	
+	
 	/**
-	 * add to history, not complete yet
-	 * @param composite_scroll
-	 * @param composite_fn
-	 * @param color
-	 * @param width
-	 * @param height
-	 * @param his
+	 * refresh the table if user select do not use the soft keyboard
 	 */
-//	public static void addToHistoryPanel(ScrolledComposite composite_scroll,
-//			Composite composite_fn, Color color, int width, int height,
-//			History his) {
-//		// search the database
-//		addToHistory();
-//
-//		ItemComposite ic = new ItemComposite(composite_fn, color, width, height);
-//		ic.setValue(his.getTitle(), his.getTime(), his.getNumber());
-//		itemList.add(ic);
-//		composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
-//				SWT.DEFAULT));
-//		composite_fn.layout();
-//
-//	}
+	public static void refreshTableData(){
+		
+		StockContentPart.getTableViewer().addFilter(sf);
+		StockContentPart.getTableViewer().removeFilter(sf);
+		Utils.refreshTable(StockContentPart.getTableViewer().getTable());
+		StockFilter.resetIsFirst();
+	}
 	
 	/**
 	 * dispose all the history item

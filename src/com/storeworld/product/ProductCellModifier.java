@@ -4,8 +4,6 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.storeworld.customer.Customer;
-import com.storeworld.customer.CustomerValidator;
 import com.storeworld.utils.Utils;
 
 /**
@@ -26,10 +24,15 @@ public class ProductCellModifier implements ICellModifier {
 		return true;
 	}
 
+	/**
+	 * add a new row in product table
+	 * @param product
+	 */
 	public static void addNewTableRow(Product product){
 //		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
 			int new_id = Integer.valueOf(product.getID()) + 1;
-			ProductValidator.setNewID(String.valueOf(new_id));
+//			ProductValidator.setNewID(String.valueOf(new_id));
+			ProductUtils.setNewLineID(String.valueOf(new_id));
 			Product prod_new = new Product(String.valueOf(new_id));
 			productlist.addProduct(prod_new);
 			Utils.refreshTable(tv.getTable());

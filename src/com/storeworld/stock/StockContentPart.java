@@ -1,20 +1,17 @@
 package com.storeworld.stock;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -28,22 +25,18 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.storeworld.common.ComboUtils;
-import com.storeworld.common.DataInTable;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
+import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
-import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
 /**
@@ -54,6 +47,7 @@ import com.storeworld.utils.Utils;
 public class StockContentPart extends ContentPart{
 	
 	private static Table table;
+	private static TableViewer tv;
 	//the product list
 	private static StockList stocklist = new StockList();
 	//the row height of the table
@@ -74,11 +68,16 @@ public class StockContentPart extends ContentPart{
 	private int sizeColumn = 3;
 	private int priceColumn = 5;
 	private int numberColumn = 6;
-	private int sub_brandColomn = 2;
-	private int brandColomn = 1;
-	private static GeneralComboCellEditor<String> comboboxCellEditor = null;
-	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;
+	private int sub_brandColumn = 2;
+	private int brandColumn = 1;
 	
+	private int deleteButtonColumn = 7;
+	private static GeneralComboCellEditor<String> comboboxCellEditor = null;//brand
+	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;//sub_brand
+	private static GeneralComboCellEditor<String> comboboxCellEditor3 = null;//size
+	private static Text total_val=null;
+	private static DateTime dateTime_stock = null;
+	private static int rowCurrent = -1;
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -86,8 +85,38 @@ public class StockContentPart extends ContentPart{
 		initialization();
 		addListenerForTable();
 	}
+	
+	/**
+	 * getters: to get the basic info of the table
+	 * @return
+	 */
+	public static CellEditor[] getCellEditors(){
+		return cellEditor;
+	}
+	public static TableEditor getEditor(){
+		return editorEdit;
+	}
+	public static int getRowCurrent(){
+		return rowCurrent;
+	}
+	public static Table getTable(){
+		return table;
+	}
+	public static TableViewer getTableViewer(){
+		return tv;
+	}
 	public static StockList getStockList(){
 		return stocklist;
+	}
+	public static void setTotal(String total){
+		total_val.setText(total+Constants.SPACE);
+	}
+	public static String getTotal(){
+		return total_val.getText();
+	}
+	
+	public static void setStockTimer(int year, int month, int day){
+		dateTime_stock.setDate(year, month, day);
 	}
 	/**
 	 * call the software keyboard
@@ -101,22 +130,23 @@ public class StockContentPart extends ContentPart{
 	 * @param event
 	 */
 	public void addListenerForTable(){
-		
+		//refactor
 		table.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
-				if(Utils.getUseSoftKeyBoard()){
+				
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
 				int index = table.getTopIndex();	
 				int colCurrent = -1;
-				int rowCurrent = -1;
+//				int rowCurrent = -1;
+				rowCurrent = -1;
 				boolean found = false;
 				for (; index < rowCount; index++) {
 					TableItem item = table.getItem(index);
-					for(int col=0; col<colCount-1; col++){
+					for(int col=0; col<colCount; col++){
 						Rectangle rect = item.getBounds(col);
 						if(rect.contains(pt)){	
 							rowCurrent = index;
@@ -128,63 +158,50 @@ public class StockContentPart extends ContentPart{
 					if(found){
 						break;
 					}
-				}						
+				}	
+				
 				if(found){
-					if(colCurrent == sizeColumn || colCurrent == priceColumn || colCurrent == numberColumn){
-					//cannot reuse the editor, make cause unstable
-					editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-					Text text = (Text)(editorEdit.getEditor());	
-					callKeyBoard(text);
-					Stock c = (Stock)(table.getItem(rowCurrent).getData());	
-					if(colCurrent == sizeColumn){
-						String sizelast = c.getSize();
-						if(Utils.getClickButton() && Utils.getInputNeedChange()){
-							c.setSize(Utils.getInput());
-							text.setText(c.getSize());//validate the text
-							if(StockValidator.validateSize(c.getSize()))//table, table.getItem(rowCurrent), colCurrent, 
-							{
-								stocklist.stockChanged(c);	
-								text.setText(c.getSize());
-							}else{
-								c.setSize(sizelast);
+					if(Utils.getUseSoftKeyBoard()){
+						if(colCurrent == priceColumn || colCurrent == numberColumn){
+							//cannot reuse the editor, make cause unstable
+							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+							Text text = (Text)(editorEdit.getEditor());	
+							callKeyBoard(text);
+							Stock c = (Stock)(table.getItem(rowCurrent).getData());	
+							if(colCurrent == priceColumn){
+								String pricelast = c.getPrice();
+								if(Utils.getClickButton() && Utils.getInputNeedChange()){
+									c.setPrice(Utils.getInput());
+									text.setText(c.getPrice());//validate the text
+									if(StockValidator.validatePrice(c.getPrice())){
+										stocklist.stockChanged(c);	
+//										text.setText(c.getPrice());
+									}else{
+										c.setPrice(pricelast);
+									}
+									//initial the next click
+									Utils.setClickButton(false);
+								}
+							}else if(colCurrent == numberColumn){
+								String numberlast = c.getNumber();
+								if(Utils.getClickButton() && Utils.getInputNeedChange()){
+									c.setNumber(Utils.getInput());
+									text.setText(c.getNumber());//validate the text
+									if(StockValidator.validateNumber(c.getNumber())){
+										stocklist.stockChanged(c);	
+//										text.setText(c.getNumber());
+									}else{
+										c.setNumber(numberlast);
+									}
+									//initial the next click
+									Utils.setClickButton(false);
+								}
 							}
-							//initial the next click
-							Utils.setClickButton(false);
 						}
-					}else if(colCurrent == priceColumn){
-						String pricelast = c.getPrice();
-						if(Utils.getClickButton() && Utils.getInputNeedChange()){
-							c.setPrice(Utils.getInput());
-							text.setText(c.getPrice());//validate the text
-							if(StockValidator.validatePrice(c.getPrice()))//table, table.getItem(rowCurrent), colCurrent, 
-							{
-								stocklist.stockChanged(c);	
-								text.setText(c.getPrice());
-							}else{
-								c.setPrice(pricelast);
-							}
-							//initial the next click
-							Utils.setClickButton(false);
-						}
-					}else if(colCurrent == numberColumn){
-						String numberlast = c.getNumber();
-						if(Utils.getClickButton() && Utils.getInputNeedChange()){
-							c.setNumber(Utils.getInput());
-							text.setText(c.getNumber());//validate the text
-							if(StockValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
-							{
-								stocklist.stockChanged(c);	
-								text.setText(c.getNumber());
-							}else{
-								c.setNumber(numberlast);
-							}
-							//initial the next click
-							Utils.setClickButton(false);
-						}
+					}else{
+						//do nothing
 					}
-
-					}
-					else if(colCurrent == brandColomn){//sub_brand column, then fill the combox
+					if(colCurrent == brandColumn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
 						StockUtils.setCurrentLine(rowCurrent);
@@ -194,8 +211,7 @@ public class StockContentPart extends ContentPart{
 						//set data into objects
 						comboboxCellEditor.setObjects(list);
 						combo.setItems(list.toArray(new String[list.size()]));
-					}
-					else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
+					}else if(colCurrent == sub_brandColumn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
@@ -210,9 +226,37 @@ public class StockContentPart extends ContentPart{
 							comboboxCellEditor2.setObjects(list);
 							combo.setItems(list.toArray(new String[list.size()]));
 						}
+					}else if(colCurrent == sizeColumn){
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						Stock c = (Stock)(table.getItem(rowCurrent).getData());
+						String current_brand = c.getBrand();
+						String current_sub = c.getSubBrand();
+						//all this will make the size column with empty
+						if(current_brand == null || current_brand.equals("") || current_sub==null || current_sub.equals("")
+								|| !Utils.checkBrand(current_brand) || !Utils.checkSubBrand(current_sub)){
+							combo.removeAll();
+							c.setSize("");
+							stocklist.stockChanged(c);	
+						}else{
+							//query the database to get the available size
+							List<String> list = Utils.getSizes(current_brand, current_sub);
+							//set data into objects
+							comboboxCellEditor3.setObjects(list);
+							combo.setItems(list.toArray(new String[list.size()]));
+						}
+													
 					}
-				}
-			}
+					else if(colCurrent == deleteButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editor.getEditor().isDisposed())
+								editor.getEditor().setVisible(false);
+						}
+					}
+					
+					
+				}	
 			}
 			
 		});
@@ -235,12 +279,12 @@ public class StockContentPart extends ContentPart{
 					}
 				}								
 				if(row >= 0){			
-					editor.setEditor(cellEditor[7].getControl(), table.getItem(row), 7);
+					editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
 					if(!editor.getEditor().isDisposed())
 						editor.getEditor().setVisible(true);
 				}else{
 					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
-						editor.setEditor(cellEditor[7].getControl(), table.getItem(visibleButton_last), 7);
+						editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
 						if(!editor.getEditor().isDisposed())
 							editor.getEditor().setVisible(false);
 					}
@@ -253,23 +297,17 @@ public class StockContentPart extends ContentPart{
 		        event.height =rowHeight;
 		    }
 		});
-		//control the verify
-		Text text = (Text)cellEditor[3].getControl();
-		text.addVerifyListener(new VerifyListener(){
-			public void verifyText(VerifyEvent e){
-				String inStr = e.text;
-				if (inStr.length() > 0){
-					try{
-						if(!inStr.equals(""))
-							e.doit = true;
-						else
-							e.doit=false;
-					}catch(Exception ep){
-						e.doit = false;
-					}
-				}
-			}
-		});
+		
+//		table.addPaintListener(new PaintListener(){
+//
+//			@Override
+//			public void paintControl(PaintEvent e) {
+//				System.out.println("paint");
+//				
+//			}
+//			
+//		});
+		
 	}
 	
 	
@@ -305,12 +343,16 @@ public class StockContentPart extends ContentPart{
 //				StockUtils.setTime();//record the time
 				//TODO: check if has history
 				if(StockList.getStocks().size() > 1){
-					StockUtils.addToHistory();
+					//only records when the time is not empty
+					if(!StockUtils.getTime().equals("")){
+						StockUtils.addToHistory();
+					}
 					
 					//clear table
 					//and add a new line
 					table.removeAll();
 					StockList.removeAllStocks();
+					setTotal("0.000");
 				}
 				//after we add to history, initial the time 
 				StockUtils.setTime("");//initial
@@ -360,21 +402,45 @@ public class StockContentPart extends ContentPart{
         StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
         composite_2.layout();
         //date picker
-        DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
+        final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
 		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		Button btnSearch = new Button(composite_left, SWT.NONE);
 		//search the history
 		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
 		btnSearch.setText("²éÕÒ");
-		
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				String year = String.valueOf(dateTime.getYear());
+				String month = String.valueOf(dateTime.getMonth()+1);
+//				String day = String.valueOf(dateTime.getDay());
+//				int hour = dateTime.getHours()+1;
+//				int min = dateTime.getMinutes()+1;
+//				int sec = dateTime.getSeconds()+1;
+				if(!month.startsWith("0"))
+					month = "0"+month;
+//				if(!day.startsWith("0"))
+//					day="0"+day;
+				//date to search
+				String dateSearch = year+month;
+				StockUtils.showSearchHistory(dateSearch);
+			}
+		});
 
 		//show time in the right cmposite
-		DateTime dateTime_stock = new DateTime(composite_right, SWT.BORDER);
+		dateTime_stock = new DateTime(composite_right, SWT.BORDER);
 		dateTime_stock.setBounds((int)(4*w/5/100), (int)(4*w/5/100), (int)(6*4*w/5/50), (int)(h/20));
 		//delete or clear the table
 		Button btn_delete = new Button(composite_right, SWT.NONE);
 		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setText("É¾³ý");
+		btn_delete.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				//TODO: what is the logic, also delete the data in database??
+			}
+		});
+				
 		composite_updown = (int)(h/20)+(int)(2*4*w/5/100);
 		
 		//sum composite
@@ -397,12 +463,12 @@ public class StockContentPart extends ContentPart{
 		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total.setLayoutData(gd_text);
 		//total value
-		Text total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("3000"+Constants.SPACE);
+		total_val.setText("0.000"+Constants.SPACE);
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setLayoutData(gd_text);
-		//indeed text
+		//indeed text?? this part of value
 		Text indeed = new Text(composite_sum, SWT.NONE);
 		indeed.setEnabled(false);
 		indeed.setText("Êµ¸¶:");
@@ -411,7 +477,8 @@ public class StockContentPart extends ContentPart{
 		//indeed value
 		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		indeed_val.setEnabled(false);
-		indeed_val.setText("2870"+Constants.SPACE);
+//		indeed_val.setText("2870"+Constants.SPACE);
+		indeed_val.setText(""+Constants.SPACE);
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_val.setLayoutData(gd_text);
 		composite_sum.layout();
@@ -421,6 +488,7 @@ public class StockContentPart extends ContentPart{
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
 		table.setBounds(0, (int)(h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(6*h/10));
+		tv = tableViewer;
 		
 		//set the columns of the table
 		int columnWidth = (int)(4*9*w/60/5);		
@@ -527,7 +595,7 @@ public class StockContentPart extends ContentPart{
 		tableViewer.setLabelProvider(new StockTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		Stock stock_new = new Stock(StockUtils.getNewLineID());//dynamic from the database
-		StockValidator.setNewID(StockUtils.getNewLineID());
+//		StockValidator.setNewID(StockUtils.getNewLineID());
 		stocklist.addStock(stock_new);
 		
 		tableViewer.setInput(stocklist);		
@@ -547,7 +615,12 @@ public class StockContentPart extends ContentPart{
 //		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
 
-		cellEditor[3] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 3);
+//		cellEditor[3] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 3);
+		
+		ComboUtils.setWidth_Col(columnWidth, 3, Constants.STOCK_TYPE_SUB_BRAND);
+		comboboxCellEditor3 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSizes());
+		cellEditor[3] = comboboxCellEditor3;
+				
 		cellEditor[4] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 4);
 		cellEditor[5] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 5);
 		cellEditor[6] = new StockTextCellEditor(tableViewer.getTable(),columnWidth, 6);				

@@ -4,10 +4,6 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.storeworld.customer.Customer;
-import com.storeworld.customer.CustomerValidator;
-import com.storeworld.product.Product;
-import com.storeworld.product.ProductValidator;
 import com.storeworld.utils.Utils;
 
 /**
@@ -18,26 +14,47 @@ import com.storeworld.utils.Utils;
 public class StockCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static StockList stocklist;	
-
-	public StockCellModifier(TableViewer tv, StockList stocklist) {
-		this.tv = tv;
-		this.stocklist = stocklist;
+	private static Stock stock_backup = new Stock();
+	
+	public StockCellModifier(TableViewer tv_tmp, StockList stocklist_tmp) {
+		tv = tv_tmp;
+		stocklist = stocklist_tmp;
 	}
 
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
 	
+	/**
+	 * get the class instance StockList, not the stocks
+	 * @return
+	 */
 	public static StockList getStockList(){
 		return stocklist;
 	}
+	
+	/**
+	 * get the table viewer, to operate the table
+	 * @return
+	 */
 	public static TableViewer getTableViewer(){
 		return tv;
 	}
+	//no use now
+	public static Stock getLastStock(){
+		return stock_backup;
+	}
+	
+	/**
+	 * 1. add a new row in table UI
+	 * 2. compute the total value here
+	 * @param stock
+	 */
 	public static void addNewTableRow(Stock stock){
 //		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
 			int new_id = Integer.valueOf(stock.getID()) + 1;
-			StockValidator.setNewID(String.valueOf(new_id));
+//			StockValidator.setNewID(String.valueOf(new_id));
+			StockUtils.setNewLineID(String.valueOf(new_id));
 			Stock stock_new = new Stock(String.valueOf(new_id));
 			stocklist.addStock(stock_new);
 			Utils.refreshTable(tv.getTable());
@@ -89,7 +106,7 @@ public class StockCellModifier implements ICellModifier {
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;		
-		Stock s = (Stock) item.getData();	
+		Stock s = (Stock) item.getData();
 		String brandlast = "";
 		String sub_brandlast = "";
 		String sizelast = "";
@@ -182,7 +199,8 @@ public class StockCellModifier implements ICellModifier {
 			return;//just return, do nothing
 //			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
-
+		//validate if the change of the table is valid, if not, do not update the 
+		//table UI & database
 		boolean valid = false;
 		if (hasBeenChanged) {
 

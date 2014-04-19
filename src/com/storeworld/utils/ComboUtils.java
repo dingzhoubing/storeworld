@@ -1,6 +1,5 @@
-package com.storeworld.common;
+package com.storeworld.utils;
 
-import com.storeworld.utils.Constants;
 
 /**
  * has no use now

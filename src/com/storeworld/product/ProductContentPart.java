@@ -3,31 +3,24 @@ package com.storeworld.product;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.storeworld.mainui.ContentPart;
-import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Utils;
 
@@ -39,6 +32,7 @@ import com.storeworld.utils.Utils;
 public class ProductContentPart extends ContentPart{
 	
 	private static Table table;
+	private static TableViewer tv;
 	//the product list
 	private static ProductList productlist = new ProductList();
 	//the row height of the table
@@ -55,6 +49,7 @@ public class ProductContentPart extends ContentPart{
 	
 	private int sizeColumn = 3;
 	private int repColumn = 5;
+	private int deleteButtonColumn = 6;
 	public ProductContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -62,6 +57,11 @@ public class ProductContentPart extends ContentPart{
 		initialization();
 		addListenerForTable();
 	}
+	
+	public static TableViewer getTableViewer(){
+		return tv;
+	}
+		
 	/**
 	 * call the software keyboard
 	 */
@@ -79,7 +79,7 @@ public class ProductContentPart extends ContentPart{
 
 			@Override
 			public void handleEvent(Event event) {
-				if(Utils.getUseSoftKeyBoard()){
+				//no matter use the software keyboard or not, we need to catch the mouse point
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
@@ -89,7 +89,7 @@ public class ProductContentPart extends ContentPart{
 				boolean found = false;
 				for (; index < rowCount; index++) {
 					TableItem item = table.getItem(index);
-					for(int col=0; col<colCount-1; col++){
+					for(int col=0; col<colCount; col++){
 						Rectangle rect = item.getBounds(col);
 						if(rect.contains(pt)){	
 							rowCurrent = index;
@@ -101,51 +101,69 @@ public class ProductContentPart extends ContentPart{
 					if(found){
 						break;
 					}
-				}						
+				}
+				
+			if(Utils.getUseSoftKeyBoard()){									
 				if(found){
-					if(colCurrent ==sizeColumn || colCurrent == repColumn){
-					//cannot reuse the editor, make cause unstable
-					editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-					Text text = (Text)(editorEdit.getEditor());	
-					callKeyBoard(text);
-					Product p = (Product)(table.getItem(rowCurrent).getData());
-					if(colCurrent == sizeColumn){
-						String sizelast = p.getSize();
-						if(Utils.getClickButton() && Utils.getInputNeedChange()){
-							p.setSize(Utils.getInput()+"kg");
-							text.setText(p.getSize());
-							if(ProductValidator.validateSize(p.getSize()))//table, table.getItem(rowCurrent), colCurrent, 
-							{
-								productlist.productChanged(p);
-								text.setText(p.getSize());
-							}else{
-								p.setSize(sizelast);
-							}
-							//initial the next click
-							Utils.setClickButton(false);
-						}
-					}else if(colCurrent == repColumn){
-						String repositorylast = p.getRepository();
-						if(Utils.getClickButton() && Utils.getInputNeedChange()){
-							p.setRepository(Utils.getInput());
-							text.setText(p.getRepository());
-							if(ProductValidator.validateRepository(p.getRepository()))//table, table.getItem(rowCurrent), colCurrent, 
-							{
-								productlist.productChanged(p);
+					if(colCurrent == repColumn){//colCurrent ==sizeColumn || 
+						//cannot reuse the editor, make cause unstable
+						editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						Text text = (Text)(editorEdit.getEditor());	
+						callKeyBoard(text);
+						Product p = (Product)(table.getItem(rowCurrent).getData());
+//						if(colCurrent == sizeColumn){
+//							String sizelast = p.getSize();
+//							if(Utils.getClickButton() && Utils.getInputNeedChange()){
+//								p.setSize(Utils.getInput()+"kg");
+//								text.setText(p.getSize());
+//								if(ProductValidator.validateSize(p.getSize())){
+//									productlist.productChanged(p);
+//									text.setText(p.getSize());
+//								}else{
+//									p.setSize(sizelast);
+//								}
+//								//initial the next click
+//								Utils.setClickButton(false);
+//							}
+//						}else 
+						if(colCurrent == repColumn){
+							String repositorylast = p.getRepository();
+							if(Utils.getClickButton() && Utils.getInputNeedChange()){
+								p.setRepository(Utils.getInput());
 								text.setText(p.getRepository());
-							}else{
-								p.setRepository(repositorylast);;
+								if(ProductValidator.validateRepository(p.getRepository())){
+									productlist.productChanged(p);
+									text.setText(p.getRepository());
+								}else{
+									p.setRepository(repositorylast);;
+								}
+								//initial the next click
+								Utils.setClickButton(false);
 							}
-							//initial the next click
-							Utils.setClickButton(false);
+						}
+					}else if(colCurrent == deleteButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editor.getEditor().isDisposed())
+								editor.getEditor().setVisible(false);
 						}
 					}
+				}else{
+					if(found){
+						//if the deliver Button column, we disable the click
+						if(colCurrent == deleteButtonColumn){
+							if(rowCurrent == table.getItemCount()-1){
+								editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+								if(!editor.getEditor().isDisposed()){
+									editor.getEditor().setVisible(false);
+								}
+							}
+						}
 					}
 				}
-			}
-			}
-			
-		});
+		  }
+		}
+    });
 			
 		//hover to show the delete button
 		table.addListener(SWT.MouseHover, new Listener() {
@@ -216,7 +234,7 @@ public class ProductContentPart extends ContentPart{
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
 		table.setBounds(0, 0, w, h);
-		
+		tv = tableViewer;
 		//set the columns of the table
 		int columnWidth = (int)(9*w/50);		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
@@ -311,7 +329,7 @@ public class ProductContentPart extends ContentPart{
 		
 		
 		Product prod_new = new Product(ProductUtils.getNewLineID());//dynamic from the database
-		ProductValidator.setNewID(ProductUtils.getNewLineID());
+//		ProductValidator.setNewID(ProductUtils.getNewLineID());
 		productlist.addProduct(prod_new);
 		
 		
@@ -339,7 +357,7 @@ public class ProductContentPart extends ContentPart{
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
-		tableViewer.addFilter(new ProductFilter());
+//		tableViewer.addFilter(new ProductFilter());
 		
 		Utils.refreshTable(table);
 		composite.setLayout(new FillLayout());

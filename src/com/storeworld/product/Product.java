@@ -13,8 +13,6 @@ public class Product extends DataInTable{
 	private String sub_brand="";
 	private String size="";
 	private String unit="";
-//	private double avg_stock_price;
-//	private double avg_deliver_price;
 	private String repository="";//make it easy to process
 	
 	public Product(){
@@ -34,10 +32,13 @@ public class Product extends DataInTable{
 		this.sub_brand = sub_brand;
 		this.size = size;
 		this.unit = unit;
-//		this.avg_stock_price = avg_stock;
-//		this.avg_deliver_price = avg_deliver;
 		this.repository = repository;		
 	}
+	
+	/**
+	 * all getters, setters
+	 * @return
+	 */
 	public String getID(){
 		return this.id;
 	}
@@ -68,18 +69,6 @@ public class Product extends DataInTable{
 	public void setUnit(String unit) {
 		this.unit = unit;
 	}
-//	public double getAvgStockPrice() {
-//		return this.avg_stock_price;
-//	}
-//	public void setAvgStockPrice(double price) {
-//		this.avg_stock_price = price;
-//	}
-//	public double getAvgDeliverPrice() {
-//		return this.avg_deliver_price;
-//	}
-//	public void setAvgDeliverPrice(double price) {
-//		this.avg_deliver_price = price;
-//	}
 	public String getRepository() {
 		return this.repository;
 	}
@@ -94,8 +83,6 @@ public class Product extends DataInTable{
 		sb.append(this.sub_brand+" ");
 		sb.append(this.size+" ");
 		sb.append(this.unit+" ");
-//		sb.append(this.avg_stock_price+" ");
-//		sb.append(this.avg_deliver_price+" ");
 		sb.append(this.repository);
 		return sb.toString();
 	}

@@ -2,6 +2,12 @@ package com.storeworld.stock;
 
 import com.storeworld.common.History;
 
+/**
+ * the sub-class of History, to show the stock history of stock page
+ * left navigator
+ * @author dingyuanxiong
+ *
+ */
 public class StockHistory extends History {
 	String title;
 	String time;
@@ -33,13 +39,18 @@ public class StockHistory extends History {
 		return this.number;
 	}
 	public String getTimeShow(){
-		String month = time.substring(4, 6);
-		String day = time.substring(6, 8);
-		if(month.startsWith("0"))
-			month = month.substring(1);
-		if(day.startsWith("0"))
-			day = day.substring(1);
-		return month+"月  " + day + "日";			
+		if(!time.equals("")){
+			String month = time.substring(4, 6);
+			String day = time.substring(6, 8);
+			if(month.startsWith("0"))
+				month = month.substring(1);
+			if(day.startsWith("0"))
+				day = day.substring(1);
+			return month+"月  " + day + "日";
+		}else{
+			return "";
+		}
+		
 	}
 
 }

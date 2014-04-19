@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-import com.storeworld.analyze.ratioutils.RatioBlock;
 import com.storeworld.mainui.ContentPart;
 
 /**

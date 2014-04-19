@@ -2,16 +2,7 @@ package com.storeworld.customer;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolTip;
-
 import com.storeworld.utils.Utils;
 
 /**
@@ -32,6 +23,9 @@ public class CustomerCellModifier implements ICellModifier {
 		return true;
 	}
 
+	public static CustomerList getCustomerList(){
+		return customerlist;
+	}
 	//when initial the table data
 	public Object getValue(Object element, String property) {
 		Customer c = (Customer) element;
@@ -60,16 +54,22 @@ public class CustomerCellModifier implements ICellModifier {
 		}else if(property.equals("operation")){
 //			return String.valueOf("1");
 			return null;// show the operation button
+		}else if(property.equals("deliver")){
+			return null;
 		}
 		return null;
 //		throw new RuntimeException("error column name : " + property);
 	}
 
-
+	/**
+	 * add a new row in table with newest customer id
+	 * @param customer
+	 */
 	public static void addNewTableRow(Customer customer){
 //		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
 			int new_id = Integer.valueOf(customer.getID()) + 1;
-			CustomerValidator.setNewID(String.valueOf(new_id));
+//			CustomerValidator.setNewID(String.valueOf(new_id));
+			CustomerUtils.setNewLineID(String.valueOf(new_id));
 			Customer cus_new = new Customer(String.valueOf(new_id));
 			customerlist.addCustomer(cus_new);
 			Utils.refreshTable(tv.getTable());
@@ -86,7 +86,7 @@ public class CustomerCellModifier implements ICellModifier {
 		String arealast = "";
 		String phonelast = "";
 		String addresslast = "";
-		int col = 0;
+		int col = 0;//no use now
 		boolean hasBeenChanged = false;
 		if (property.equals("name")) {
 			namelast = c.getName();
@@ -149,6 +149,7 @@ public class CustomerCellModifier implements ICellModifier {
 			// throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
 		
+		//validate the new value, update the table & database, only if the values are valid
 		boolean valid = false;
 		if (hasBeenChanged) {
 
@@ -175,8 +176,7 @@ public class CustomerCellModifier implements ICellModifier {
 					c.setAddress(addresslast);
 				}
 			}
-			if (valid) {
-				
+			if (valid) {				
 				customerlist.customerChanged(c);
 				
 			}

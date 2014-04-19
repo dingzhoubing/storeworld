@@ -10,13 +10,11 @@ import java.util.Set;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
-import com.storeworld.customer.CustomerCellModifier;
-import com.storeworld.customer.CustomerUtils;
-import com.storeworld.customer.CustomerValidator;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.GoodsInfoService;
+import com.storeworld.utils.DataCachePool;
 
 /**
  * get the data in product table
@@ -38,63 +36,17 @@ public class ProductList {
 	
 	//initial data, later, in database
 	public void initial(){		
-//		String brand = "五得利";
-//		String subbrand = "精一";
-//		String size = "50kg";
-//		String unit = "包";
-////		double avg_in = 68.0;
-////		double avg_out = 72.0;
-//		int repository = 3000;
-//		Product prod = new Product("1",brand, subbrand, size, unit, repository+"");
-//		productList.add(prod);
-//		String brand2 = "五得利";
-//		String subbrand2 = "特精";
-//		String size2 = "50kg";
-//		String unit2 = "包";
-////		double avg_in2 = 69.0;
-////		double avg_out2 = 74.0;
-//		int repository2 = 2500;
-//		Product prod2 = new Product("2",brand2, subbrand2, size2, unit2, repository2+"");
-//		productList.add(prod2);
-//		String brand3 = "五得利";
-//		String subbrand3 = "普粉";
-//		String size3 = "50kg";
-//		String unit3 = "包";
-////		double avg_in3 = 63.0;
-////		double avg_out3 = 67.0;
-//		int repository3 = 3000;
-//		Product prod3 = new Product("3",brand3, subbrand3, size3, unit3, repository3+"");
-//		productList.add(prod3);
-//		String brand4 = "金龙";
-//		String subbrand4 = "精粉";
-//		String size4 = "50kg";
-//		String unit4 = "包";
-////		double avg_in4 = 66.0;
-////		double avg_out4 = 70.0;
-//		int repository4 = 4000;
-//		Product prod4 = new Product("4", brand4, subbrand4, size4, unit4, repository4+"");
-//		productList.add(prod4);
-//		String brand5 = "五联";
-//		String subbrand5 = "包子粉";
-//		String size5 = "50kg";
-//		String unit5 = "包";
-////		double avg_in5 = 65.0;
-////		double avg_out5 = 69.0;
-//		int repository5 = 2800;
-//		Product prod5 = new Product("5", brand5, subbrand5, size5, unit5, repository5+"");
-//		productList.add(prod5);				
-//		
-//		ProductUtils.setNewLineID("6");
 		
 		String newID = "";
 		try {
 			ReturnObject ret = goodsinfo.queryGoodsInfoAll();
+			newID = String.valueOf(goodsinfo.getNextGoodsID());
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
 			for(int i=0;i<list.size();i++){
 				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
 				Product prod = new Product();
-				newID = cDTO.getId();
+//				newID = cDTO.getId();
 				prod.setID(cDTO.getId());
 				prod.setBrand(cDTO.getBrand());
 				prod.setSubBrand(cDTO.getSub_brand());
@@ -104,24 +56,31 @@ public class ProductList {
 				
 				productList.add(prod);
 //				System.out.println("name: "+cDTO.getCustomer_name());
+				//add to cache
+				DataCachePool.addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());
 			}
 		} catch (Exception e) {
 			System.out.println("failed");
 		}
 		//no record
-		if(newID.equals(""))
-			newID="0";//empty
+		if(newID.equals("-1"))
+			newID="1";//empty
 		//by the list of Customer from database
-		ProductUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)+1));
+		ProductUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
 		
 	}
 	
+	/**
+	 * get the products
+	 * @return
+	 */
 	public ArrayList<DataInTable> getProducts() {
 		return this.productList;
 	}
 	
 	/**
-	 * add a product
+	 * add a product into table (UI side)
+	 * @param product
 	 */
 	public void addProduct(Product product) {
 		this.productList.add(product);
@@ -131,7 +90,8 @@ public class ProductList {
 	}
 
 	/**
-	 * @param remove a product
+	 * delete a product UI table & database
+	 * @param product
 	 */
 	public void removeProduct(Product product) {
 		this.productList.remove(product);
@@ -143,11 +103,14 @@ public class ProductList {
 			} catch (Exception e) {
 				System.out.println("remove product failed");
 			}
+			//update the cache
+			DataCachePool.removeProductInfoOfCache(product.getBrand(), product.getSubBrand());
 		}
 	}
 
 	/**
-	 * @param update a product
+	 * update the product table in UI & database
+	 * @param product
 	 */
 	public void productChanged(Product product) {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
@@ -164,7 +127,27 @@ public class ProductList {
 			if(!ProductValidator.checkID(product.getID())){
 				//update the database here				
 				try {
+					//before update the database, record the old brand/sub, for updating the cache
+					Map<String, Object> prod_old = new HashMap<String, Object>();
+					prod_old.put("id", product.getID());
+					ReturnObject ret = goodsinfo.queryGoodsInfo(prod_old);
+					Pagination page = (Pagination) ret.getReturnDTO();
+					List<Object> list = page.getItems();
+					String old_brand="";
+					String old_sub="";
+					//it should contains only one element, or something wrong
+					if(!list.isEmpty()){
+						GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(0);
+						old_brand = cDTO.getBrand();
+						old_sub = cDTO.getSub_brand();
+					}else{
+						System.out.println("query a product with an exist ID returns empty");
+					}
+					
 					goodsinfo.updateGoodsInfo(product.getID(), prod);
+					//update the cache
+					//based on: the product/customer page will not often be changed
+					DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());
 				} catch (Exception e) {
 					System.out.println("update product failed");
 				}
@@ -173,6 +156,8 @@ public class ProductList {
 				try {
 					goodsinfo.addGoodsInfo(prod);
 					ProductCellModifier.addNewTableRow(product);
+					
+					DataCachePool.addBrand2Sub(product.getBrand(), product.getSubBrand());
 				} catch (Exception e) {
 					System.out.println("add product failed");
 				}
@@ -181,16 +166,14 @@ public class ProductList {
 	}
 
 	/**
-	 * @param may multi contentprovider?， one remove
+	 *  may multi content provider
+	 * @param viewer
 	 */
 	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
-	/**
-	 * @param may multi contentprovider? one add
-	 * viewer is a content provider
-	 */
+
 	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}

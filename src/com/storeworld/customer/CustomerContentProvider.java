@@ -3,10 +3,6 @@ package com.storeworld.customer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
 
@@ -17,19 +13,19 @@ import com.storeworld.common.IDataListViewer;
  */
 public class CustomerContentProvider implements IStructuredContentProvider, IDataListViewer{
 		
-		private CustomerList productlist;
+		private CustomerList customerlist;
 		private TableViewer tableviewer;
-		public CustomerContentProvider(TableViewer tableviewer, CustomerList productlist){
+		public CustomerContentProvider(TableViewer tableviewer, CustomerList customerlist){
 			this.tableviewer = tableviewer;
-			this.productlist = productlist;
+			this.customerlist = customerlist;
 		}
 		public Object[] getElements(Object inputElement) {
 //			System.out.println("call here");
-			return productlist.getCustomers().toArray();
+			return CustomerList.getCustomers().toArray();
 		}
 		
 		public void dispose() {
-			productlist.removeChangeListener(this);
+			customerlist.removeChangeListener(this);
 		}
 		
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -41,24 +37,12 @@ public class CustomerContentProvider implements IStructuredContentProvider, IDat
 		@Override
 		public void add(DataInTable customer) {
 			tableviewer.add(customer);
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("add customer: "+customer);   
-//			messageBox.open(); 
-//			System.out.println(product);
 			
 		}
 		@Override
 		public void remove(DataInTable customer) {
 			tableviewer.remove(customer);
-			//no use later
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("remove customer: "+customer);   
-//			messageBox.open(); 
-			
+	
 		}
 		@Override
 		public void update(DataInTable customer) {

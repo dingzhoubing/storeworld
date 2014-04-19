@@ -280,8 +280,10 @@ public class CustomerInfoService extends BaseAction{
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
 		List<CustomerInfoDTO> customerInfoList = new ArrayList<CustomerInfoDTO>();
-		
-		Integer id=(Integer) map.get("id");
+		String tmp = (String)map.get("id");
+		Integer id = null;
+		if(tmp!=null)
+			id=Integer.valueOf((String)map.get("id"));
 		String customer_area=(String) map.get("customer_area");
 		String customer_name=(String) map.get("customer_name");
 		String telephone=(String) map.get("telephone");
@@ -350,4 +352,10 @@ public class CustomerInfoService extends BaseAction{
 		}
 		return ro;
 	}
+	
+	public int getNextCustomerID() throws Exception{
+		return getNextID("customer_info");
+	}
+	
+	
 }

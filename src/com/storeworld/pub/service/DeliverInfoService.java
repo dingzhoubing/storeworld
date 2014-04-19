@@ -30,12 +30,15 @@ public class DeliverInfoService extends BaseAction{
 
 	 try{
 		 //0.输入参数校验：
-		 Float unit_price=(Float)uniMap.get("unit_price");
+//		 Float unit_price=(Float)uniMap.get("unit_price");
+		 Float unit_price=Float.valueOf(String.valueOf(uniMap.get("unit_price")));
 		 String brand=(String)uniMap.get("brand");
 		 String sub_brand=(String)uniMap.get("sub_brand");
 		 String standard=(String)uniMap.get("standard");
-		 Integer quantity=(Integer)uniMap.get("quantity");
-		 List<Object> paramList = null;
+//		 Integer quantity=(Integer)uniMap.get("quantity");
+		 Integer quantity=Integer.valueOf(String.valueOf(uniMap.get("quantity")));
+//		 List<Object> paramList = null;
+		 List<Object> paramList =new ArrayList<Object>();
 		 paramList.add(unit_price);
 		 paramList.add(brand);
 		 paramList.add(sub_brand);
@@ -835,4 +838,7 @@ public class DeliverInfoService extends BaseAction{
        return list;
 	}
 
+	public int getNextDeliverID() throws Exception{
+		return getNextID("deliver_info");
+	}
 }

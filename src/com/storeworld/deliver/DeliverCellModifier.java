@@ -4,10 +4,6 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.storeworld.product.Product;
-import com.storeworld.stock.Stock;
-import com.storeworld.stock.StockList;
-import com.storeworld.stock.StockValidator;
 import com.storeworld.utils.Utils;
 
 /**
@@ -28,16 +24,31 @@ public class DeliverCellModifier implements ICellModifier {
 		return true;
 	}
 
-	public static DeliverList getStockList(){
+	/**
+	 * get the DeliverList
+	 * @return
+	 */
+	public static DeliverList getDeliverList(){
 		return deliverlist;
 	}
+	
+	/**
+	 * get the TableViewer
+	 * @return
+	 */
 	public static TableViewer getTableViewer(){
 		return tv;
 	}
+	
+	/**
+	 * add a new row of deliver table 
+	 * @param deliver
+	 */
 	public static void addNewTableRow(Deliver deliver){
 //		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
 			int new_id = Integer.valueOf(deliver.getID()) + 1;
-			DeliverValidator.setNewID(String.valueOf(new_id));
+//			DeliverValidator.setNewID(String.valueOf(new_id));
+			DeliverUtils.setNewLineID(String.valueOf(new_id));
 			Deliver deliver_new = new Deliver(String.valueOf(new_id));
 			deliverlist.addDeliver(deliver_new);
 			Utils.refreshTable(tv.getTable());
@@ -45,6 +56,7 @@ public class DeliverCellModifier implements ICellModifier {
 	}
 	
 	//when initial the table data
+	@Override
 	public Object getValue(Object element, String property) {
 		Deliver s = (Deliver) element;
 		if(property.equals("id")){			
@@ -87,6 +99,7 @@ public class DeliverCellModifier implements ICellModifier {
 	}
 
 	//when modify the table
+	@Override
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
 		Deliver s = (Deliver) item.getData();		
@@ -221,13 +234,6 @@ public class DeliverCellModifier implements ICellModifier {
 			}
 			if (valid) {
 				deliverlist.deliverChanged(s);
-//				if (DeliverValidator.checkID(s.getID()) && DeliverValidator.rowLegal(s)) {
-//					int new_id = Integer.valueOf(s.getID()) + 1;
-//					DeliverValidator.setNewID(String.valueOf(new_id));
-//					Deliver deliver_new = new Deliver(String.valueOf(new_id));
-//					deliverlist.addDeliver(deliver_new);
-//					Utils.refreshTable(tv.getTable());
-//				}
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package com.storeworld.deliver;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -9,8 +8,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -28,9 +25,6 @@ public class DeliverButtonCellEditor extends CellEditor {
     protected Table table;
     protected DeliverList deliverlist;
     protected int rowHeight = 0;
-    
-//    private static final int defaultStyle = SWT.SINGLE;
-
     
     public DeliverButtonCellEditor() {
         setStyle(0);
@@ -70,12 +64,8 @@ public class DeliverButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Deliver c = (Deliver)(table.getItem(index).getData());		
+						//delete the deliver from table & database
 						deliverlist.removeDeliver(c);
-//						MessageBox messageBox =   
-//								   new MessageBox(new Shell(),   					     
-//								    SWT.ICON_WARNING);   
-//						messageBox.setMessage("É¾³ý: "+c);   
-//						messageBox.open(); 
 						button.setVisible(false);
 						Utils.refreshTable(table);											
 								 

@@ -33,70 +33,172 @@ public class DeliverSorter extends ViewerSorter {
 	private DeliverSorter(int sortType){
 		this.sortType = sortType;
 	}
+	
+	/**
+	 * just as other pages
+	 *  we need to check if the row is the last row
+	 */
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		Deliver p1 = (Deliver)e1;
 		Deliver p2 = (Deliver)e2;
 		switch(sortType){
-			case BRAND:{
+		case BRAND:{
+			if(!p1.getBrand().equals("")  && !p2.getBrand().equals("")){
 				String l1 = p1.getBrand();
 				String l2 = p2.getBrand();
 				return l1.compareTo(l2);
-			}
-			case -BRAND:{
+				}else{
+					if(p1.getBrand().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}
+		}
+		case -BRAND:{
+			if(!p1.getBrand().equals("")  && !p2.getBrand().equals("")){
 				String l1 = p1.getBrand();
 				String l2 = p2.getBrand();
 				return l2.compareTo(l1);
-			}
-			case SUB_BRAND:{
-				String s1 = p1.getSubBrand();
-				String s2 = p2.getSubBrand();
-				return s1.compareTo(s2);
-			}
-			case -SUB_BRAND:{
-				String s1 = p1.getSubBrand();
-				String s2 = p2.getSubBrand();
-				return s2.compareTo(s1);
-			}
-			case SIZE:{
-				String s1 = p1.getSize();
-				String s2 = p2.getSize();
-				return s1.compareTo(s2);
-			}
-			case -SIZE:{
-				String s1 = p1.getSize();
-				String s2 = p2.getSize();
-				return s2.compareTo(s1);
-			}
-			case UNIT:{
-				String i1 = p1.getUnit();
-				String i2 = p2.getUnit();
-				return i1.compareTo(i2);
-			}
-			case -UNIT:{
-				String i1 = p1.getUnit();
-				String i2 = p2.getUnit();
-				return i2.compareTo(i1);
-			}
-			case PRICE:{
+				}else{
+					if(p1.getBrand().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}
+		}
+		case SUB_BRAND:{
+			if(!p1.getSubBrand().equals("")  && !p2.getSubBrand().equals("")){
+				String l1 = p1.getSubBrand();
+				String l2 = p2.getSubBrand();
+				return l1.compareTo(l2);
+				}else{
+					if(p1.getSubBrand().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}
+		}
+		case -SUB_BRAND:{
+			if(!p1.getSubBrand().equals("")  && !p2.getSubBrand().equals("")){
+				String l1 = p1.getSubBrand();
+				String l2 = p2.getSubBrand();
+				return l2.compareTo(l1);
+				}else{
+					if(p1.getSubBrand().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case SIZE:{
+			if(!p1.getSize().equals("")  && !p2.getSize().equals("")){
+				String l1 = p1.getSize();
+				String l2 = p2.getSize();
+				return l1.compareTo(l2);
+				}else{
+					if(p1.getSize().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case -SIZE:{
+			if(!p1.getSize().equals("")  && !p2.getSize().equals("")){
+				String l1 = p1.getSize();
+				String l2 = p2.getSize();
+				return l2.compareTo(l1);
+				}else{
+					if(p1.getSize().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case UNIT:{
+			if(!p1.getUnit().equals("")  && !p2.getUnit().equals("")){
+				String l1 = p1.getUnit();
+				String l2 = p2.getUnit();
+				return l1.compareTo(l2);
+				}else{
+					if(p1.getUnit().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case -UNIT:{
+			if(!p1.getUnit().equals("")  && !p2.getUnit().equals("")){
+				String l1 = p1.getUnit();
+				String l2 = p2.getUnit();
+				return l2.compareTo(l1);
+				}else{
+					if(p1.getUnit().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case PRICE:{
+			if(!p1.getPrice().equals("") && !p2.getPrice().equals("")){
 				double i1 = Double.valueOf(p1.getPrice());
 				double i2 = Double.valueOf(p2.getPrice());
 				return Double.valueOf(i1).compareTo(Double.valueOf(i2));
-			}
-			case -PRICE:{
+				}else{
+					if(p1.getPrice().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}					
+		}
+		case -PRICE:{
+			if(!p1.getPrice().equals("") && !p2.getPrice().equals("")){
 				double i1 = Double.valueOf(p1.getPrice());
 				double i2 = Double.valueOf(p2.getPrice());
 				return Double.valueOf(i2).compareTo(Double.valueOf(i1));
-			}
-			case NUMBER:{
+				}else{
+					if(p1.getPrice().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}	
+		}
+		case NUMBER:{
+			if(!p1.getNumber().equals("") && !p2.getNumber().equals("")){
 				int i1 = Integer.valueOf(p1.getNumber());
 				int i2 = Integer.valueOf(p2.getNumber());
-				return Integer.valueOf(i1).compareTo(Integer.valueOf(i2));		
-			}
-			case -NUMBER:{
+				return Integer.valueOf(i1).compareTo(Integer.valueOf(i2));
+				}else{
+					if(p1.getNumber().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}						
+		}
+		case -NUMBER:{
+			if(!p1.getNumber().equals("") && !p2.getNumber().equals("")){
 				int i1 = Integer.valueOf(p1.getNumber());
 				int i2 = Integer.valueOf(p2.getNumber());
-				return Integer.valueOf(i2).compareTo(Integer.valueOf(i1));				
-			}
+				return Integer.valueOf(i2).compareTo(Integer.valueOf(i1));
+				}else{
+					if(p1.getNumber().equals("")){
+						return 1;
+					}else{
+						return -1;
+					}
+				}			
+		}
+
 
 		}
 		return 0;

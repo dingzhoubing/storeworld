@@ -7,9 +7,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
 
 import com.storeworld.common.History;
 import com.storeworld.stock.StockHistory;
@@ -30,6 +29,7 @@ public class ItemComposite extends Composite {
 	private int height;
 	private ItemComposite self ; 
 	private History his;
+	
 	public void setID(int id){
 		this.id = id;
 	}
@@ -41,11 +41,15 @@ public class ItemComposite extends Composite {
 	private Text up = new Text(this, SWT.NONE);
 	private Text down_left = new Text(this, SWT.NONE);
 	private Text down_right = new Text(this, SWT.RIGHT | SWT.NONE);
+	private ToolTip tip;
+	
 	
 	public ItemComposite(Composite parent, Color color, int width, int height, History his) {
 		super(parent, SWT.BORDER);		
 		final Color color1 = new Color(parent.getDisplay(), 255, 245, 238);
 		final Color color2 = new Color(parent.getDisplay(), 255, 250, 250);
+		tip = new ToolTip(this.getShell(), SWT.NONE);
+		tip.setText("双击显示详细信息");
 		this.his = his;
 		self = this;
 		GridLayout gd = new GridLayout(2, false);
@@ -70,11 +74,6 @@ public class ItemComposite extends Composite {
 
 			@Override
 			public void handleEvent(Event event) {
-//				MessageBox messageBox =   
-//						   new MessageBox(new Shell(),   					     
-//						    SWT.ICON_WARNING);   
-//				messageBox.setMessage("显示进货信息");   
-//				messageBox.open(); 
 				History history = getHistory();
 				if(history instanceof StockHistory){
 					StockList.showHistory((StockHistory)history);
@@ -91,6 +90,7 @@ public class ItemComposite extends Composite {
 			@Override
 			public void handleEvent(Event event) {
 				 self.setBackgroundColor(color1);
+				 tip.setVisible(true);
 			}
 			
 		});
@@ -99,6 +99,7 @@ public class ItemComposite extends Composite {
 			@Override
 			public void handleEvent(Event event) {
 				 self.setBackgroundColor(color2);
+				 tip.setVisible(false);
 			}
 			
 		});			
@@ -138,7 +139,7 @@ public class ItemComposite extends Composite {
 	public void setValue(String u, String dl, String dr){
 		this.up.setText(u);
 		this.down_left.setText(dl);
-		this.down_right.setText(dr);
+		this.down_right.setText(dr+Constants.SPACE);
 		
 	}
 	public History getHistory(){

@@ -293,7 +293,12 @@ public class GoodsInfoService extends BaseAction{
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
 		List<GoodsInfoDTO> goodsInfoList = new ArrayList<GoodsInfoDTO>();
-		Integer id=(Integer) map.get("id");
+		Integer id;
+		String tmp = (String)map.get("id");
+		if(tmp == null)
+			id=null;
+		else
+			id=Integer.valueOf(tmp);
 		String brand=(String) map.get("brand");
 		String sub_brand=(String) map.get("sub_brand");
 		String standard=(String) map.get("standard");
@@ -359,4 +364,8 @@ public class GoodsInfoService extends BaseAction{
 		return ro;
 	}
 
+	public int getNextGoodsID() throws Exception{
+		return getNextID("goods_info");
+	}
+	
 }

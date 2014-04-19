@@ -43,6 +43,41 @@ public class BaseAction {
     	return connection;
 	}
     
+    /**
+     * get the next id we need in table
+     * @param tablename
+     * @return
+     * @throws Exception
+     */
+    public int getNextID(String tablename) throws Exception{
+    
+       ResultSet rs = null;
+       int id = -1;
+       Connection connection = this.getConnection();
+       PreparedStatement preparedStatement = null;
+ 	   String sql = "show table status where Name = " + "\""+ tablename + "\"";
+       try {    	   
+		   preparedStatement=connection.prepareStatement(sql);
+		   rs = preparedStatement.executeQuery();
+		   if(rs!=null){
+			   while(rs.next()){
+//				   System.out.println(rs.getString("Auto_increment"));
+				   //is this int, the same length of integer in java??
+				   String tmp = rs.getString("Auto_increment");
+				   if(tmp!=null)
+					   id = Integer.valueOf(tmp);				   
+				   //else id = -1;
+			   }
+		   }
+       } catch (Exception e) {
+    	   throw new Exception("get the id failed");
+       }finally{
+       	this.closeAll(connection, preparedStatement, null);
+       }
+       
+       return id;
+       
+    }
     
     /**
     * Ö´ÐÐÔö¡¢É¾¡¢¸ÄSQLÓï¾ä
@@ -259,5 +294,7 @@ public List executeQuery(String sql, List<Object> param) throws Exception {
 	    }
 	   return null;
    }
+   
+
 
 }

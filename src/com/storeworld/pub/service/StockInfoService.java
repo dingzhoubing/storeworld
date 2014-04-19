@@ -94,7 +94,6 @@ public class StockInfoService extends BaseAction{
 		return true;
 	}
 	
-//<<<<<<< HEAD
 	public boolean addBatch(Map<String,Object> map) throws Exception{
 		String sql_query="select count(*) batchNo from goods_batch_info where brand=? and sub_brand=? and standard=?";
 		String sql_insert="insert into goods_batch_info values(?,?,?,?,?,?,?,?,?)";
@@ -416,7 +415,7 @@ public class StockInfoService extends BaseAction{
 		int p_num=0;
 		
 		if(Utils.isNotNull(stock_time)){
-			sql=sql+" and si.stock_time>? and si.stock_time<";
+			sql=sql+" and si.stock_time>? and si.stock_time<?";
 			params.add(start_time);
 			params.add(stock_time);
 		}
@@ -483,7 +482,7 @@ public class StockInfoService extends BaseAction{
 		int p_num=0;
 		
 		if(Utils.isNotNull(stock_time)){
-			sql=sql+" and si.stock_time>? and si.stock_time<";
+			sql=sql+" and si.stock_time>? and si.stock_time<?";
 			params.add(start_time);
 			params.add(end_time);
 		}
@@ -519,4 +518,7 @@ public class StockInfoService extends BaseAction{
 		return ro;
 	} 
 
+	public int getNextStockID() throws Exception{
+		return getNextID("stock_info");
+	}
 }

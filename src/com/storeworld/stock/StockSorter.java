@@ -33,6 +33,11 @@ public class StockSorter extends ViewerSorter {
 	private StockSorter(int sortType){
 		this.sortType = sortType;
 	}
+	
+	/**
+	 * if the row is the last row in table, always be the last one 
+	 * for user to input new record 
+	 */
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		Stock p1 = (Stock)e1;
 		Stock p2 = (Stock)e2;

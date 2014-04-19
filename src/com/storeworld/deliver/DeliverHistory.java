@@ -2,10 +2,15 @@ package com.storeworld.deliver;
 
 import com.storeworld.common.History;
 
+/**
+ * 
+ * @author dingyuanxiong
+ * store and change the value of history in deliver table history panel
+ */
 public class DeliverHistory extends History {
 	String title;
-	String time;
-	String time_show;
+	String time;      //the time like "yyyyMMddhhmmss"
+	String time_show; //the time showed like "m ‘¬  d»’"
 	String number;
 	
 	DeliverHistory(String title, String time, String number){
@@ -32,7 +37,11 @@ public class DeliverHistory extends History {
 	public String getNumber(){
 		return this.number;
 	}
-	//change here
+
+	/**
+	 * get the format we need by time
+	 */
+	@Override
 	public String getTimeShow(){
 		String month = time.substring(4, 6);
 		String day = time.substring(6, 8);

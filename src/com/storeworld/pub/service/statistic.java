@@ -383,7 +383,6 @@ public class statistic extends BaseAction{
 			return ro;
 	}
 	
-//<<<<<<< HEAD
 	//=====================================利润统计===========================================//
 	/**
 	 * description:片区与客户均为空，则只按片区的维度统计
@@ -702,8 +701,6 @@ public class statistic extends BaseAction{
 			return ro;
 	}
 	
-//=======
-//>>>>>>> refs/remotes/origin/master
 	public String calculateStartTimeByEndTime(String end_time, int flag){
 		String year=end_time.substring(0, 4);
 		String month=end_time.substring(4, 6);
@@ -805,14 +802,6 @@ public class statistic extends BaseAction{
 	
 	String calFunc4(String year,String month,String day){
 		return "00000000";
-	}
-	
-/*<<<<<<< HEAD
-	//private String queryStockPrice(String end_time){
-		//String sql="select unit_price from stock_info si where si.stock_time=(select max(b.stock_time) from stock_info b where b.brand=? and b.sub_brand=?)";
-	//}
-=======
-	
->>>>>>> refs/remotes/origin/master*/
+	}	
 
 }

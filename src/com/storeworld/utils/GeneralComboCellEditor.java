@@ -13,8 +13,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolTip;
 
-import com.storeworld.common.ComboUtils;
-
 
 /** 
  * wheels from the Internet
@@ -225,7 +223,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     	if(ComboUtils.getType().equals(Constants.STOCK_TYPE_BRAND)){
     		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Stock_Brand(), ComboUtils.getCol_Stock_Brand(), Constants.STOCK_TYPE);
     	}
-    	else if(ComboUtils.getType().equals(Constants.STOCK_TYPE_SUB_BRAND)){//deliver
+    	else if(ComboUtils.getType().equals(Constants.STOCK_TYPE_SUB_BRAND)){//stock
     		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Stock_Sub_Brand(), ComboUtils.getCol_Stock_Sub_Brand(), Constants.STOCK_TYPE);
     	}
     	else if(ComboUtils.getType().equals(Constants.DELIVER_TYPE_BRAND)){//deliver
@@ -235,7 +233,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
     		comboBox = new GeneralCCombo(parent, getStyle(), ComboUtils.getWidth_Deliver_Sub_Brand(), ComboUtils.getCol_Deliver_Sub_Brand(), Constants.DELIVER_TYPE);
     	}
     	else{
-//    		this cannot happed
+//    		this cannot happened
     		comboBox = new GeneralCCombo(parent, getStyle(), 0,0,"");
     	}
         comboBox.setVisibleItemCount(10);

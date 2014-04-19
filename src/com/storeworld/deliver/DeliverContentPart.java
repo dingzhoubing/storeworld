@@ -1,10 +1,10 @@
 package com.storeworld.deliver;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -13,8 +13,6 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -23,7 +21,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
@@ -37,13 +34,17 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.storeworld.common.ComboUtils;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.pojo.dto.CustomerInfoDTO;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
+import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
+import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
-import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
 /**
@@ -54,6 +55,7 @@ import com.storeworld.utils.Utils;
 public class DeliverContentPart extends ContentPart{
 	
 	private static Table table;
+	private static TableViewer tv;
 	//the product list
 	private static DeliverList deliverlist = new DeliverList();
 	//the row height of the table
@@ -75,9 +77,21 @@ public class DeliverContentPart extends ContentPart{
 	private int priceColumn = 5;
 	private int numberColumn = 6;
 	private int sub_brandColomn = 2;
+	private static int deleteButtonColumn = 7;
 	private int brandColomn = 1;
 	private static GeneralComboCellEditor<String> comboboxCellEditor = null;
 	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;
+	private static GeneralComboCellEditor<String> comboboxCellEditor3 = null;//size
+	
+	private static Button btn_delete;
+	private static GeneralCCombo gc;
+	private static GeneralCCombo gcName;
+	private static Text text_phone;
+	private static Text text_address;
+	private static Text text_serial;
+	private static Text text_time;
+	private static Text total_val=null;
+	private static String TOTAL_VAL = "总计(小写):";
 	
 	public DeliverContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -87,9 +101,81 @@ public class DeliverContentPart extends ContentPart{
 		addListenerForTable();
 	}
 	
+	/**
+	 * kinds of method to control the page of deliver out of deliver page
+	 * @param ordernumber
+	 */
+	public static void setTextOrderNumber(String ordernumber){
+		text_serial.setText("");
+		text_serial.setText(ordernumber);
+	}
+	public static void setTime(String time){
+		text_time.setText("");
+		text_time.setText(time);
+	}
+	
+	public static void setCommon(String area, String name, String phone, String addr){
+		gc.setText(area);
+		gcName.setText(name);
+		text_phone.setText(phone);
+		text_address.setText(addr);
+	}
+	
+	public static void clearContent(){
+		gc.clearSelection();
+//		gc.removeAll();
+		gcName.clearSelection();
+		text_phone.setText("");
+		text_address.setText("");
+	}
+	
+	public static void enableEditContent(){
+		gc.setEnabled(true);
+		gcName.setEnabled(true);
+		text_phone.setEnabled(true);
+		text_address.setEnabled(true);
+		table.setEnabled(true);
+	}
+	
+	public static void disableEditContent(){
+		//clear the context 
+		gc.setText("");
+		gcName.setText("");
+		text_phone.setText("");
+		text_address.setText("");
+		text_serial.setText("");
+		text_time.setText("");
+		
+		gc.setEnabled(false);
+		gcName.setEnabled(false);
+		text_phone.setEnabled(false);
+		text_address.setEnabled(false);
+		table.setEnabled(false);
+		
+		//make the delete button visible = false
+		for (int index=0; index < table.getItemCount(); index++) {
+			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
+			if(!editor.getEditor().isDisposed())
+				editor.getEditor().setVisible(false);
+		}
+		
+	}
+
+	public static TableViewer getTableViewer(){
+		return tv;
+	}
 	public static DeliverList getDeliverList(){
 		return deliverlist;
 	}
+	
+	
+	public static void setTotal(String total){
+		total_val.setText(TOTAL_VAL+total+Constants.SPACE);
+	}
+	public static String getTotal(){
+		return total_val.getText();
+	}
+	
 	/**
 	 * call the software keyboard
 	 */
@@ -107,7 +193,7 @@ public class DeliverContentPart extends ContentPart{
 
 			@Override
 			public void handleEvent(Event event) {
-				if(Utils.getUseSoftKeyBoard()){
+				
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
@@ -117,7 +203,7 @@ public class DeliverContentPart extends ContentPart{
 				boolean found = false;
 				for (; index < rowCount; index++) {
 					TableItem item = table.getItem(index);
-					for(int col=0; col<colCount-1; col++){
+					for(int col=0; col<colCount; col++){
 						Rectangle rect = item.getBounds(col);
 						if(rect.contains(pt)){	
 							rowCurrent = index;
@@ -129,85 +215,109 @@ public class DeliverContentPart extends ContentPart{
 					if(found){
 						break;
 					}
-				}						
+				}	
+				
 				if(found){
-					if(colCurrent == sizeColumn || colCurrent == priceColumn || colCurrent == numberColumn){
-						//cannot reuse the editor, make cause unstable
-						editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-						Text text = (Text)(editorEdit.getEditor());	
-						callKeyBoard(text);
-						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());	
-						if(colCurrent == sizeColumn){
-							String sizelast = c.getSize();
-							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-								c.setSize(Utils.getInput());
-								text.setText(c.getSize());//validate the text
-								if(DeliverValidator.validateSize(c.getSize()))//table, table.getItem(rowCurrent), colCurrent, 
-								{
-									deliverlist.deliverChanged(c);	
-									text.setText(c.getSize());
-								}else{
-									c.setSize(sizelast);
+					if(Utils.getUseSoftKeyBoard()){
+						if(colCurrent == priceColumn || colCurrent == numberColumn){
+							//cannot reuse the editor, make cause unstable
+							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+							Text text = (Text)(editorEdit.getEditor());	
+							callKeyBoard(text);
+							Deliver c = (Deliver)(table.getItem(rowCurrent).getData());	
+							if(colCurrent == priceColumn){
+								String pricelast = c.getPrice();
+								if(Utils.getClickButton() && Utils.getInputNeedChange()){
+									c.setPrice(Utils.getInput());
+									text.setText(c.getPrice());//validate the text
+									if(DeliverValidator.validatePrice(c.getPrice()))//table, table.getItem(rowCurrent), colCurrent, 
+									{
+										deliverlist.deliverChanged(c);	
+//										text.setText(c.getPrice());
+									}else{
+										c.setPrice(pricelast);
+									}
+									//initial the next click
+									Utils.setClickButton(false);
 								}
-								//initial the next click
-								Utils.setClickButton(false);
-							}
-						}else if(colCurrent == priceColumn){
-							String pricelast = c.getPrice();
-							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-								c.setPrice(Utils.getInput());
-								text.setText(c.getPrice());//validate the text
-								if(DeliverValidator.validatePrice(c.getPrice()))//table, table.getItem(rowCurrent), colCurrent, 
-								{
-									deliverlist.deliverChanged(c);	
-									text.setText(c.getPrice());
-								}else{
-									c.setPrice(pricelast);
+							}else if(colCurrent == numberColumn){
+								String numberlast = c.getNumber();
+								if(Utils.getClickButton() && Utils.getInputNeedChange()){
+									c.setNumber(Utils.getInput());
+									text.setText(c.getNumber());//validate the text
+									if(DeliverValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
+									{
+										deliverlist.deliverChanged(c);	
+//										text.setText(c.getNumber());
+									}else{
+										c.setNumber(numberlast);
+									}
+									//initial the next click
+									Utils.setClickButton(false);
 								}
-								//initial the next click
-								Utils.setClickButton(false);
 							}
-						}else if(colCurrent == numberColumn){
-							String numberlast = c.getNumber();
-							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-								c.setNumber(Utils.getInput());
-								text.setText(c.getNumber());//validate the text
-								if(DeliverValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
-								{
-									deliverlist.deliverChanged(c);	
-									text.setText(c.getNumber());
-								}else{
-									c.setNumber(numberlast);
-								}
-								//initial the next click
-								Utils.setClickButton(false);
-							}
-						}
 
-						}
-						else if(colCurrent == brandColomn){//sub_brand column, then fill the combox
-							DeliverUtils.setCurrentLine(rowCurrent);
-							Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
-							DeliverUtils.setCurrentSub_Brand(c.getSubBrand());
-						}
-						else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
-							editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-							GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
-							Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
-							String current_brand = c.getBrand();
-							if( current_brand == null ||current_brand.equals("") || !Utils.checkBrand(current_brand)){
-								combo.removeAll();
-								c.setSubBrand("");
-								deliverlist.deliverChanged(c);	
-							}else{
-								List<String> list = Utils.getSub_Brands(current_brand);
-								//set data into objects
-								comboboxCellEditor2.setObjects(list);
-								combo.setItems(list.toArray(new String[list.size()]));
 							}
+					}else{
+						//do nothing
+					}
+					if(colCurrent == brandColomn){//sub_brand column, then fill the combox
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						DeliverUtils.setCurrentLine(rowCurrent);
+						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
+						DeliverUtils.setCurrentSub_Brand(c.getSubBrand());
+						List<String> list = Utils.getBrands();
+						//set data into objects
+						comboboxCellEditor.setObjects(list);
+						combo.setItems(list.toArray(new String[list.size()]));
+					}
+					else if(colCurrent == sub_brandColomn){//sub_brand column, then fill the combox
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
+						String current_brand = c.getBrand();
+						if( current_brand == null ||current_brand.equals("") || !Utils.checkBrand(current_brand)){
+							combo.removeAll();
+							c.setSubBrand("");
+							deliverlist.deliverChanged(c);	
+						}else{
+							List<String> list = Utils.getSub_Brands(current_brand);
+							//set data into objects
+							comboboxCellEditor2.setObjects(list);
+							combo.setItems(list.toArray(new String[list.size()]));
 						}
+					}else if(colCurrent == sizeColumn){
+						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
+						String current_brand = c.getBrand();
+						String current_sub = c.getSubBrand();
+						//all this will make the size column with empty
+						if(current_brand == null || current_brand.equals("") || current_sub==null || current_sub.equals("")
+								|| !Utils.checkBrand(current_brand) || !Utils.checkSubBrand(current_sub)){
+							combo.removeAll();
+							c.setSize("");
+							deliverlist.deliverChanged(c);	
+						}else{
+							//query the database to get the available size
+							List<String> list = Utils.getSizes(current_brand, current_sub);
+							//set data into objects
+							comboboxCellEditor3.setObjects(list);
+							combo.setItems(list.toArray(new String[list.size()]));
+						}
+													
+					}
+					else if(colCurrent == deleteButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editor.getEditor().isDisposed())
+								editor.getEditor().setVisible(false);
+						}
+					}
+					
+					
 				}
-			}
 			}
 			
 		});
@@ -230,12 +340,12 @@ public class DeliverContentPart extends ContentPart{
 					}
 				}								
 				if(row >= 0){			
-					editor.setEditor(cellEditor[7].getControl(), table.getItem(row), 7);
+					editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
 					if(!editor.getEditor().isDisposed())
 						editor.getEditor().setVisible(true);
 				}else{
 					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
-						editor.setEditor(cellEditor[7].getControl(), table.getItem(visibleButton_last), 7);
+						editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
 						if(!editor.getEditor().isDisposed())
 							editor.getEditor().setVisible(false);
 					}
@@ -247,23 +357,6 @@ public class DeliverContentPart extends ContentPart{
 		    public void handleEvent(Event event) {
 		        event.height =rowHeight;
 		    }
-		});
-		//control the verify
-		Text text = (Text)cellEditor[3].getControl();
-		text.addVerifyListener(new VerifyListener(){
-			public void verifyText(VerifyEvent e){
-				String inStr = e.text;
-				if (inStr.length() > 0){
-					try{
-						if(!inStr.equals(""))
-							e.doit = true;
-						else
-							e.doit=false;
-					}catch(Exception ep){
-						e.doit = false;
-					}
-				}
-			}
 		});
 	}
 	
@@ -293,6 +386,28 @@ public class DeliverContentPart extends ContentPart{
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
 		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setText("创建送货单");
+		btnNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				
+				DeliverUtils.setOrderNumber();//set the order number for the deliver table
+				
+				clearContent();
+				enableEditContent();
+//				disableEditContent();
+				DeliverUtils.setTime(null);
+				
+				text_serial.setText(DeliverUtils.getOrderNumber());
+				String time = DeliverUtils.getTime();
+				String year = time.substring(0, 4);
+				String month = time.substring(4, 6);
+				String day = time.substring(6, 8);
+				String hour = time.substring(8, 10);
+				String min = time.substring(10, 12);
+				time = year+"-"+month+"-"+day+" "+hour+":"+min;
+				text_time.setText(time);
+			}
+		});
 		
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" 当月历史记录(在下方设置日期进行搜索)");
@@ -374,7 +489,7 @@ public class DeliverContentPart extends ContentPart{
 		text_title.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		text_title.setText("送货单");		
 		//delete button to delete the list or clear the current list
-		Button btn_delete = new Button(composite_right, SWT.NONE);
+		btn_delete = new Button(composite_right, SWT.NONE);
 		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setText("删除");
 		composite_updown = (int)(h/3);
@@ -386,13 +501,19 @@ public class DeliverContentPart extends ContentPart{
 		lbl_area.setBounds(0, (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
 		//area combo
 		
-		GeneralCCombo gc = new GeneralCCombo(composite_right, SWT.NONE, 0, -1, Constants.DELIVER_TYPE);
+		gc = new GeneralCCombo(composite_right, SWT.NONE, 0, -1, Constants.DELIVER_TYPE);
 		gc.setBounds((int)(4*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
 		gc.setFont(SWTResourceManager.getFont("微软雅黑", 12, SWT.NORMAL));
 		gc.setVisibleItemCount(5);
 		gc.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
 		//mouse down listener
-//		gc.setItems(items);		
+		gc.addListener(SWT.MouseDown, new Listener() {
+			@Override
+        	public void handleEvent(Event event)  {
+				gc.setItems(DataCachePool.getCustomerAreas());
+			}
+		});
+	
 		//customer
 		Label lbl_cusname = new Label(composite_right, SWT.CENTER|SWT.NONE);
 		lbl_cusname.setFont(SWTResourceManager.getFont("微软雅黑", 12, SWT.NORMAL));
@@ -401,7 +522,7 @@ public class DeliverContentPart extends ContentPart{
 		lbl_cusname.setBounds(0, (int)(5*h/18), (int)(4*w/5/25), (int)(h/9/2));
 
 		//customer name
-		GeneralCCombo gcName = new GeneralCCombo(composite_right, SWT.NONE, 0, -2, Constants.DELIVER_TYPE);
+		gcName = new GeneralCCombo(composite_right, SWT.NONE, 0, -2, Constants.DELIVER_TYPE);
 		gcName.setBounds((int)(4*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
 		gcName.setFont(SWTResourceManager.getFont("微软雅黑", 12, SWT.NORMAL));
 		gcName.setVisibleItemCount(5);
@@ -412,6 +533,44 @@ public class DeliverContentPart extends ContentPart{
 				btn_quick.setVisible(true);				
 			}			
 		});
+		gcName.addListener(SWT.MouseDown, new Listener() {
+			@Override
+        	public void handleEvent(Event event) {
+				String area = gc.getText();
+//				System.out.println("area: "+area);
+				String[] names = DataCachePool.getCustomerNames(area);
+				if(names.length != 0){//no such areas
+					gcName.setItems(names);
+				}
+			}
+		});
+		
+		gcName.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+//				System.out.println("selected");
+				String area = gc.getText();
+				String name = gcName.getText();
+				try {
+					//		
+					CustomerInfoService cusinfo = new CustomerInfoService();		
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("customer_area", area);
+					map.put("customer_name", name);
+					ReturnObject ret = cusinfo.queryCustomerInfo(map);
+					Pagination page = (Pagination) ret.getReturnDTO();
+					List<Object> list = page.getItems();
+					if(list.size() > 0){
+						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
+						text_phone.setText(cDTO.getTelephone());
+						text_address.setText(cDTO.getCustomer_addr());
+					}					
+				} catch (Exception ex) {
+					System.out.println("get customer names of a specfied area & name failed");
+				}
+				
+			}
+		});
 //		gc.setItems(items);		
 		//add listener for customer names
 		
@@ -421,7 +580,7 @@ public class DeliverContentPart extends ContentPart{
 		lbl_phone.setAlignment(SWT.CENTER);
 		lbl_phone.setText("电话:");
 		lbl_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
-		Text text_phone = new Text(composite_right, SWT.NONE);
+		text_phone = new Text(composite_right, SWT.NONE);
 		text_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));		
 		//customer address
 		Label lbl_address = new Label(composite_right, SWT.CENTER);
@@ -429,7 +588,7 @@ public class DeliverContentPart extends ContentPart{
 		lbl_address.setAlignment(SWT.CENTER);
 		lbl_address.setText("地址:");
 		lbl_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
-		Text text_address = new Text(composite_right, SWT.NONE);
+		text_address = new Text(composite_right, SWT.NONE);
 		text_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));		
 		//serial number
 		Label lbl_serial = new Label(composite_right, SWT.CENTER);
@@ -437,15 +596,17 @@ public class DeliverContentPart extends ContentPart{
 		lbl_serial.setAlignment(SWT.CENTER);
 		lbl_serial.setText("单号:");
 		lbl_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
-		Text text_serial = new Text(composite_right, SWT.NONE);
+		text_serial = new Text(composite_right, SWT.NONE);
+		text_serial.setEnabled(false);
 		text_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));		
 		//time
 		Label lbl_time = new Label(composite_right, SWT.CENTER);
 		lbl_time.setFont(SWTResourceManager.getFont("微软雅黑", 12, SWT.NORMAL));
 		lbl_time.setAlignment(SWT.CENTER);
-		lbl_time.setText("单号:");
+		lbl_time.setText("时间:");
 		lbl_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
-		Text text_time = new Text(composite_right, SWT.NONE);
+		text_time = new Text(composite_right, SWT.NONE);
+		text_time.setEnabled(false);
 		text_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
 		
 		
@@ -481,9 +642,9 @@ public class DeliverContentPart extends ContentPart{
 		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total.setLayoutData(gd_text);
 		//text total 2
-		Text total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("总计(小写):               ");
+		total_val.setText("总计(小写):"+Constants.SPACE+Constants.SPACE);
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setLayoutData(gd_text2);
 		//indeed 1
@@ -511,13 +672,33 @@ public class DeliverContentPart extends ContentPart{
 		Button btn_print = new Button(composite_right, SWT.NONE);
 		btn_print.setText("打印");
 		btn_print.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
-		
+		btn_print.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				System.out.println("print");
+				//do more check here
+				if(DeliverList.getDelivers().size() > 1){
+					DeliverUtils.addToHistory();
+					
+					//clear table
+					//and add a new line					
+					table.clearAll();
+					table.removeAll();
+					
+					DeliverList.removeAllDelivers();
+					clearContent();
+					disableEditContent();	
+					DeliverUtils.setTime("");
+				}
+				
+			}
+		});
 		//define a table				
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
 		table.setBounds(0, (int)(h/3), (int)(4*w/5), (int)(h/3));
-		
+		tv = tableViewer;
 		//set the columns of the table
 		int columnWidth = (int)(4*9*w/60/5);		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
@@ -623,7 +804,7 @@ public class DeliverContentPart extends ContentPart{
 		tableViewer.setLabelProvider(new DeliverTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		Deliver deliver_new = new Deliver(DeliverUtils.getNewLineID());//dynamic from the database
-		DeliverValidator.setNewID(DeliverUtils.getNewLineID());
+//		DeliverValidator.setNewID(DeliverUtils.getNewLineID());
 		deliverlist.addDeliver(deliver_new);
 		
 		tableViewer.setInput(deliverlist);		
@@ -640,10 +821,14 @@ public class DeliverContentPart extends ContentPart{
 		comboboxCellEditor2 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSub_Brands());
 //		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
-		cellEditor[3] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[4] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[5] = new TextCellEditor(tableViewer.getTable());
-		cellEditor[6] = new TextCellEditor(tableViewer.getTable());				
+		
+		ComboUtils.setWidth_Col(columnWidth, 3, Constants.DELIVER_TYPE_SUB_BRAND);
+		comboboxCellEditor3 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSizes());
+		cellEditor[3] = comboboxCellEditor3;
+		
+		cellEditor[4] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 4);
+		cellEditor[5] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 5);
+		cellEditor[6] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 6);	
 		cellEditor[7] = new DeliverButtonCellEditor(tableViewer.getTable(), deliverlist, rowHeight);//ButtonCellEditor
 
 		tableViewer.setCellEditors(cellEditor);
@@ -665,21 +850,8 @@ public class DeliverContentPart extends ContentPart{
 		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
 		
+		//initial state: disable
+		disableEditContent();
 
-		
-
-		
-
-		
-
-		
-
-		
-
-		
-		
-		
-		
-		
 	}
 }

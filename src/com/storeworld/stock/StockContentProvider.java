@@ -3,10 +3,6 @@ package com.storeworld.stock;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
 
@@ -24,7 +20,7 @@ public class StockContentProvider implements IStructuredContentProvider, IDataLi
 			this.stocklist = stocklist;
 		}
 		public Object[] getElements(Object inputElement) {
-			return stocklist.getStocks().toArray();
+			return StockList.getStocks().toArray();
 		}
 		
 		public void dispose() {
@@ -40,23 +36,11 @@ public class StockContentProvider implements IStructuredContentProvider, IDataLi
 		@Override
 		public void add(DataInTable stock) {
 			tableviewer.add(stock);
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("add stock: "+stock);   
-//			messageBox.open(); 
-//			System.out.println(stock);
 			
 		}
 		@Override
 		public void remove(DataInTable stock) {
 			tableviewer.remove(stock);
-//			//no use later
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("remove stock: "+stock);   
-//			messageBox.open(); 
 			
 		}
 		@Override

@@ -3,10 +3,6 @@ package com.storeworld.deliver;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
 
@@ -23,8 +19,12 @@ public class DeliverContentProvider implements IStructuredContentProvider, IData
 			this.tableviewer = tableviewer;
 			this.deliverlist = deliverlist;
 		}
+		
+		/**
+		 * get the elements of the deliver table initial/refresh 
+		 */
 		public Object[] getElements(Object inputElement) {
-			return deliverlist.getDelivers().toArray();
+			return DeliverList.getDelivers().toArray();
 		}
 		
 		public void dispose() {
@@ -40,23 +40,11 @@ public class DeliverContentProvider implements IStructuredContentProvider, IData
 		@Override
 		public void add(DataInTable deliver) {
 			tableviewer.add(deliver);
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("add deliver: "+deliver);   
-//			messageBox.open(); 
-//			System.out.println(deliver);
 			
 		}
 		@Override
 		public void remove(DataInTable deliver) {
 			tableviewer.remove(deliver);
-			//no use later
-//			MessageBox messageBox =   
-//					   new MessageBox(new Shell(),   					     
-//					    SWT.ICON_WARNING);   
-//			messageBox.setMessage("remove deliver: "+deliver);   
-//			messageBox.open(); 
 			
 		}
 		@Override

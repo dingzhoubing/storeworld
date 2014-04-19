@@ -180,18 +180,25 @@ public class customerMatch {
 	      conn.close();*/
 			Pagination page = new Pagination();
 			ReturnObject ro=new ReturnObject();
-			GoodsInfoService tempService=new GoodsInfoService();
-			tempService.queryGoodsInfoAll();
+//			GoodsInfoService tempService=new GoodsInfoService();
+//			tempService.queryGoodsInfoAll();
 //<<<<<<< HEAD
-			statistic temp=new statistic();
+//=======
+//<<<<<<< HEAD
+//			statistic temp=new statistic();
 			//Map map = new HashMap<String,Object>();
 //=======
-			statistic temp=new statistic();
-			Map map = new HashMap<String,Object>();
+//>>>>>>> refs/remotes/origin/master
+//			statistic temp=new statistic();
+//			Map map = new HashMap<String,Object>();
 //>>>>>>> refs/remotes/origin/master
 			/*map.put("customer_area", "城东");
 			map.put("brand", "五得利");
 			map.put("sub_brand", "精一");*/
+//<<<<<<< HEAD
+//			map.put("end_time", "20140403");
+//			temp.deliverQuantityAnalysis(map);
+//=======
 //<<<<<<< HEAD
 			/*map.put("end_time", "20140403");
 			String tt=(String)map.get("tt");
@@ -200,8 +207,9 @@ public class customerMatch {
 			}*/
 			//temp.deliverQuantityAnalysis(map);
 //=======
-			map.put("end_time", "20140403");
-			temp.deliverQuantityAnalysis(map);
+//			map.put("end_time", "20140403");
+//			temp.deliverQuantityAnalysis(map);
+//>>>>>>> refs/remotes/origin/master
 //>>>>>>> refs/remotes/origin/master
 			/*Map map = new HashMap<String,Object>();
 			map.put("brand", "五得利");

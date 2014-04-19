@@ -68,7 +68,18 @@ public class GeneralCCombo extends Composite {
     protected ToolTip tip;
     private static final int ADJUST_X = 30;
 	private static final int ADJUST_Y = 20;
-//	static final String PACKAGE_PREFIX = "org.eclipse.swt.custom."; //$NON-NLS-1$
+
+	private static final int BRAND_COLUMN = 1;
+	private static final int SUB_BRAND_COLUMN = 2;
+	private static final int SIZE_COLUMN = 3;
+	private static final int NAME= -1;
+	private static final int AREA = -2;
+	
+	private static final String BRAND_MESSAGE="品牌应该为中文字串";
+	private static final String SUB_BRAND_MESSAGE="子品牌应该为中文字串";
+	private static final String SIZE_MESSAGE="规格应该以数字开头以中文或字母结尾";
+	private static final String NAME_MESSAGE="名字应该为中文字串";
+	private static final String AREA_MESSAGE="片区应该只包含中文或字母，数字";
 
 
 public GeneralCCombo (Composite parent, int style, int the_width, int the_col, String the_type) {
@@ -87,22 +98,25 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 	 * in combo box, the validator
 	 * this listener is too big, may cut it into pieces
 	 */
-	//it seems that the focus lost listener is better
-//	text.addModifyListener(new ModifyListener(){
+	//it seems that the focus lost listener is better    
+	/**
+	 * if we use modifyListener, which will cause an conflict with the 
+	 * mousedown event in StockContentPart & DeliverContentPart
+	 */
 	text.addFocusListener(new FocusAdapter(){
 			@Override
-//			public void modifyText(ModifyEvent e) {
 			public void focusLost(FocusEvent e) {
+//				System.out.println("text focus lost");
 				boolean valid = false;
 				// listener for table brand and sub_brand
-				if (col == 1 || col == 2) {
+				if (col == BRAND_COLUMN || col == SUB_BRAND_COLUMN) {
 					//stock
 					if (type.equals(Constants.STOCK_TYPE)) {
 						
 						Table table = (Table) text.getParent().getParent();
 						TableItem item = table.getItem(StockUtils.getCurrentLine());
 						Stock stock = (Stock) item.getData();
-						if (col == 1) {
+						if (col == BRAND_COLUMN) {
 							valid = StockValidator.validateBrand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
@@ -111,27 +125,43 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								// reset the last sub_brand
 								stock.setSubBrand(StockUtils.getCurrentSub_Brand());
 								StockContentPart.getStockList().stockChanged(stock);
+								
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-								tip.setMessage("wrong brand, the brand should obey....");
+//								tip.setMessage("wrong brand, the brand should obey....");
+								tip.setMessage(BRAND_MESSAGE);
 								tip.setVisible(true);
 							} else {
 								String current_brand = text.getText();
 								if (current_brand == null|| current_brand.equals("")|| !Utils.checkBrand(current_brand)) {
 									stock.setSubBrand("");
+									stock.setSize("");
 									StockContentPart.getStockList().stockChanged(stock);
 									// Utils.refreshTable(table);
 								}
 
 							}
-						} else if (col == 2) {
+						} else if (col == SUB_BRAND_COLUMN) {
 							valid = StockValidator.validateSub_Brand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// tip.setLocation(loc.x+ADJUST_X+width*(col-2),
 								// loc.y+text.getLocation().y+ADJUST_Y);//
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-								tip.setMessage("wrong sub brand, the sub brand should obey....");
+//								tip.setMessage("wrong sub brand, the sub brand should obey....");
+								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
+							}else{
+								stock.setSize("");
+								StockContentPart.getStockList().stockChanged(stock);
+							}
+						}else if(col == SIZE_COLUMN){
+							valid = StockValidator.validateSize(text.getText());
+							if (!valid && !text.getText().equals("")) {
+								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
+								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+								tip.setMessage(SIZE_MESSAGE);
+								tip.setVisible(true);
+								StockContentPart.getStockList().stockChanged(stock);
 							}
 						}
 					}else{//deliver type
@@ -139,7 +169,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 						Table table = (Table) text.getParent().getParent();
 						TableItem item = table.getItem(DeliverUtils.getCurrentLine());
 						Deliver deliver = (Deliver) item.getData();
-						if (col == 1) {
+						if (col == BRAND_COLUMN) {
 							valid = DeliverValidator.validateBrand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
@@ -149,56 +179,73 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								deliver.setSubBrand(DeliverUtils.getCurrentSub_Brand());
 								DeliverContentPart.getDeliverList().deliverChanged(deliver);							
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-								tip.setMessage("wrong brand, the brand should obey....");
+								tip.setMessage(BRAND_MESSAGE);
 								tip.setVisible(true);
 							} else {
 								String current_brand = text.getText();
 								if (current_brand == null|| current_brand.equals("")|| !Utils.checkBrand(current_brand)) {
 									deliver.setSubBrand("");
+									deliver.setSize("");
 									DeliverContentPart.getDeliverList().deliverChanged(deliver);
 									// Utils.refreshTable(table);
 								}
 
 							}
-						} else if (col == 2) {
+						} else if (col == SUB_BRAND_COLUMN) {
 							valid = DeliverValidator.validateSub_Brand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// tip.setLocation(loc.x+ADJUST_X+width*(col-2),
 								// loc.y+text.getLocation().y+ADJUST_Y);//
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-								tip.setMessage("wrong sub brand, the sub brand should obey....");
+								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
+							}else{
+								deliver.setSize("");
+								DeliverContentPart.getDeliverList().deliverChanged(deliver);
+							}
+						}else if(col == SIZE_COLUMN){
+							if (!valid && !text.getText().equals("")) {
+								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
+								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+								tip.setMessage(SIZE_MESSAGE);
+								tip.setVisible(true);
+								DeliverContentPart.getDeliverList().deliverChanged(deliver);
 							}
 						}
 						
 					}
-				} else {// listener for name, area
-					if (col == -1) {
-						valid = DeliverValidator.validateName(text.getText());
-						if (!valid && !text.getText().equals("")) {
-							Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-							tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-							tip.setMessage("wrong name, the name should obey....");
-							tip.setVisible(true);
-							text.setText("");
-						}
-					}else if(col == -2){
-						valid = DeliverValidator.validateArea(text.getText());
-						if (!valid && !text.getText().equals("")) {
-							Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-							tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
-							tip.setMessage("wrong area, the area should obey....");
-							tip.setVisible(true);
-							text.setText("");
-						}
-					}
-				}
-
+				}				
 			}
 		
 	});
 	
+	//for name & area in deliver page
+	text.addModifyListener(new ModifyListener(){
+		@Override
+		public void modifyText(ModifyEvent e) {
+			boolean valid = false;
+			if (col == NAME) {
+				valid = DeliverValidator.validateName(text.getText());
+				if (!valid && !text.getText().equals("")) {
+					Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
+					tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+					tip.setMessage(NAME_MESSAGE);
+					tip.setVisible(true);
+					text.setText("");
+				}
+			}else if(col == AREA){
+				valid = DeliverValidator.validateArea(text.getText());
+				if (!valid && !text.getText().equals("")) {
+					Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
+					tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+					tip.setMessage(AREA_MESSAGE);
+					tip.setVisible(true);
+					text.setText("");
+				}
+			}
+		}
+	});
 	
 	int arrowStyle = SWT.ARROW | SWT.DOWN;
 	if ((style & SWT.FLAT) != 0) arrowStyle |= SWT.FLAT;

@@ -10,8 +10,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-
 import com.storeworld.analyze.ratioutils.RatioAnalyzerCellModifier;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerContentProvider;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerLabelProvider;

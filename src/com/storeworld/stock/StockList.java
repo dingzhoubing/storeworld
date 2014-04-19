@@ -1,5 +1,6 @@
 package com.storeworld.stock;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,14 +10,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.storeworld.common.DataInTable;
-import com.storeworld.common.History;
 import com.storeworld.common.IDataListViewer;
-import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
-import com.storeworld.pub.service.GoodsInfoService;
 import com.storeworld.pub.service.StockInfoService;
+import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
 
 /**
@@ -31,6 +30,8 @@ public class StockList {
 	//hash set, so make it only has one of one kind
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final StockInfoService stockinfo = new StockInfoService();
+	private static boolean isFirst = true;
+	private static DecimalFormat df = new DecimalFormat("#.###");
 	
 	public StockList() {
 		super();
@@ -39,93 +40,60 @@ public class StockList {
 	
 	//initial data, later, in database
 	public void initial(){		
-//		String brand = "五得利";
-//		String subbrand = "精一";
-//		String size = "50kg";
-//		String unit = "包";
-//		String price = "50.0";
-//		String number = "30";
-//		Stock stock = new Stock("1",brand, subbrand, size, unit, price, number);
-//		stockList.add(stock);
-//		
-//		String brand2 = "五得利";
-//		String subbrand2 = "特精";
-//		String size2 = "50kg";
-//		String unit2 = "包";
-//		String price2 = "75.0";
-//		String number2 = "40";
-//		Stock stock2 = new Stock("2",brand2, subbrand2, size2, unit2, price2, number2);
-//		stockList.add(stock2);
-//		
-//		String brand3 = "五联";
-//		String subbrand3 = "包子粉";
-//		String size3 = "50kg";
-//		String unit3= "包";
-//		String price3 = "72.0";
-//		String number3 = "20";
-//		Stock stock3 = new Stock("3", brand3, subbrand3, size3, unit3, price3, number3);
-//		stockList.add(stock3);	
-	
+
 		//at initial, the newLine is the latest number of the stock in database
 		//??quick query for the last one?
 		String newID = "";
 		try {
-			ReturnObject ret = stockinfo.queryStockInfoAll();
-			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();
-			for(int i=0;i<list.size();i++){
-				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
-				newID = cDTO.getId();		
-//				String brand = cDTO.getBrand();
-//				String sub_brand = cDTO.getSub_brand();
-//				StockUtils.addBrand2Sub(brand, sub_brand);
-			}
+//			ReturnObject ret = stockinfo.queryStockInfoAll();
+			newID = String.valueOf(stockinfo.getNextStockID());
+//			Pagination page = (Pagination) ret.getReturnDTO();
+//			List<Object> list = page.getItems();
+//			for(int i=0;i<list.size();i++){
+//				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
+//				newID = cDTO.getId();						
+//			}
 		} catch (Exception e) {
 			System.out.println("failed");
 		}
 		//no record
-		if(newID.equals(""))
-			newID="0";//empty
+		if(newID.equals("-1"))
+			newID="1";//empty
 		//by the list of Customer from database
-		StockUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)+1));
+		StockUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
 		
-		try {
-			GoodsInfoService goodsinfo = new GoodsInfoService();
-			ReturnObject ret = goodsinfo.queryGoodsInfoAll();
-			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();
-			for(int i=0;i<list.size();i++){
-				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
-//				Product prod = new Product();				
-//				prod.setBrand(cDTO.getBrand());
-//				prod.setSubBrand(cDTO.getSub_brand());
-				StockUtils.addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());
-			}
-		} catch (Exception e) {
-			System.out.println("failed");
-		}
-		
-		
-		
+		//if the brand2sub not cached, query the database
+		DataCachePool.cacheProductInfo();
 		
 	}
 	
+	/**
+	 * get all the stocks
+	 * @return
+	 */
 	public static ArrayList<DataInTable> getStocks() {
 		return stockList;
 	}
 	
 	/**
-	 * add a stock
+	 * add a stock in table UI
+	 * @param stock
 	 */
 	public void addStock(Stock stock) {
 		stockList.add(stock);
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
-		while (iterator.hasNext())
+		while (iterator.hasNext()){
 			(iterator.next()).add(stock);
+//			if(isFirst){
+//				StockUtils.refreshTableData();
+//				isFirst = false;
+//			}
+		}
 	}
 
 	/**
-	 * @param remove a stock
+	 * delete a stock in table & database
+	 * @param stock
 	 */
 	public void removeStock(Stock stock) {
 		stockList.remove(stock);
@@ -138,11 +106,30 @@ public class StockList {
 				System.out.println("remove the stock failed");
 			}
 		}
+		
+		//only complete record can used to compute the total value of this stock ??
+		double total = 0.000;
+//		boolean has = false;
+		for(int i=0;i<stockList.size()-1;i++){
+			Stock st = (Stock)(stockList.get(i));
+			String price = st.getPrice();
+			String number = st.getNumber();
+			double p = Double.valueOf(price);
+			int n = Integer.valueOf(number);
+			total+=(p * n);	
+//			has = true;
+		}
+		StockContentPart.setTotal(df.format(total));		
+		
 	}
 	
+	/**
+	 * remove all the stocks in table when user click button to add a new stock table
+	 */
 	public static void removeAllStocks(){
 		//the new item
-		Stock st = new Stock(StockValidator.getNewID());
+//		Stock st = new Stock(StockValidator.getNewID());
+		Stock st = new Stock(StockUtils.getNewLineID());
 		stockList.clear();
 		//add a new line
 		StockCellModifier.getStockList().addStock(st);
@@ -150,13 +137,77 @@ public class StockList {
 		Utils.refreshTable(StockCellModifier.getTableViewer().getTable());
 	}
 
+	/**
+	 * if user want to see the detail of a specified history item
+	 * double click to show the history in stock table
+	 * 1. query the detail by the history time
+	 * 2. add the detail info into the table stocklist, auto show it in table
+	 * 3. refresh the table
+	 * @param history
+	 */
 	public static void showHistory(StockHistory history){
+		//clear the stocks first
+		stockList.clear();
+		
+		//show the clicked stock history
 		String time = history.getTime();
 		//query database to get the history and addStock
+		Map<String, Object> map = new HashMap<String ,Object>();
+		map.put("stock_time", time);
+		double total = 0.000;
+		try {
+			//remove the items
+			StockCellModifier.getTableViewer().getTable().removeAll();
+			stockList.clear();//clear first
+			ReturnObject ret = stockinfo.queryStockInfo(map);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();			
+			for(int i=0;i<list.size();i++){
+				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
+				Stock st_tmp = new Stock();
+				st_tmp.setBrand(cDTO.getBrand());
+				st_tmp.setSubBrand(cDTO.getSub_brand());
+				st_tmp.setSize(cDTO.getStandard());		
+				st_tmp.setUnit(cDTO.getUnit());
+				st_tmp.setPrice(String.valueOf(cDTO.getUnit_price()));
+				st_tmp.setNumber(cDTO.getQuantity());				
+				//...now in test, only show these three property
+				StockCellModifier.getStockList().addStock(st_tmp);
+				double p = Double.valueOf(cDTO.getUnit_price());
+				int n = Integer.valueOf(cDTO.getQuantity());
+				total+=(p * n);		
+			}
+			//add new line
+//			Stock st = new Stock(StockValidator.getNewID());
+			Stock st = new Stock(StockUtils.getNewLineID());
+			StockCellModifier.getStockList().addStock(st);
+			//refresh table
+			Utils.refreshTable(StockCellModifier.getTableViewer().getTable());
+			
+		} catch (Exception e) {
+			System.out.println("query the stock by time failed");
+		}
+		//show time of the stock
+		int year = Integer.valueOf(time.substring(0, 4));
+		int month = Integer.valueOf(time.substring(4, 6));
+		int day = Integer.valueOf(time.substring(6, 8));
+		StockContentPart.setStockTimer(year, month-1, day);//month-1, be care
+		
+		//show total
+		StockContentPart.setTotal(df.format(total));
+
 	}
 	
+	public void stockChangedForUnit(Stock stock){
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			(iterator.next()).update(stock);
+		}
+	}
+
 	/**
-	 * @param update a stock
+	 * update the stock table
+	 * @param stock
 	 */
 	public void stockChanged(Stock stock) {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
@@ -190,14 +241,16 @@ public class StockList {
 				//update the database here				
 				try {
 					stockinfo.updateStockInfo(stock.getID(), st);
+					//if the brand, sub are new, we update the product cache !!
 				} catch (Exception e) {
 					System.out.println("update stock failed");
 				}
 			}
-			if(StockValidator.checkID(stock.getID()) && StockValidator.rowLegal(stock)){				
+			if(StockValidator.checkID(stock.getID()) && StockValidator.rowLegal(stock) && StockValidator.rowComplete(stock)){				
 				try {
 					stockinfo.addStockInfo(st);
-					StockUtils.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+//					StockUtils.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+					DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
 					//if also add into the product table, we should update the productlist
 					//every time we enter the product/customer page, we should refresh the table
 					//to show the data from stock, deliver page
@@ -207,25 +260,35 @@ public class StockList {
 				}
 			}
 		}
+		double total = 0.000;
+//		boolean has = false;
+		for(int i=0;i<stockList.size()-1;i++){
+//			has = true;
+			Stock st = (Stock)(stockList.get(i));
+			String price = st.getPrice();
+			String number = st.getNumber();
+			double p = Double.valueOf(price);
+			int n = Integer.valueOf(number);
+			total+=(p * n);						
+		}
+		StockContentPart.setTotal(df.format(total));
+		
 	}
 
 	/**
-	 * @param may multi contentprovider?， one remove
+	 * may multi content provider
+	 * @param viewer
 	 */
 	public void removeChangeListener(IDataListViewer viewer) {
 		changeListeners.remove(viewer);
 	}
 
-	/**
-	 * @param may multi contentprovider? one add
-	 * viewer is a content provider
-	 */
 	public void addChangeListener(IDataListViewer viewer) {
 		changeListeners.add(viewer);
 	}
 	
 	public String toString(){
-		return this.stockList.toString();
+		return stockList.toString();
 	}
 	
 }

@@ -14,6 +14,7 @@ import com.storeworld.database.BaseAction;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pub.service.GoodsInfoService;
 import com.storeworld.utils.Utils;
 
 public class DeliverInfoService extends BaseAction{
@@ -201,19 +202,25 @@ public class DeliverInfoService extends BaseAction{
 	 * description:判断库存数量是否充足，已完成该笔送货
 	 * @param uniMap
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean queryRepertory4Deliver(Map<String,Object> uniMap){
+	private boolean queryRepertory4Deliver(Map<String,Object> uniMap) throws Exception{
 		String sql_query_batch="select sum(quantity) quantity from goods_batch_info where brand=? and sub_brand=?"
 				+" and standard=?";
 		Object[] params_tmp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("standard")};
 
 		List<Object> params=objectArray2ObjectList(params_tmp);
 		List list=null;
-		Map retMap=(Map) list.get(0);
-		Integer repertory=(Integer)(retMap.get("quantity"));
-		Integer quantity=(Integer)(uniMap.get("quantity"));
-		if(repertory<quantity){
-			return false;
+		try{
+			list=executeQuery(sql_query_batch, params);
+			Map retMap=(Map) list.get(0);
+			Integer repertory=(Integer)(retMap.get("quantity"));
+			Integer quantity=(Integer)(uniMap.get("quantity"));
+			if(repertory<quantity){
+				return false;
+			}
+		}catch(Exception e){
+			throw new Exception("查询库存失败",e);
 		}
 		return true;
 	}

@@ -148,20 +148,20 @@ public class ProductContentPart extends ContentPart{
 								editor.getEditor().setVisible(false);
 						}
 					}
-				}else{
-					if(found){
-						//if the deliver Button column, we disable the click
-						if(colCurrent == deleteButtonColumn){
-							if(rowCurrent == table.getItemCount()-1){
-								editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
-								if(!editor.getEditor().isDisposed()){
-									editor.getEditor().setVisible(false);
-								}
+				}
+		  }else{
+				if(found){
+					//if the deliver Button column, we disable the click
+					if(colCurrent == deleteButtonColumn){
+						if(rowCurrent == table.getItemCount()-1){
+							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editor.getEditor().isDisposed()){
+								editor.getEditor().setVisible(false);
 							}
 						}
 					}
 				}
-		  }
+			}
 		}
     });
 			
@@ -182,12 +182,12 @@ public class ProductContentPart extends ContentPart{
 					}
 				}								
 				if(row >= 0){			
-					editor.setEditor(cellEditor[6].getControl(), table.getItem(row), 6);
+					editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
 					if(!editor.getEditor().isDisposed())
 						editor.getEditor().setVisible(true);
 				}else{
 					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
-						editor.setEditor(cellEditor[6].getControl(), table.getItem(visibleButton_last), 6);
+						editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
 						if(!editor.getEditor().isDisposed())
 							editor.getEditor().setVisible(false);
 					}

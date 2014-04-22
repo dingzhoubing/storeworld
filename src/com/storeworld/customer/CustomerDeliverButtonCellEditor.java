@@ -77,6 +77,7 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 						System.out.println("jump into the deliver page");
 						//record the customer info
 						Customer c = (Customer)(table.getItem(index).getData());
+						//current deliver list from customer page
 						UIDataConnector.setFromCustomer(true);
 						UIDataConnector.setCustomerRecord(c);//record the customer
 						

@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -34,7 +35,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.CoolBarPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
@@ -46,6 +50,9 @@ import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.Utils;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
+import com.storeworld.utils.Constants.NORTH_TYPE;
 
 /**
  * the main class of the deliver page
@@ -458,11 +465,17 @@ public class DeliverContentPart extends ContentPart{
 		btn_quick.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MessageBox messageBox =   
-						   new MessageBox(new Shell(),   					     
-						    SWT.ICON_WARNING);   
-				messageBox.setMessage("进入客户页面");   
-				messageBox.open(); 
+				System.out.println("jump into customer page, can filter the customer by already exist options(todo)");
+				//jump into the customer page
+				Utils.setFunctin(FUNCTION.CUSTOMER);
+				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
+					shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+				if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_CUSTOMER) == null)
+					shell.setContentPart(new CustomerContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_CUSTOMER);
+				shell.show_North_index();
+				Utils.setFunctinLast(FUNCTION.CUSTOMER);
+				shell.show_Content_customer();
 			}
 		});
 		btn_quick.setBounds((int)(4*w/5/25)+(int)(24*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(6*w/5/25), (int)(3*h/9/2/4));

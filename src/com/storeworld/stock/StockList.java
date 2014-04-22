@@ -16,6 +16,7 @@ import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
 import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.utils.DataCachePool;
+import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
 /**
@@ -88,6 +89,10 @@ public class StockList {
 //				StockUtils.refreshTableData();
 //				isFirst = false;
 //			}
+			//if in edit mode, change the history
+			if(StockUtils.getEditMode()){
+				StockUtils.updateHistory(stockList);
+			}
 		}
 	}
 
@@ -105,6 +110,10 @@ public class StockList {
 			} catch (Exception e) {
 				System.out.println("remove the stock failed");
 			}
+			//if in edit mode, change the history
+			if(StockUtils.getEditMode()){
+				StockUtils.updateHistory(stockList);
+			}
 		}
 		
 		//only complete record can used to compute the total value of this stock ??
@@ -119,10 +128,51 @@ public class StockList {
 			total+=(p * n);	
 //			has = true;
 		}
-		StockContentPart.setTotal(df.format(total));		
+		StockContentPart.setTotal(df.format(total));	
+		
 		
 	}
 	
+	/**
+	 * remove current history from database & navigator
+	 */
+	public static void removeCurrentHistory(){
+		StockInfoService stockinfo = new StockInfoService();
+		String time_current = StockContentPart.getStockTimer();
+		List<String> listid = new ArrayList<String>();
+		Map<String, Object> map = new HashMap<String ,Object>();
+		map.put("stock_time", time_current);
+		
+		try {
+			ReturnObject ret = stockinfo.queryStockInfo(map);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();			
+			for(int i=0;i<list.size();i++){
+				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
+				listid.add(cDTO.getId());
+			}
+		} catch (Exception e) {
+			System.out.println("in remove Currenthistory, query stocks by time failed");			
+		}
+		
+		try {
+			//delete the stocks from database
+			stockinfo.batchDeleteStockInfo(listid);
+		} catch (Exception e) {
+			System.out.println("in remove Currenthistory, batch delete stocks failed");	
+		}
+		
+		//remove history & item composite
+		ItemComposite itemCurrent = StockUtils.getItemCompositeRecord();
+		ArrayList<ItemComposite> itemlist = StockUtils.getItemList();
+		ArrayList<StockHistory> hislist = StockUtils.getHistoryList();
+		StockHistory his = (StockHistory)itemCurrent.getHistory();
+		hislist.remove(his);//remove the StockHistory
+		itemlist.remove(itemCurrent);
+		itemCurrent.dispose();
+		//layout the item list
+		StockUtils.layoutItemList();
+	}
 	/**
 	 * remove all the stocks in table when user click button to add a new stock table
 	 */
@@ -148,6 +198,10 @@ public class StockList {
 	public static void showHistory(StockHistory history){
 		//clear the stocks first
 		stockList.clear();
+		//show the editable button
+		StockContentPart.makeHistoryEditable();
+		//make the table & time picker enable = false
+		StockContentPart.makeDisable();		
 		
 		//show the clicked stock history
 		String time = history.getTime();
@@ -165,12 +219,14 @@ public class StockList {
 			for(int i=0;i<list.size();i++){
 				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
 				Stock st_tmp = new Stock();
+				st_tmp.setID(cDTO.getId());
 				st_tmp.setBrand(cDTO.getBrand());
 				st_tmp.setSubBrand(cDTO.getSub_brand());
 				st_tmp.setSize(cDTO.getStandard());		
 				st_tmp.setUnit(cDTO.getUnit());
 				st_tmp.setPrice(String.valueOf(cDTO.getUnit_price()));
-				st_tmp.setNumber(cDTO.getQuantity());				
+				st_tmp.setNumber(cDTO.getQuantity());
+				st_tmp.setTime(cDTO.getStock_time());
 				//...now in test, only show these three property
 				StockCellModifier.getStockList().addStock(st_tmp);
 				double p = Double.valueOf(cDTO.getUnit_price());
@@ -191,7 +247,10 @@ public class StockList {
 		int year = Integer.valueOf(time.substring(0, 4));
 		int month = Integer.valueOf(time.substring(4, 6));
 		int day = Integer.valueOf(time.substring(6, 8));
-		StockContentPart.setStockTimer(year, month-1, day);//month-1, be care
+		int hour = Integer.valueOf(time.substring(8, 10));
+		int min = Integer.valueOf(time.substring(10, 12));
+		int sec = Integer.valueOf(time.substring(12, 14));
+		StockContentPart.setStockTimer(year, month-1, day, hour, min, sec);//month-1, be care
 		
 		//show total
 		StockContentPart.setTotal(df.format(total));
@@ -212,7 +271,7 @@ public class StockList {
 	public void stockChanged(Stock stock) {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
-			(iterator.next()).update(stock);
+//			(iterator.next()).update(stock);
 			Map<String, Object> st = new HashMap<String ,Object>();
 			st.put("id", stock.getID());
 			st.put("brand", stock.getBrand());
@@ -230,13 +289,21 @@ public class StockList {
 			//blank table
 			//then, add a stock, we initialize the time, if not blank table, we use the same time
 			//every time we click "add a new", we set the time ""
-			if(!StockUtils.getTime().equals("")){
-				st.put("stock_time", StockUtils.getTime());//time, when to count the time
+			//but: if in editable mode, the time is just from the time picker
+			if(StockUtils.getEditMode()){
+				st.put("stock_time", StockContentPart.getStockTimer());
+			}else{
+				if(!StockUtils.getTime().equals("")){
+					st.put("stock_time", StockUtils.getTime());//time, when to count the time
+				}else{
+					StockUtils.setTime(null);
+					st.put("stock_time", StockUtils.getTime());//time, when to count the time
+				}
 			}
-			else{
-				StockUtils.setTime(null);
-				st.put("stock_time", StockUtils.getTime());//time, when to count the time
-			}
+			//update the time of the stock in table(even cannot see)
+			stock.setTime(String.valueOf(st.get("stock_time")));
+			(iterator.next()).update(stock);
+			
 			if(!StockValidator.checkID(stock.getID())){
 				//update the database here				
 				try {
@@ -244,6 +311,10 @@ public class StockList {
 					//if the brand, sub are new, we update the product cache !!
 				} catch (Exception e) {
 					System.out.println("update stock failed");
+				}
+				//if in edit mode, change the history
+				if(StockUtils.getEditMode()){
+					StockUtils.updateHistory(stockList);
 				}
 			}
 			if(StockValidator.checkID(stock.getID()) && StockValidator.rowLegal(stock) && StockValidator.rowComplete(stock)){				
@@ -258,7 +329,12 @@ public class StockList {
 				} catch (Exception e) {
 					System.out.println("add stock failed");
 				}
+//				//if in edit mode, change the history
+//				if(StockUtils.getEditMode()){
+//					StockUtils.updateHistory(stockList);
+//				}
 			}
+
 		}
 		double total = 0.000;
 //		boolean has = false;
@@ -273,6 +349,18 @@ public class StockList {
 		}
 		StockContentPart.setTotal(df.format(total));
 		
+	}
+	
+	/**
+	 * if we change the timer, update table&database stock time
+	 */
+	public static void changeStocksTime(){
+		String time = StockContentPart.getStockTimer();		
+		for(int i=0; i<stockList.size()-1; i++){
+			Stock st = (Stock)(stockList.get(i));
+			st.setTime(time);
+			StockCellModifier.getStockList().stockChanged(st);
+		}
 	}
 
 	/**

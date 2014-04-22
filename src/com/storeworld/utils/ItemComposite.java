@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolTip;
 
 import com.storeworld.common.History;
+import com.storeworld.deliver.DeliverHistory;
 import com.storeworld.stock.StockHistory;
 import com.storeworld.stock.StockList;
 import com.storeworld.stock.StockUtils;
@@ -76,8 +77,13 @@ public class ItemComposite extends Composite {
 			public void handleEvent(Event event) {
 				History history = getHistory();
 				if(history instanceof StockHistory){
+					//if click to show history, leave edit mode
+					StockUtils.leaveEditMode();
+					
 					StockList.showHistory((StockHistory)history);
 					StockUtils.recordItemComposite(getSelf());
+					
+					
 				}else{//DeliverHistory
 					
 				}
@@ -148,4 +154,23 @@ public class ItemComposite extends Composite {
 	public ItemComposite getSelf(){
 		return this.self;
 	}
+	@Override
+	public boolean equals(Object obj) {
+		ItemComposite ic = (ItemComposite)obj;
+		History history = getHistory();
+		if(history instanceof StockHistory){
+			StockHistory hisic = (StockHistory)ic.getHistory();
+			if(((StockHistory)history).getTime().equals(hisic.getTime()))
+				return true;
+			else 
+				return false;
+		}else{
+			DeliverHistory hisic = (DeliverHistory)ic.getHistory();
+			if(((DeliverHistory)history).getTime().equals(hisic.getTime()))
+				return true;
+			else 
+				return false;
+		}
+	}
+	
 }

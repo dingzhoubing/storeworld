@@ -53,4 +53,13 @@ public class StockHistory extends History {
 		
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		StockHistory his = (StockHistory)obj;
+		if(this.getTime().equals(his.getTime()))
+			return true;
+		else
+			return false;
+	}
+	
 }

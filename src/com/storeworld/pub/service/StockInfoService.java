@@ -198,8 +198,10 @@ public class StockInfoService extends BaseAction{
 	 * @throws Exception
 	 */
 	public boolean updateStockInfo(String id,Map<String,Object> map) throws Exception{
+//		String sql="update stock_info si set si.brand=?,si.sub_brand=?,si.unit_price=?,"
+//	+"si.unit=? and si.standard=? and si.quantity=? and si.stock_time=? where si.id=?";
 		String sql="update stock_info si set si.brand=?,si.sub_brand=?,si.unit_price=?,"
-	+"si.unit=? and si.standard=? and si.quantity=? and si.stock_time=? where si.id=?";
+				+"si.unit=?, si.standard=? ,si.quantity=? ,si.stock_time=? where si.id=?";
 		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),
 				map.get("unit"),map.get("standard"),map.get("quantity"),map.get("stock_time"),id};
 		List<Object> params=objectArray2ObjectList(params_temp);

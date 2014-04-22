@@ -1,5 +1,7 @@
 package com.storeworld.stock;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -8,8 +10,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -22,9 +22,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -32,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
@@ -78,6 +81,10 @@ public class StockContentPart extends ContentPart{
 	private static Text total_val=null;
 	private static DateTime dateTime_stock = null;
 	private static int rowCurrent = -1;
+	
+	private static Button btn_edit = null;
+	private static Button btn_delete = null;
+	
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -115,9 +122,90 @@ public class StockContentPart extends ContentPart{
 		return total_val.getText();
 	}
 	
-	public static void setStockTimer(int year, int month, int day){
+	/**
+	 * get/set the timer value when edit the history	
+	 */
+	public static void setStockTimer(int year, int month, int day, int hour, int min, int sec){
 		dateTime_stock.setDate(year, month, day);
+		dateTime_stock.setHours(hour);
+		dateTime_stock.setMinutes(min);
+		dateTime_stock.setSeconds(sec);
+//		System.out.println("set time: "+ year+""+month+""+day+""+hour+""+min+""+sec);
 	}
+	public static void initialTimer(){
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		String current_time = formatter.format(new Date());
+		int year = Integer.valueOf(current_time.substring(0, 4));
+		int month = Integer.valueOf(current_time.substring(4, 6));
+		int day = Integer.valueOf(current_time.substring(6, 8));
+		dateTime_stock.setDate(year, month-1, day);
+	}
+	public static String getStockTimer(){
+		String year = String.valueOf(dateTime_stock.getYear());
+		String mon = String.valueOf(dateTime_stock.getMonth()+1);
+		String day = String.valueOf(dateTime_stock.getDay());
+		String hour = String.valueOf(dateTime_stock.getHours());
+		String min = String.valueOf(dateTime_stock.getMinutes());
+		String sec = String.valueOf(dateTime_stock.getSeconds());				
+		if(mon.length()<2)
+			mon = "0"+mon;
+		if(day.length()<2)
+			day = "0"+day;
+		if(hour.length()<2)
+			hour = "0"+hour;
+		if(min.length()<2)
+			min = "0"+min;
+		if(sec.length()<2)
+			sec = "0"+sec;
+		String time = year+mon+day+hour+min+sec+"";
+		return time;
+//		System.out.println("current time is: "+time);
+	}
+	
+	/**
+	 * make the history editable|un-editable
+	 */
+	public static void makeHistoryEditable(){
+		btn_delete.setVisible(false);
+		btn_edit.setVisible(true);
+	}
+	public static void makeHistoryUnEditable(){
+		btn_delete.setVisible(false);
+		btn_edit.setVisible(false);
+	}
+	/**
+	 * make the table & time picker unable to edit
+	 */
+	public static void makeEnable(){
+		dateTime_stock.setEnabled(true);
+		table.setEnabled(true);		
+	}
+	public static void makeDisable(){
+		dateTime_stock.setEnabled(false);
+		table.setEnabled(false);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * call the software keyboard
 	 */
@@ -340,22 +428,32 @@ public class StockContentPart extends ContentPart{
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
+				
+				
 //				StockUtils.setTime();//record the time
 				//TODO: check if has history
-				if(StockList.getStocks().size() > 1){
-					//only records when the time is not empty
-					if(!StockUtils.getTime().equals("")){
-						StockUtils.addToHistory();
-					}
+				if((StockList.getStocks().size() > 1)){
 					
+					//only records when the time is not empty
+					if(!StockUtils.getEditMode()){
+						if(!StockUtils.getTime().equals("")){
+							StockUtils.addToHistory();
+						}
+					}
 					//clear table
 					//and add a new line
 					table.removeAll();
 					StockList.removeAllStocks();
 					setTotal("0.000");
 				}
-				//after we add to history, initial the time 
+				//after we add to history, initial the time
+				initialTimer();
 				StockUtils.setTime("");//initial
+				makeHistoryUnEditable();
+				makeEnable();
+				
+				//if entered to add a new stock, leave the edit mode
+				StockUtils.leaveEditMode();
 
 			}
 		});
@@ -430,14 +528,42 @@ public class StockContentPart extends ContentPart{
 		//show time in the right cmposite
 		dateTime_stock = new DateTime(composite_right, SWT.BORDER);
 		dateTime_stock.setBounds((int)(4*w/5/100), (int)(4*w/5/100), (int)(6*4*w/5/50), (int)(h/20));
+		dateTime_stock.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				dateTime_stock.setEnabled(false);
+				//update all the time value in table & update the history panel
+				StockList.changeStocksTime();
+				dateTime_stock.setEnabled(true);
+			}
+		});
+		
+		
 		//delete or clear the table
-		Button btn_delete = new Button(composite_right, SWT.NONE);
+		btn_delete = new Button(composite_right, SWT.NONE);
 		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setText("删除");
+		//while editing the table, we make the delete button in-visible
+		btn_delete.setVisible(false);
 		btn_delete.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-				//TODO: what is the logic, also delete the data in database??
+				//first leave the edit mode, avoid update the table
+				StockUtils.leaveEditMode();
+				//clear table
+				table.removeAll();
+				StockList.removeAllStocks();
+				//remove current history from database
+				StockList.removeCurrentHistory();
+//				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+//				String current_time = formatter.format(new Date());
+//				int year = Integer.valueOf(current_time.substring(0, 4));
+//				int month = Integer.valueOf(current_time.substring(4, 6));
+//				int day = Integer.valueOf(current_time.substring(6, 8));
+//				dateTime_stock.setDate(year, month-1, day);
+				initialTimer();
+				//will not show delete button anymore
+				btn_delete.setVisible(false);
 			}
 		});
 				
@@ -482,6 +608,28 @@ public class StockContentPart extends ContentPart{
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_val.setLayoutData(gd_text);
 		composite_sum.layout();
+		
+		//button edit the history
+		btn_edit = new Button(composite_right, SWT.NONE);
+		btn_edit.setText("修改记录");
+		btn_edit.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
+		//at first, set in-visible
+		btn_edit.setVisible(false);
+		btn_edit.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
+				messageBox.setMessage("点击确定进入编辑模式");
+				if (messageBox.open() == SWT.OK){ 
+					makeHistoryEditable();
+					makeEnable();
+					btn_edit.setVisible(false);
+					btn_delete.setVisible(true);
+					StockUtils.enterEditMode();
+				}
+			}
+		});
+		
 		
 		//the stock table	
 		table = tableViewer.getTable();

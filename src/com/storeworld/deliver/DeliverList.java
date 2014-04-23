@@ -24,6 +24,7 @@ import com.storeworld.stock.StockHistory;
 import com.storeworld.stock.StockUtils;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.ItemComposite;
+import com.storeworld.utils.UIDataConnector;
 import com.storeworld.utils.Utils;
 
 /**
@@ -93,7 +94,7 @@ public class DeliverList {
 			(iterator.next()).add(deliver);
 		
 		//if in edit mode, change the history
-		if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")){
+		if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
 			DeliverUtils.updateHistory(deliverList);
 		}
 	}
@@ -113,7 +114,7 @@ public class DeliverList {
 				System.out.println("remove the deliver failed");
 			}
 			//if in edit mode, change the history
-			if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")){
+			if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
 				DeliverUtils.updateHistory(deliverList);
 			}
 		}
@@ -179,7 +180,7 @@ public class DeliverList {
 					System.out.println("update deliver failed");
 				}
 				//if in edit mode, change the history
-				if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")){
+				if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
 					DeliverUtils.updateHistory(deliverList);
 				}
 			}

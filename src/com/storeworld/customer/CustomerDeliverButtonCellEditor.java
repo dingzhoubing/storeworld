@@ -101,6 +101,7 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 						DeliverList.removeAllDelivers();
 						
 						DeliverContentPart.enableEditContent();
+						DeliverContentPart.makeHistoryUnEditable();
 						DeliverUtils.setTime(null);
 						DeliverUtils.setStatus("NEW");
 						

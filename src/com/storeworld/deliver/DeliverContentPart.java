@@ -7,7 +7,6 @@ import java.util.Map;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
@@ -28,7 +27,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -43,19 +41,22 @@ import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.CustomerInfoService;
+import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.FUNCTION;
+import com.storeworld.utils.Constants.NORTH_TYPE;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
 import com.storeworld.utils.Utils;
-import com.storeworld.utils.Constants.CONTENT_TYPE;
-import com.storeworld.utils.Constants.FUNCTION;
-import com.storeworld.utils.Constants.NORTH_TYPE;
 
 /**
  * the main class of the deliver page
+ * TODO: there are too many static method, not a good way, using a return Object or some else
+ * to simplify it
  * @author dingyuanxiong
  *
  */
@@ -90,7 +91,9 @@ public class DeliverContentPart extends ContentPart{
 	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;
 	private static GeneralComboCellEditor<String> comboboxCellEditor3 = null;//size
 	
+	private static Button btnNewButton;
 	private static Button btn_delete;
+	private static Button btn_edit;
 	private static GeneralCCombo gc;
 	private static GeneralCCombo gcName;
 	private static Text text_phone;
@@ -116,6 +119,9 @@ public class DeliverContentPart extends ContentPart{
 		text_serial.setText("");
 		text_serial.setText(ordernumber);
 	}
+	public static String getOrderNumber(){
+		return text_serial.getText().trim();
+	}
 	public static void setTime(String time){
 		text_time.setText("");
 		text_time.setText(time);
@@ -132,8 +138,19 @@ public class DeliverContentPart extends ContentPart{
 		gc.clearSelection();
 //		gc.removeAll();
 		gcName.clearSelection();
+		gc.setText("");
+		gcName.setText("");
 		text_phone.setText("");
 		text_address.setText("");
+		text_serial.setText("");
+		text_time.setText("");
+		total_val.setText(TOTAL_VAL+Constants.SPACE);
+		//make the delete button visible = false
+		for (int index=0; index < table.getItemCount(); index++) {
+			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
+			if(!editor.getEditor().isDisposed())
+				editor.getEditor().setVisible(false);
+		}
 	}
 	
 	public static void enableEditContent(){
@@ -152,6 +169,7 @@ public class DeliverContentPart extends ContentPart{
 		text_address.setText("");
 		text_serial.setText("");
 		text_time.setText("");
+		total_val.setText(TOTAL_VAL+Constants.SPACE);
 		
 		gc.setEnabled(false);
 		gcName.setEnabled(false);
@@ -165,7 +183,7 @@ public class DeliverContentPart extends ContentPart{
 			if(!editor.getEditor().isDisposed())
 				editor.getEditor().setVisible(false);
 		}
-		
+		btnNewButton.forceFocus();
 	}
 
 	public static TableViewer getTableViewer(){
@@ -175,13 +193,77 @@ public class DeliverContentPart extends ContentPart{
 		return deliverlist;
 	}
 	
-	
+	/**
+	 * get|set the total field
+	 * @param total
+	 */
 	public static void setTotal(String total){
 		total_val.setText(TOTAL_VAL+total+Constants.SPACE);
 	}
 	public static String getTotal(){
 		return total_val.getText();
 	}
+	
+	public static String getArea(){
+		return gc.getText();
+	}
+	public static String getName(){
+		return gcName.getText();
+	}
+	
+	/**
+	 * make the history editable|un-editable
+	 */
+	public static void makeHistoryEditable(){
+		btn_delete.setVisible(false);
+		btn_edit.setVisible(true);
+	}
+	public static void makeHistoryUnEditable(){
+		btn_delete.setVisible(false);
+		btn_edit.setVisible(false);
+	}
+	/**
+	 * make the table & time picker unable to edit
+	 */
+	public static void makeEnable(){
+		table.setEnabled(true);		
+	}
+	public static void makeDisable(){
+		//make the delete button visible = false
+		for (int index=0; index < table.getItemCount(); index++) {
+			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
+			if(!editor.getEditor().isDisposed())
+				editor.getEditor().setVisible(false);
+		}
+		gc.setEnabled(false);
+		gcName.setEnabled(false);
+		text_phone.setEnabled(false);
+		text_address.setEnabled(false);
+		table.setEnabled(false);
+	}
+	
+	public static void setCommonInfo(String area, String name, String phone, String addr, String order, String time){
+		gc.setText(area);
+		gcName.setText(name);
+		text_phone.setText(phone);
+		text_address.setText(addr);
+		text_serial.setText(order);
+		String year = time.substring(0, 4);
+		String month = time.substring(4, 6);
+		String day = time.substring(6, 8);
+		String hour = time.substring(8, 10);
+		String min = time.substring(10, 12);
+		time = year+"-"+month+"-"+day+" "+hour+":"+min;
+		text_time.setText(time);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * call the software keyboard
@@ -390,29 +472,38 @@ public class DeliverContentPart extends ContentPart{
 		//define a table
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		//add a new deliver table
-		Button btnNewButton = new Button(composite_left, SWT.NONE);
+		btnNewButton = new Button(composite_left, SWT.NONE);
 		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setText("创建送货单");
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
-				DeliverUtils.setOrderNumber();//set the order number for the deliver table
+//				if(!gc.getText().equals("") && !gcName.equals("")){
+					DeliverUtils.setOrderNumber();//set the order number for the deliver table
 				
-				clearContent();
-				enableEditContent();
-//				disableEditContent();
-				DeliverUtils.setTime(null);
+					clearContent();
+					enableEditContent();
+//					disableEditContent();
+					DeliverUtils.setTime(null);
+					DeliverUtils.setStatus("NEW");
 				
-				text_serial.setText(DeliverUtils.getOrderNumber());
-				String time = DeliverUtils.getTime();
-				String year = time.substring(0, 4);
-				String month = time.substring(4, 6);
-				String day = time.substring(6, 8);
-				String hour = time.substring(8, 10);
-				String min = time.substring(10, 12);
-				time = year+"-"+month+"-"+day+" "+hour+":"+min;
-				text_time.setText(time);
+					table.removeAll();
+					DeliverList.removeAllDelivers();
+					
+					text_serial.setText(DeliverUtils.getOrderNumber());
+					String time = DeliverUtils.getTime();
+					String year = time.substring(0, 4);
+					String month = time.substring(4, 6);
+					String day = time.substring(6, 8);
+					String hour = time.substring(8, 10);
+					String min = time.substring(10, 12);
+					time = year+"-"+month+"-"+day+" "+hour+":"+min;
+					text_time.setText(time);
+					btn_edit.setVisible(false);
+//				}else{
+//					
+//				}
 			}
 		});
 		
@@ -453,12 +544,33 @@ public class DeliverContentPart extends ContentPart{
         DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
         composite_2.layout();
         //date picker
-        DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
+        final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
 		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		//search button, search the deliver history
 		Button btnSearch = new Button(composite_left, SWT.NONE);
 		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
-		btnSearch.setText("查找");       
+		btnSearch.setText("查找");   
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				String year = String.valueOf(dateTime.getYear());
+				int mon = dateTime.getMonth()+1;
+				String month = String.valueOf(mon);
+				int d = dateTime.getDay();
+				String day = String.valueOf(d);
+//				int hour = dateTime.getHours()+1;
+//				int min = dateTime.getMinutes()+1;
+//				int sec = dateTime.getSeconds()+1;
+				if(mon<10)
+					month = "0"+month;
+				if(d<10)
+					day="0"+day;
+				//date to search
+				String dateSearch = year+month+day;
+				DeliverUtils.showSearchHistory(dateSearch);
+			}
+		});
+		
 		
 		//quick search for customer, to make a deliver
 		final Button btn_quick = new Button(composite_right, SWT.NONE);
@@ -505,6 +617,42 @@ public class DeliverContentPart extends ContentPart{
 		btn_delete = new Button(composite_right, SWT.NONE);
 		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setText("删除");
+		btn_delete.setVisible(false);
+		btn_delete.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+//				//first leave the edit mode, avoid update the table
+				DeliverUtils.leaveEditMode();
+				//clear table
+				table.removeAll();
+				DeliverList.removeAllDelivers();
+				//remove current history from database
+				DeliverList.removeCurrentHistory();
+				//will not show delete button anymore
+				btn_delete.setVisible(false);
+			}
+		});
+		
+		btn_edit = new Button(composite_right, SWT.NONE);
+		btn_edit.setBounds((int)(12*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+		btn_edit.setText("修改");
+		btn_edit.setVisible(false);
+		btn_edit.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
+				messageBox.setMessage("点击确定进入编辑模式");
+				if (messageBox.open() == SWT.OK){ 
+					
+					enableEditContent();
+					btn_edit.setVisible(false);
+					btn_delete.setVisible(true);
+					DeliverUtils.enterEditMode();
+				}
+			}
+		});
+		
+		
 		composite_updown = (int)(h/3);
 		//area
 		Label lbl_area = new Label(composite_right, SWT.CENTER|SWT.NONE);
@@ -688,20 +836,49 @@ public class DeliverContentPart extends ContentPart{
 		btn_print.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-				System.out.println("print");
+//				System.out.println("print");
 				//do more check here
 				if(DeliverList.getDelivers().size() > 1){
-					DeliverUtils.addToHistory();
 					
-					//clear table
-					//and add a new line					
-					table.clearAll();
-					table.removeAll();
-					
-					DeliverList.removeAllDelivers();
-					clearContent();
-					disableEditContent();	
-					DeliverUtils.setTime("");
+					//check area & name, if both are not empty, add to history, or popup an message box
+					if(!gc.getText().equals("") && !gcName.getText().equals("")){
+						
+						if(DeliverUtils.getStatus().equals("NEW")){
+							DeliverUtils.addToHistory();
+						}
+						//step 1: add the deliver common info into database
+						DeliverInfoService deliverinfo = new DeliverInfoService();
+						Map<String,Object> commonMap = new HashMap<String,Object>();
+						commonMap.put("order_num", DeliverUtils.getOrderNumber());
+						commonMap.put("customer_area", gc.getText());
+						commonMap.put("customer_name", gcName.getText());						
+						commonMap.put("deliver_addr", text_address.getText());
+						commonMap.put("deliver_time", DeliverUtils.getTime());
+						commonMap.put("telephone", text_phone.getText());
+						//if already exist, update it 
+						deliverinfo.print_voucher(commonMap);
+						
+						//status: NEW, HISTORY, EMPTY
+						DeliverUtils.setStatus("EMPTY");
+						
+						//step 2: initial the deliver page
+						//clear table
+						//and add a new line					
+						table.clearAll();
+						table.removeAll();					
+						DeliverList.removeAllDelivers();
+						clearContent();
+						disableEditContent();	
+						DeliverUtils.setTime("");
+						
+						total_val.setText(TOTAL_VAL+Constants.SPACE+Constants.SPACE);
+						btn_edit.setVisible(false);
+						
+					}else{
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("收货人片区和姓名需填写完整");
+						mbox.open();						
+					}
 				}
 				
 			}

@@ -214,40 +214,6 @@ public class StockUtils {
 				st_tmp.setTime(cDTO_tmp.getStock_time());
 				addIntoStocks(st_tmp,stocks);
 			}
-//			if(list.size()>0){
-//				StockInfoDTO cDTO = (StockInfoDTO) list.get(0);
-//				Stock stock = new Stock();
-//				stock.setBrand(cDTO.getBrand());
-//				stock.setPrice(String.valueOf(cDTO.getUnit_price()));
-//				stock.setNumber(cDTO.getQuantity());
-//				stock.setTime(cDTO.getStock_time());
-////				stocks.add(stock);
-//				addIntoStocks(stock,stocks);
-//				last_time = stock.getTime();
-//				for(int i=1;i<list.size();i++){
-//					StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
-//					Stock st_tmp = new Stock();
-//					String tmp_time = cDTO_tmp.getStock_time();
-//					st_tmp.setBrand(cDTO_tmp.getBrand());
-//					st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
-//					st_tmp.setNumber(cDTO_tmp.getQuantity());
-//					st_tmp.setTime(cDTO_tmp.getStock_time());
-//					if(tmp_time.equals(last_time)){						
-////						stocks.add(st_tmp);//if still the same stock, add to array list
-//						addIntoStocks(st_tmp,stocks);
-//					}else{//a new stock
-//						addToHistory(stocks);
-//						stocks.clear();
-//						stocks.add(st_tmp);
-//						last_time = tmp_time;
-//					}				
-//				}
-//				//the last stock
-//				if(!stocks.isEmpty()){
-//					addToHistory(stocks);//finish
-//				}
-//			}
-			//add into history
 			addToHistory(stocks);
 			
 		} catch (Exception e) {

@@ -209,8 +209,10 @@ public class DataCachePool {
 		cacheCustomerInfo();
 		
 		HashSet<String> names = new HashSet<String>();
-		if(!area.equals(""))
-			names.addAll(area2names.get(area));
+		if(!area.equals("")){
+			if(area2names.containsKey(area))
+				names.addAll(area2names.get(area));
+		}
 		else{//area is ""
 			for(String ar : area2names.keySet()){
 				names.addAll(area2names.get(ar));

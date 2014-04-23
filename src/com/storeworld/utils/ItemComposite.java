@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.ToolTip;
 
 import com.storeworld.common.History;
 import com.storeworld.deliver.DeliverHistory;
+import com.storeworld.deliver.DeliverList;
+import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.stock.StockHistory;
 import com.storeworld.stock.StockList;
 import com.storeworld.stock.StockUtils;
@@ -86,6 +88,11 @@ public class ItemComposite extends Composite {
 					
 				}else{//DeliverHistory
 					
+					//if click to show history, leave edit mode
+					DeliverUtils.leaveEditMode();
+					
+					DeliverList.showHistory((DeliverHistory)history);
+					DeliverUtils.recordItemComposite(getSelf());
 				}
 				
 			}
@@ -142,6 +149,11 @@ public class ItemComposite extends Composite {
 		down_right.setBackground(color);
 	}
 	
+	//set the title
+	public void setValue(String u){
+		this.up.setText(u);
+	}
+	//set the three fields
 	public void setValue(String u, String dl, String dr){
 		this.up.setText(u);
 		this.down_left.setText(dl);

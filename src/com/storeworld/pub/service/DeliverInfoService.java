@@ -49,9 +49,10 @@ public class DeliverInfoService extends BaseAction{
 		 if(!inputCheck(paramList)){
 			 throw new Exception("参数校验不通过，有部分重要参数为空，不能提交送货信息！");
 		 }
-		 if(!queryRepertory4Deliver(uniMap)){
-			 throw new Exception("库存的该商品数量少于送货单中该商品数量，库存不足，请修改送货单中该商品数量！");
-		 }
+		 //by Ding: 被我注释了
+//		 if(!queryRepertory4Deliver(uniMap)){
+//			 throw new Exception("库存的该商品数量少于送货单中该商品数量，库存不足，请修改送货单中该商品数量！");
+//		 }
 		//1.获得输入的用户信息值，放入param中，ADD your code below:
 		boolean isExist=isExistDeliverInfo(commonMap,uniMap);
 		if(isExist){
@@ -88,7 +89,8 @@ public class DeliverInfoService extends BaseAction{
 			}catch(Exception e){
 				//System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
 			}finally{
-				boolean rest=updateBatchInfoAndDeliverInfo(uniMap);
+				//by Ding: 被我注释了
+//				boolean rest=updateBatchInfoAndDeliverInfo(uniMap);
 			}
 		}
 		}catch (Exception e) {
@@ -98,6 +100,77 @@ public class DeliverInfoService extends BaseAction{
 		}
 	 return true;
 	}
+	
+	//by Ding: 我新添加的
+	public boolean addDeliverInfo(Map<String,Object> uniMap) throws Exception{
+
+		 try{
+			 //0.输入参数校验：
+//			 Float unit_price=(Float)uniMap.get("unit_price");
+			 Float unit_price=Float.valueOf(String.valueOf(uniMap.get("unit_price")));
+			 String brand=(String)uniMap.get("brand");
+			 String sub_brand=(String)uniMap.get("sub_brand");
+			 String standard=(String)uniMap.get("standard");
+//			 Integer quantity=(Integer)uniMap.get("quantity");
+			 Integer quantity=Integer.valueOf(String.valueOf(uniMap.get("quantity")));
+			 String order_num = String.valueOf(uniMap.get("order_num"));
+//			 List<Object> paramList = null;
+			 List<Object> paramList =new ArrayList<Object>();
+			 paramList.add(unit_price);
+			 paramList.add(brand);
+			 paramList.add(sub_brand);
+			 paramList.add(standard);
+			 paramList.add(quantity);
+			 paramList.add(order_num);
+			 
+			 if(!inputCheck(paramList)){
+				 throw new Exception("参数校验不通过，有部分重要参数为空，不能提交送货信息！");
+			 }
+
+			String sql_uni="insert into deliver_info(order_num,"
+			+"brand,sub_brand,unit_price,unit,standard,quantity,"
+			+"reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?)";
+			
+			/*String sql_common="insert into deliver_common_info(id,customer_area,customer_name,deliver_addr,"
+			+"deliver_time,total_price,real_price,"
+			+"is_print,telephone,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?,?,?,?,?,?)";*/
+			
+			Object[] uni_params_temp={uniMap.get("order_num"),uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
+					uniMap.get("reserve1"),uniMap.get("reserve2"),uniMap.get("reserve3")};//来自map
+			
+			/*Object[] common_params_temp={commonMap.get("order_num"),commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("deliver_addr"),
+					commonMap.get("deliver_time"),commonMap.get("total_price"),commonMap.get("real_price"),commonMap.get("is_print"),commonMap.get("telephone"),commonMap.get("reserve1"),commonMap.get("reserve2"),commonMap.get("reserve3")};*///来自map
+			
+			List<Object> uni_params=objectArray2ObjectList(uni_params_temp);
+			
+			//List<Object> common_params=objectArray2ObjectList(common_params_temp);
+			//2.调用接口执行插入
+			//BaseAction tempAction=new BaseAction();
+			int suninum=executeUpdate(sql_uni,uni_params);
+			//int scomnum=executeUpdate(sql_common,common_params);
+			if(suninum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+				throw new Exception("新增送货信息失败，请检查数据!");
+			}
+			else if(suninum==1){
+				try{
+					GoodsInfoService tempService=new GoodsInfoService();
+					tempService.addGoodsInfo(uniMap);
+				}catch(Exception e){
+					//System.out.println("进货单中的货品已存在货品信息表中，无需重复加入。");
+				}finally{
+					//by Ding: 被我注释了
+//					boolean rest=updateBatchInfoAndDeliverInfo(uniMap);
+				}
+			}
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new Exception("新增送货信息失败!"+e.getMessage());
+			}
+		 return true;
+		}
+	
+	
 	
 	/**
 	 * 输入参数校验
@@ -307,6 +380,19 @@ public class DeliverInfoService extends BaseAction{
 		}
 	}
 	
+	/**
+	 * by Ding: 我新添加的
+	 * description:打印功能，在这里实现对送货单Common部分的修改 2
+	 */
+	public void print_voucher(Map<String,Object> commonMap){
+		try {
+			addCommonPart(commonMap);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private boolean addCommonPart(Map<String,Object> commonMap) throws Exception{
 		try{
 			String sql_common="insert into deliver_common_info(id,customer_area,customer_name,deliver_addr,"
@@ -431,10 +517,14 @@ public class DeliverInfoService extends BaseAction{
 			total_price=((Float)uniMap.get("unit_price"))*((Float)uniMap.get("quantity"));
 			commonMap.put("total_price", total_price);
 		}*/
+//		String sql="update deliver_info di set "
+//				+" di.brand=?,di.sub_brand=?,di.unit_price=?,"
+//				+" di.unit=?,di.standard=?,di.quantity=? where di.id=?";
+		//by Ding: 我替换上面的语句了
 		String sql="update deliver_info di set "
 				+" di.brand=?,di.sub_brand=?,di.unit_price=?,"
-				+" di.unit=?,di.standard=?,di.quantity=? where di.id=?";
-		Object[] params_temp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),
+				+" di.unit=?,di.standard=?,di.quantity=?, di.order_num=? where di.id=?";
+		Object[] params_temp={uniMap.get("brand"),uniMap.get("sub_brand"),uniMap.get("unit_price"),uniMap.get("unit"),uniMap.get("standard"),uniMap.get("quantity"),uniMap.get("order_num"),
 				id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
@@ -631,7 +721,10 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
 				deliverInfoDto.setBrand((String) retMap.get("brand"));
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+//				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				//by Ding: 我替换上面的语句了
+				deliverInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
@@ -701,7 +794,10 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
 				deliverInfoDto.setBrand((String) retMap.get("brand"));
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+//				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				//by Ding: 我替换上面的语句了
+				deliverInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));
@@ -772,7 +868,10 @@ public class DeliverInfoService extends BaseAction{
 				deliverInfoDto.setTelephone((String) retMap.get("telephone"));
 				deliverInfoDto.setBrand((String) retMap.get("brand"));
 				deliverInfoDto.setSub_brand((String) retMap.get("sub_brand"));
-				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				//by Ding: 我替换上面的语句了
+//				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
+				deliverInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				
 				deliverInfoDto.setDeliver_time((String) retMap.get("deliver_time"));
 				deliverInfoDto.setCommon_reserve1((String) retMap.get("commonReserve1"));
 				deliverInfoDto.setCommon_reserve2((String) retMap.get("commonReserve2"));

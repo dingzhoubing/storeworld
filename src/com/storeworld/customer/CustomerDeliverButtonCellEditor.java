@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.storeworld.deliver.DeliverContentPart;
+import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.mainui.CoolBarPart;
 import com.storeworld.mainui.MainUI;
@@ -96,8 +97,12 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 						DeliverUtils.setOrderNumber();//set the order number for the deliver table
 						
 						DeliverContentPart.clearContent();
+						DeliverContentPart.getTableViewer().getTable().removeAll();
+						DeliverList.removeAllDelivers();
+						
 						DeliverContentPart.enableEditContent();
 						DeliverUtils.setTime(null);
+						DeliverUtils.setStatus("NEW");
 						
 						DeliverContentPart.setTextOrderNumber(DeliverUtils.getOrderNumber());						
 						String time = DeliverUtils.getTime();
@@ -111,8 +116,8 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 						DeliverContentPart.setCommon(c.getArea(), c.getName(), c.getPhone(), c.getAddress());
 												
 						button.setVisible(false);
-						Utils.refreshTable(table);											
-								 
+//						Utils.refreshTable(table);											
+								 												
 						break;
 					}
 				}

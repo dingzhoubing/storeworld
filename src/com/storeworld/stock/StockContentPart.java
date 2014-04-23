@@ -74,7 +74,7 @@ public class StockContentPart extends ContentPart{
 	private int sub_brandColumn = 2;
 	private int brandColumn = 1;
 	
-	private int deleteButtonColumn = 7;
+	private static int deleteButtonColumn = 7;
 	private static GeneralComboCellEditor<String> comboboxCellEditor = null;//brand
 	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;//sub_brand
 	private static GeneralComboCellEditor<String> comboboxCellEditor3 = null;//size
@@ -182,6 +182,13 @@ public class StockContentPart extends ContentPart{
 		table.setEnabled(true);		
 	}
 	public static void makeDisable(){
+		//make the delete button visible = false
+		for (int index=0; index < table.getItemCount(); index++) {
+			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
+			if(!editor.getEditor().isDisposed())
+				editor.getEditor().setVisible(false);
+		}
+		
 		dateTime_stock.setEnabled(false);
 		table.setEnabled(false);
 	}
@@ -510,12 +517,14 @@ public class StockContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				String year = String.valueOf(dateTime.getYear());
-				String month = String.valueOf(dateTime.getMonth()+1);
+				int mon = dateTime.getMonth()+1;
+				String month = String.valueOf(mon);
 //				String day = String.valueOf(dateTime.getDay());
 //				int hour = dateTime.getHours()+1;
 //				int min = dateTime.getMinutes()+1;
 //				int sec = dateTime.getSeconds()+1;
-				if(!month.startsWith("0"))
+				
+				if(mon<10)
 					month = "0"+month;
 //				if(!day.startsWith("0"))
 //					day="0"+day;

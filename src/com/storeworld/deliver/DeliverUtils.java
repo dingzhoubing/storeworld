@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -13,13 +14,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import com.storeworld.common.DataInTable;
+import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.DeliverInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
-import com.storeworld.pojo.dto.StockInfoDTO;
 import com.storeworld.pub.service.DeliverInfoService;
-import com.storeworld.pub.service.StockInfoService;
-import com.storeworld.stock.Stock;
 import com.storeworld.stock.StockHistory;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
@@ -52,6 +51,28 @@ public class DeliverUtils {
 	
 	//item composite
 	private static ItemComposite ic_record;
+	//the table is in edit mode or not
+	private static boolean editMode = false;
+	private static String status = "";
+	
+	//NEW, HISTORY
+	public static void setStatus(String sta){
+		status = sta;
+	}
+	public static String getStatus(){
+		return status;
+	} 
+	
+	
+	public static void enterEditMode(){
+		editMode = true;
+	}
+	public static void leaveEditMode(){
+		editMode = false;
+	}
+	public static boolean getEditMode(){
+		return editMode;
+	}
 	
 	/**
 	 * record the time when user click add a new deliver record(table)	
@@ -71,6 +92,11 @@ public class DeliverUtils {
 	 * @return
 	 */
 	public static String getTime(){
+		
+		if(DeliverUtils.getEditMode()){
+			DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
+			time_record = shis.getTime();
+		}
 		return time_record;
 	}
 	
@@ -84,6 +110,13 @@ public class DeliverUtils {
 	}
 	public static ItemComposite getItemCompositeRecord(){
 		return ic_record;
+	}
+	
+	public static ArrayList<ItemComposite> getItemList(){
+		return itemList;
+	}
+	public static ArrayList<DeliverHistory> getHistoryList(){
+		return historyList;
 	}
 	
 	/**
@@ -111,24 +144,21 @@ public class DeliverUtils {
 		String prefix = time_current.substring(0, 8);//order number is: 20140420xxxx
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("deliver_time", time_current);
+		HashSet<String> orderset = new HashSet<String>();
 		try {
 			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-			String last_order = "";
+//			String last_order = "";
+	
 			if(list.size()>0){
-				DeliverInfoDTO dto = (DeliverInfoDTO)list.get(0);
-				last_order = dto.getOrder_num();
+				
 				int count = 1;
-				for(int i=1;i<list.size();i++){
-					DeliverInfoDTO cDTO_tmp = (DeliverInfoDTO) list.get(i);
-					if(last_order.equals(cDTO_tmp.getOrder_num())){
-						continue;
-					}else{
-						count++;
-						last_order = cDTO_tmp.getOrder_num();
-					}
+				for(int i=0;i<list.size();i++){
+					DeliverInfoAllDTO dto = (DeliverInfoAllDTO)list.get(i);
+					orderset.add(dto.getOrder_num());
 				}
+				count = orderset.size();			
 				if(count<10)
 					orderNumber = prefix+"000"+(count+1);
 				else if(count<100)
@@ -152,6 +182,10 @@ public class DeliverUtils {
 		
 	}
 	public static String getOrderNumber(){
+		if(DeliverUtils.getEditMode()){
+			DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
+			orderNumber = shis.getOrderNumber();
+		}
 		return orderNumber;
 	}
 	
@@ -165,36 +199,30 @@ public class DeliverUtils {
 	 */
 	private static ArrayList<DeliverHistory> historyList = new ArrayList<DeliverHistory>();	
 	
-	public static void addToHistory(ArrayList<Deliver> delivers){
-//		/*String title = "";
-//		double total = 0.000;
-//		String time_tmp = "";
-//		for(int i=0;i<delivers.size()-1;i++){
-//			Deliver st = delivers.get(i);
-//			title+=(st.getBrand()+",");
-//			time_tmp = st.getTime();
-//			String price = st.getPrice();
-//			String number = st.getNumber();
-//			double p = Double.valueOf(price);
-//			int n = Integer.valueOf(number);
-//			total+=(p * n);	
-//		}
-//		Deliver st = delivers.get(delivers.size()-1);
-//		String price = st.getPrice();
-//		String number = st.getNumber();
-//		time_tmp = st.getTime();
-//		double p = Double.valueOf(price);
-//		int n = Integer.valueOf(number);
-//		total+=(p * n);	
-//		
-//		title+=(st.getBrand());//title
-//		
-//		
-//		String number_total = String.valueOf(total);
-//		
-//		DeliverHistory his = new DeliverHistory(title,time_tmp,number_total);
-//		historyList.add(his);	*/	
+	public static void addToHistory(HashMap<String, ArrayList<DeliverInfoAllDTO>> delivermap){
+
+		for(String key : delivermap.keySet()){
+			String title = "";
+			double total = 0.000;
+			String time_tmp = "";
+			ArrayList<DeliverInfoAllDTO> delivers = delivermap.get(key);
+			String area = delivers.get(0).getCustomer_area();
+			String name = delivers.get(0).getCustomer_name();
+			String ordernumber = delivers.get(0).getOrder_num();
+			title = area+" "+name;
+			double p = 0.0;
+			int n = 0;
+			time_tmp = delivers.get(0).getDeliver_time();
+			for(int i=0;i<delivers.size();i++){
+				p = Double.valueOf(delivers.get(i).getUnit_price());
+				n = Integer.valueOf(delivers.get(i).getQuantity());
+				total+=(p * n);	
+			}
+			DeliverHistory his = new DeliverHistory(title,time_tmp,total+"", ordernumber);
+			historyList.add(his);				
+		}
 	}
+	
 	
 	/**
 	 * when first in deliver page, initialize the history page
@@ -209,47 +237,73 @@ public class DeliverUtils {
 			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-			String last_order = "";
-			ArrayList<Deliver> delivers = new ArrayList<Deliver>();
+//			String last_order = "";
+			//ordernumber -- > deliver
+			HashMap<String, ArrayList<DeliverInfoAllDTO>> delivers = new HashMap<String, ArrayList<DeliverInfoAllDTO>>();  
 			if(list.size()>0){
-				DeliverInfoDTO cDTO = (DeliverInfoDTO) list.get(0);
-				Deliver deliver = new Deliver();
-				deliver.setBrand(cDTO.getBrand());
-				deliver.setPrice(String.valueOf(cDTO.getUnit_price()));
-				deliver.setNumber(cDTO.getQuantity());
-				deliver.setOrderNumber(cDTO.getOrder_num());
-				delivers.add(deliver);
-				last_order = deliver.getOrderNumber();
-				for(int i=1;i<list.size();i++){
-					DeliverInfoDTO cDTO_tmp = (DeliverInfoDTO) list.get(i);
-					Deliver st_tmp = new Deliver();
-					String tmp_order = cDTO_tmp.getOrder_num();
-					st_tmp.setBrand(cDTO_tmp.getBrand());
-					st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
-					st_tmp.setNumber(cDTO_tmp.getQuantity());
-					st_tmp.setOrderNumber(cDTO_tmp.getOrder_num());
-					if(tmp_order.equals(last_order)){						
-						delivers.add(st_tmp);//if still the same stock, add to array list
-					}else{//a new stock
-						addToHistory(delivers);
-						delivers.clear();
-						delivers.add(st_tmp);
-						last_order = tmp_order;
-					}				
-				}
-				//the last stock
-				if(!delivers.isEmpty()){
-					addToHistory(delivers);//finish
+				for(int i=0;i<list.size();i++){
+				DeliverInfoAllDTO cDTO = (DeliverInfoAllDTO) list.get(i);
+				String ordernumber = cDTO.getOrder_num();
+				if(delivers.containsKey(ordernumber)){
+					delivers.get(ordernumber).add(cDTO);
+				}else{
+					ArrayList<DeliverInfoAllDTO> delist = new ArrayList<DeliverInfoAllDTO>();
+					delist.add(cDTO);
+					delivers.put(ordernumber, delist);
+				}			
 				}
 			}
-			
+			addToHistory(delivers);//finish
 		} catch (Exception e) {
-			System.out.println("query the stocks by default time failed");
+			System.out.println("query the delivers by default time failed");
 		}	
 		
 		
 	}
 	
+	//update history when change the value of item composite
+	//!!but we do not change the history, so...problems
+	public static void updateHistory(){
+		String title = "";
+		String area = DeliverContentPart.getArea();
+		String name = DeliverContentPart.getName();
+		title = area+" "+name;
+		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
+		shis.setTitle(title);		
+		ic_record.setValue(shis.getTitle());
+	}
+	
+	public static void updateHistory(ArrayList<DataInTable> delivers){
+		
+		String title = "";
+		double total = 0.000;
+//		String time_tmp = "";
+		String area = DeliverContentPart.getArea();
+		String name = DeliverContentPart.getName();
+		title = area+" "+name;
+		double p = 0.0;
+		int n = 0;
+		for(int i=0;i<delivers.size()-1;i++){
+			Deliver st = (Deliver)delivers.get(i);
+//			time_tmp = st.getTime();
+			String price = st.getPrice();
+			String number = st.getNumber();
+			p = Double.valueOf(price);
+			n = Integer.valueOf(number);
+			total+=(p * n);	
+		}
+		
+		String number_total = String.valueOf(total);
+		
+		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
+		shis.setTitle(title);
+//		shis.setTime(time_tmp);
+		shis.setNumber(number_total);
+		
+		ic_record.setValue(shis.getTitle(), shis.getTimeShow(), shis.getNumber());
+		
+	}
+
 	/**
 	 * make the current deliver record into history
 	 * include the common info & table info
@@ -258,21 +312,35 @@ public class DeliverUtils {
 		//need to change as the UI design
 		ArrayList<DataInTable> deliverList = DeliverList.getDelivers();
 		String title = "";
-		for(int i=0;i<deliverList.size()-2;i++){
+		double total = 0.000;
+		double p = 0.0;//price
+		int n=0;//number
+		
+		for(int i=0;i<deliverList.size()-1;i++){
 			Deliver st = (Deliver)deliverList.get(i);
-			title+=(st.getBrand()+",");
+			p = Double.valueOf(st.getPrice());
+			n = Integer.valueOf(st.getNumber());
+			total+=(p*n);			
 		}
-		Deliver st = (Deliver)deliverList.get(deliverList.size()-2);
-		title+=(st.getBrand());//title
+
 		String time_tmp = getTime();
 //		int num = queryItemsFromDataBase(time_tmp);
-		String number="50000";//fake data
-		
-		DeliverHistory his = new DeliverHistory(title,time_tmp,number);
+//		String number="50000";//fake data
+		String area = DeliverContentPart.getArea();
+		String name = DeliverContentPart.getName();
+		String ordernumber = DeliverContentPart.getOrderNumber();
+		title = area+" "+name;		
+		DeliverHistory his = new DeliverHistory(title,time_tmp,total+"", ordernumber);
 		
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
 		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
 		itemList.add(ic);
+		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
+				SWT.DEFAULT));
+		composite_fn_record.layout();
+	}
+	
+	public static void layoutItemList(){
 		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		composite_fn_record.layout();
@@ -301,7 +369,7 @@ public class DeliverUtils {
 		for (int i = 0; i < historyList.size(); i++) {
 			DeliverHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
-			ic.setValue(his.getTitle(), his.getTime(), his.getNumber());
+			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
 			itemList.add(ic);
 			composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT));
@@ -312,6 +380,53 @@ public class DeliverUtils {
 			//??
 		}
 	}
+	
+	
+	public static void showSearchHistory(String dateSearch){
+		//remove the navigator panel, clear all the result
+		for(int i=0;i<itemList.size();i++)
+			itemList.get(i).dispose();
+		itemList.clear();
+		historyList.clear();
+		
+		//add search result
+		Map<String, Object> map = new HashMap<String ,Object>();
+		map.put("deliver_time", dateSearch);
+		DeliverInfoService deliverinfo = new DeliverInfoService();
+		try {
+			ReturnObject ret = deliverinfo.queryDeliverInfoByInputDelivertime(map);
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			HashMap<String, ArrayList<DeliverInfoAllDTO>> delivers = new HashMap<String, ArrayList<DeliverInfoAllDTO>>();  
+			if(list.size()>0){
+				for(int i=0;i<list.size();i++){
+				DeliverInfoAllDTO cDTO = (DeliverInfoAllDTO) list.get(i);
+				String ordernumber = cDTO.getOrder_num();
+				if(delivers.containsKey(ordernumber)){
+					delivers.get(ordernumber).add(cDTO);
+				}else{
+					ArrayList<DeliverInfoAllDTO> delist = new ArrayList<DeliverInfoAllDTO>();
+					delist.add(cDTO);
+					delivers.put(ordernumber, delist);
+				}				
+				}
+			}
+			addToHistory(delivers);//finish
+		} catch (Exception e) {
+			System.out.println("query the delivers by default time failed");
+		}	
+		for (int i = 0; i < historyList.size(); i++) {
+			DeliverHistory his = historyList.get(i);
+			ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
+			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			itemList.add(ic);
+			composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
+					SWT.DEFAULT));
+			composite_fn_record.layout();
+		}
+		
+	}
+	
 	
 	/**
 	 * refresh the table if user select do not use the soft keyboard

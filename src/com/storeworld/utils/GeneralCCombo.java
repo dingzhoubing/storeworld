@@ -233,6 +233,10 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 					tip.setMessage(NAME_MESSAGE);
 					tip.setVisible(true);
 					text.setText("");
+				}else{
+					if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")){
+						DeliverUtils.updateHistory();
+					}
 				}
 			}else if(col == AREA){
 				valid = DeliverValidator.validateArea(text.getText());
@@ -242,6 +246,10 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 					tip.setMessage(AREA_MESSAGE);
 					tip.setVisible(true);
 					text.setText("");
+				}else{
+					if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")){
+						DeliverUtils.updateHistory();
+					}
 				}
 			}
 		}

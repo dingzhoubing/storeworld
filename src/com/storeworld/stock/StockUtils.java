@@ -2,6 +2,7 @@ package com.storeworld.stock;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,7 +144,11 @@ public class StockUtils {
 	 */
 	public static void addToHistory(HashMap<String, ArrayList<Stock>> stockmap){
 		
-		for(String key : stockmap.keySet()){
+		ArrayList<String> keylist = new ArrayList<String>();
+		keylist.addAll(stockmap.keySet());
+		Collections.sort(keylist);
+//		for(String key : stockmap.keySet()){
+		for(String key : keylist){
 			ArrayList<Stock> stocks = stockmap.get(key);
 			
 			String title = "";
@@ -214,6 +219,7 @@ public class StockUtils {
 				st_tmp.setTime(cDTO_tmp.getStock_time());
 				addIntoStocks(st_tmp,stocks);
 			}
+			
 			addToHistory(stocks);
 			
 		} catch (Exception e) {

@@ -2,6 +2,7 @@ package com.storeworld.deliver;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class DeliverUtils {
 	private static boolean editMode = false;
 	private static String status = "";
 	
-	//NEW, HISTORY
+	//NEW, HISTORY, EMPTY
 	public static void setStatus(String sta){
 		status = sta;
 	}
@@ -201,7 +202,11 @@ public class DeliverUtils {
 	
 	public static void addToHistory(HashMap<String, ArrayList<DeliverInfoAllDTO>> delivermap){
 
-		for(String key : delivermap.keySet()){
+		ArrayList<String> keylist = new ArrayList<String>();
+		keylist.addAll(delivermap.keySet());
+		Collections.sort(keylist);
+//		for(String key : delivermap.keySet()){
+		for(String key : keylist){
 			String title = "";
 			double total = 0.000;
 			String time_tmp = "";

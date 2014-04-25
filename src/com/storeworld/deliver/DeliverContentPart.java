@@ -101,7 +101,7 @@ public class DeliverContentPart extends ContentPart{
 	private static Text text_serial;
 	private static Text text_time;
 	private static Text total_val=null;
-	private static String TOTAL_VAL = "×Ü¼Æ(Ð¡Ð´):";
+//	private static String TOTAL_VAL = "×Ü¼Æ(Ð¡Ð´):";
 	
 	public DeliverContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -144,7 +144,7 @@ public class DeliverContentPart extends ContentPart{
 		text_address.setText("");
 		text_serial.setText("");
 		text_time.setText("");
-		total_val.setText(TOTAL_VAL+Constants.SPACE);
+		total_val.setText("");
 		//make the delete button visible = false
 		for (int index=0; index < table.getItemCount(); index++) {
 			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
@@ -169,7 +169,7 @@ public class DeliverContentPart extends ContentPart{
 		text_address.setText("");
 		text_serial.setText("");
 		text_time.setText("");
-		total_val.setText(TOTAL_VAL+Constants.SPACE);
+		total_val.setText("");
 		
 		gc.setEnabled(false);
 		gcName.setEnabled(false);
@@ -198,7 +198,7 @@ public class DeliverContentPart extends ContentPart{
 	 * @param total
 	 */
 	public static void setTotal(String total){
-		total_val.setText(TOTAL_VAL+total+Constants.SPACE);
+		total_val.setText(total);
 	}
 	public static String getTotal(){
 		return total_val.getText();
@@ -460,20 +460,26 @@ public class DeliverContentPart extends ContentPart{
 		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
-		final Color base = new Color(composite.getDisplay(), 255,240,245);
+//		final Color base = new Color(composite.getDisplay(), 255,240,245);
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, (int)(w/5), h);
+//		composite_left.setBounds(0, 0, (int)(w/5), h);
+		composite_left.setBounds(0, 0, 200, h);
 		 
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
-		composite_shift = (int)(w/5);
+//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
+		composite_right.setBounds(200, 0, 760, h);
+//		composite_shift = (int)(w/5);
+		composite_shift = 200;
+		
 		//define a table
-		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
+		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL);//shell, SWT.CHECK
 		//add a new deliver table
 		btnNewButton = new Button(composite_left, SWT.NONE);
-		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
+//		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
+		btnNewButton.setBounds(12, 12, 176, 36);
 		btnNewButton.setText("´´½¨ËÍ»õµ¥");
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -510,13 +516,17 @@ public class DeliverContentPart extends ContentPart{
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" µ±ÔÂÀúÊ·¼ÇÂ¼(ÔÚÏÂ·½ÉèÖÃÈÕÆÚ½øÐÐËÑË÷)");
 		label.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 8, SWT.NORMAL));
-		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
-		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
+//		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
+		label.setBackground(new Color(composite_left.getDisplay(), 0xe1, 0xe3, 0xe6));
+//		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
+		label.setBounds(0, 62, 200, 18);
 		
 		
 		Composite composite_2 = new Composite(composite_left, SWT.NONE);
-        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
-        composite_2.setBackground(new Color(composite_left.getDisplay(), 255,240,245));
+//        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
+//        composite_2.setBackground(new Color(composite_left.getDisplay(), 255,240,245));
+		composite_2.setBounds(0, 80, 200, 428);
+        composite_2.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
         composite_2.setLayout(new FillLayout());
         
 		final ScrolledComposite composite_scroll = new ScrolledComposite(composite_2, SWT.V_SCROLL);//	
@@ -529,7 +539,8 @@ public class DeliverContentPart extends ContentPart{
 		}); 
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
-		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
+//		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
+		composite_fn.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
 		GridLayout layout = new GridLayout(1, false);  
         layout.numColumns = 1;  
         layout.horizontalSpacing = 0;
@@ -540,15 +551,19 @@ public class DeliverContentPart extends ContentPart{
 //        final ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         //show the deliver history
-        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
-        DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
+//        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
+        Color comp_color = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);
+//        DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
+        DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color, 186, 50);
         composite_2.layout();
         //date picker
         final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
-		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
+//		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
+        dateTime.setBounds(12, 520, 98, 36);
 		//search button, search the deliver history
 		Button btnSearch = new Button(composite_left, SWT.NONE);
-		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
+//		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
+		btnSearch.setBounds(112, 520, 76, 36);
 		btnSearch.setText("²éÕÒ");   
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -571,7 +586,7 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
-		
+		//================================================================
 		//quick search for customer, to make a deliver
 		final Button btn_quick = new Button(composite_right, SWT.NONE);
 		btn_quick.addSelectionListener(new SelectionAdapter() {
@@ -609,13 +624,17 @@ public class DeliverContentPart extends ContentPart{
 		
 		//title fo the table
 		Text text_title = new Text(composite_right, SWT.CENTER);
-		text_title.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 30, SWT.NORMAL));
-		text_title.setBounds((int)(2*4*w/5/5), (int)(4*w/5/100+h/40), (int)(4*w/5/5), (int)(3*h/20/2));
+		text_title.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 21, SWT.NORMAL));
+//		text_title.setBounds((int)(2*4*w/5/5), (int)(4*w/5/100+h/40), (int)(4*w/5/5), (int)(3*h/20/2));
+		text_title.setBounds(305, 22, 150, 36);
 		text_title.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		text_title.setText("ËÍ»õµ¥");		
+		text_title.setText("ËÍ»õµ¥");	
+		text_title.setEditable(false);
+		
 		//delete button to delete the list or clear the current list
 		btn_delete = new Button(composite_right, SWT.NONE);
-		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+//		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+		btn_delete.setBounds(672, 12, 76, 30);
 		btn_delete.setText("É¾³ý");
 		btn_delete.setVisible(false);
 		btn_delete.addSelectionListener(new SelectionAdapter() {
@@ -634,7 +653,8 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		btn_edit = new Button(composite_right, SWT.NONE);
-		btn_edit.setBounds((int)(12*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+//		btn_edit.setBounds((int)(12*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+		btn_edit.setBounds(12, 12, 76, 30);
 		btn_edit.setText("ÐÞ¸Ä");
 		btn_edit.setVisible(false);
 		btn_edit.addSelectionListener(new SelectionAdapter() {
@@ -653,20 +673,24 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		
-		composite_updown = (int)(h/3);
+		composite_updown = (int)(h/3);//wait for adjust
 		//area
 		Label lbl_area = new Label(composite_right, SWT.CENTER|SWT.NONE);
-		lbl_area.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_area.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_area.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_area.setAlignment(SWT.CENTER);
 		lbl_area.setText("Æ¬Çø:");
-		lbl_area.setBounds(0, (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
+//		lbl_area.setBounds(0, (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_area.setBounds(12, 82, 32, 22);
 		//area combo
 		
-		gc = new GeneralCCombo(composite_right, SWT.NONE, 0, -1, Constants.DELIVER_TYPE);
-		gc.setBounds((int)(4*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
-		gc.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		gc = new GeneralCCombo(composite_right, SWT.BORDER, 0, -1, Constants.DELIVER_TYPE);
+//		gc.setBounds((int)(4*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
+		gc.setBounds(60, 82, 112, 22);
+		gc.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		gc.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		gc.setVisibleItemCount(5);
-		gc.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
+//		gc.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
 		//mouse down listener
 		gc.addListener(SWT.MouseDown, new Listener() {
 			@Override
@@ -677,17 +701,20 @@ public class DeliverContentPart extends ContentPart{
 	
 		//customer
 		Label lbl_cusname = new Label(composite_right, SWT.CENTER|SWT.NONE);
-		lbl_cusname.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_cusname.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_cusname.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_cusname.setAlignment(SWT.CENTER);
 		lbl_cusname.setText("¿Í»§:");
-		lbl_cusname.setBounds(0, (int)(5*h/18), (int)(4*w/5/25), (int)(h/9/2));
+//		lbl_cusname.setBounds(0, (int)(5*h/18), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_cusname.setBounds(12, 114, 32, 22);
 
 		//customer name
-		gcName = new GeneralCCombo(composite_right, SWT.NONE, 0, -2, Constants.DELIVER_TYPE);
-		gcName.setBounds((int)(4*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
-		gcName.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		gcName = new GeneralCCombo(composite_right, SWT.BORDER, 0, -2, Constants.DELIVER_TYPE);
+//		gcName.setBounds((int)(4*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
+		gcName.setBounds(60, 114, 112, 22);
+		gcName.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
 		gcName.setVisibleItemCount(5);
-		gcName.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
+//		gcName.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
 		gcName.addListener(SWT.MouseEnter, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
@@ -737,44 +764,139 @@ public class DeliverContentPart extends ContentPart{
 		
 		//customer phone
 		Label lbl_phone = new Label(composite_right, SWT.CENTER|SWT.NONE);
-		lbl_phone.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_phone.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_phone.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_phone.setAlignment(SWT.CENTER);
 		lbl_phone.setText("µç»°:");
-		lbl_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
-		text_phone = new Text(composite_right, SWT.NONE);
-		text_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));		
+//		lbl_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_phone.setBounds(252, 82, 32, 22);
+		
+		text_phone = new Text(composite_right, SWT.BORDER);
+//		text_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
+		text_phone.setBounds(300, 82, 162, 22);
+		text_phone.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
+		text_phone.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
+		
 		//customer address
 		Label lbl_address = new Label(composite_right, SWT.CENTER);
-		lbl_address.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_address.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_address.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_address.setAlignment(SWT.CENTER);
 		lbl_address.setText("µØÖ·:");
-		lbl_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
-		text_address = new Text(composite_right, SWT.NONE);
-		text_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));		
+//		lbl_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_address.setBounds(252, 114, 32, 22);
+		
+		text_address = new Text(composite_right, SWT.BORDER);
+//		text_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
+		text_address.setBounds(300, 114, 162, 22);
+		text_address.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
+		text_address.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
+		
+		
 		//serial number
 		Label lbl_serial = new Label(composite_right, SWT.CENTER);
-		lbl_serial.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_serial.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_serial.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_serial.setAlignment(SWT.CENTER);
 		lbl_serial.setText("µ¥ºÅ:");
-		lbl_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
-		text_serial = new Text(composite_right, SWT.NONE);
+//		lbl_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_serial.setBounds(542, 82, 32, 22);
+		
+		text_serial = new Text(composite_right, SWT.BORDER);
 		text_serial.setEnabled(false);
-		text_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));		
+//		text_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
+		text_serial.setBounds(590, 82, 158, 22);
+		text_serial.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
+		text_serial.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
+		
 		//time
 		Label lbl_time = new Label(composite_right, SWT.CENTER);
-		lbl_time.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lbl_time.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
+		lbl_time.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_time.setAlignment(SWT.CENTER);
 		lbl_time.setText("Ê±¼ä:");
-		lbl_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
-		text_time = new Text(composite_right, SWT.NONE);
+//		lbl_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
+		lbl_time.setBounds(542, 114, 32, 22);
+		
+		text_time = new Text(composite_right, SWT.BORDER);
 		text_time.setEnabled(false);
-		text_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
+//		text_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
+		text_time.setBounds(590, 114, 158, 22);
+		text_time.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
+		text_time.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
 		
-		
+		//===================================================================================================
 		//sum composite
-		Composite composite_sum = new Composite(composite_right, SWT.NONE);
+		Composite composite_sum = new Composite(composite_right, SWT.BORDER);
 		composite_sum.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_sum.setBounds(0, (int)(2*h/3), (int)(4*w/5), (int)(5*h/10/4));//(int)(13*h/20)+(int)(2*4*w/5/100)		
+//		composite_sum.setBounds(0, (int)(2*h/3), (int)(4*w/5), (int)(5*h/10/4));//(int)(13*h/20)+(int)(2*4*w/5/100)
+		composite_sum.setBounds(24, 392, 712, 52);
+		
+		Label total = new Label(composite_sum, SWT.NONE);
+		total.setEnabled(false);
+		total.setText("×Ü¼Æ(´óÐ´):");
+		total.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
+		total.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total.setBounds(0, 0, 72, 15);
+		
+		Text total_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
+		total_big.setEnabled(false);
+		total_big.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		total_big.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total_big.setBounds(74, 0, 252, 15);
+		
+		//label of total_val
+		Label total_lbl = new Label(composite_sum, SWT.LEFT|SWT.NONE);
+		total_lbl.setEnabled(false);
+		total_lbl.setText("×Ü¼Æ(Ð¡Ð´):");
+		total_lbl.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		total_lbl.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total_lbl.setBounds(412, 0, 72, 15);
+		
+		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		total_val.setEnabled(false);
+		total_val.setText("");
+		total_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total_val.setBounds(484, 0, 225, 15);
+		
+		Label indeed = new Label(composite_sum, SWT.NONE);
+		indeed.setEnabled(false);
+		indeed.setText("ÊµÊÕ(´óÐ´):");
+		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		indeed.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		indeed.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
+		indeed.setBounds(0, 27, 72, 15);
+		
+		Text indeed_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
+		indeed_big.setEnabled(false);
+		indeed_big.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		indeed_big.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		indeed_big.setBounds(74, 27, 252, 15);
+		
+		Label indeed_lbl = new Label(composite_sum, SWT.LEFT|SWT.NONE);
+		indeed_lbl.setEnabled(false);
+		indeed_lbl.setText("ÊµÊÕ(Ð¡Ð´):");
+		indeed_lbl.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		indeed_lbl.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		indeed_lbl.setBounds(412, 27, 72, 15);
+		
+		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		indeed_val.setEnabled(true);
+		indeed_val.setText("");
+		indeed_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		indeed_val.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
+		indeed_val.setBounds(484, 27, 225, 15);
+		
+		Text indeed_sign = new Text(composite_right, SWT.NONE);
+		indeed_sign.setEnabled(false);
+		indeed_sign.setText("ÊÕ»õÈËÇ©×Ö(¸ÇÕÂ):");
+		indeed_sign.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
+		indeed_sign.setBackground(new Color(composite.getDisplay(), 255, 250, 250));		
+		indeed_sign.setBounds(12, 464, 150, 15);
+		
+		/*
 		GridLayout gd = new GridLayout(2, true);
 		gd.horizontalSpacing = 0;
 		gd.verticalSpacing = 0;
@@ -827,12 +949,14 @@ public class DeliverContentPart extends ContentPart{
 		indeed_sign.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_sign.setLayoutData(gd_text5);
 		new Label(composite_sum, SWT.NONE);		
+		*/
 		composite_sum.layout();
 		
 		//button print
 		Button btn_print = new Button(composite_right, SWT.NONE);
 		btn_print.setText("´òÓ¡");
-		btn_print.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
+//		btn_print.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
+		btn_print.setBounds(293, 500, 174, 40);
 		btn_print.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
@@ -871,7 +995,7 @@ public class DeliverContentPart extends ContentPart{
 						disableEditContent();	
 						DeliverUtils.setTime("");
 						
-						total_val.setText(TOTAL_VAL+Constants.SPACE+Constants.SPACE);
+						total_val.setText("");
 						btn_edit.setVisible(false);
 						
 					}else{
@@ -883,21 +1007,24 @@ public class DeliverContentPart extends ContentPart{
 				
 			}
 		});
+		
+		//===============================================================================
 		//define a table				
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, (int)(h/3), (int)(4*w/5), (int)(h/3));
+//		table.setBounds(0, (int)(h/3), (int)(4*w/5), (int)(h/3));
+		table.setBounds(12, 150, 736, 230);
 		tv = tableViewer;
 		//set the columns of the table
-		int columnWidth = (int)(4*9*w/60/5);		
+//		int columnWidth = (int)(4*9*w/60/5);		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
 		newColumnTableColumn_ID.setResizable(false);
 		
 		final TableColumn newColumnTableColumn_1 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_1.setWidth(columnWidth);
+		newColumnTableColumn_1.setWidth(164);
 		newColumnTableColumn_1.setMoveable(false);
 		newColumnTableColumn_1.setResizable(false);
 		newColumnTableColumn_1.setText("Æ·ÅÆ");
@@ -913,7 +1040,7 @@ public class DeliverContentPart extends ContentPart{
 		});
 
 		final TableColumn newColumnTableColumn_2 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_2.setWidth(columnWidth);
+		newColumnTableColumn_2.setWidth(212);
 		newColumnTableColumn_2.setMoveable(false);
 		newColumnTableColumn_2.setResizable(false);
 		newColumnTableColumn_2.setText("×ÓÆ·ÅÆ");
@@ -927,7 +1054,7 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_3 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_3.setWidth(columnWidth);
+		newColumnTableColumn_3.setWidth(70);
 		newColumnTableColumn_3.setMoveable(false);
 		newColumnTableColumn_3.setResizable(false);
 		newColumnTableColumn_3.setText("¹æ¸ñ");
@@ -941,7 +1068,7 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_4 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_4.setWidth(columnWidth);
+		newColumnTableColumn_4.setWidth(50);
 		newColumnTableColumn_4.setMoveable(false);
 		newColumnTableColumn_4.setResizable(false);
 		newColumnTableColumn_4.setText("µ¥Î»");
@@ -954,10 +1081,11 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_5.setWidth(columnWidth);
+		newColumnTableColumn_5.setWidth(98);
 		newColumnTableColumn_5.setMoveable(false);
 		newColumnTableColumn_5.setResizable(false);
 		newColumnTableColumn_5.setText("µ¥¼Û");
+		newColumnTableColumn_5.setAlignment(SWT.RIGHT);
 		newColumnTableColumn_5.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -967,10 +1095,11 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_6.setWidth(columnWidth);
+		newColumnTableColumn_6.setWidth(62);
 		newColumnTableColumn_6.setMoveable(false);
 		newColumnTableColumn_6.setResizable(false);
 		newColumnTableColumn_6.setText("ÊýÁ¿");
+		newColumnTableColumn_6.setAlignment(SWT.CENTER);
 		newColumnTableColumn_6.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -982,7 +1111,8 @@ public class DeliverContentPart extends ContentPart{
 		
 		
 		final TableColumn newColumnTableColumn_7 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
+//		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
+		newColumnTableColumn_7.setWidth(58);//columnWidth*5/9)
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_7.setText("");
 		newColumnTableColumn_7.setMoveable(false);
@@ -1002,6 +1132,7 @@ public class DeliverContentPart extends ContentPart{
 		cellEditor = new CellEditor[8];
 		cellEditor[0] = null;//ID
 
+		int columnWidth = 50;
 		ComboUtils.setWidth_Col(columnWidth, 1, Constants.DELIVER_TYPE_BRAND);
 		comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
 //		comboboxCellEditor.setActivationStyle(SWT.Expand);

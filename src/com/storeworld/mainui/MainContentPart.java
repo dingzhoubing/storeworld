@@ -40,8 +40,8 @@ public class MainContentPart extends ContentPart{
 	
 
 	public void initialization(){
-		int w = current.getBounds().width;
-		int h = current.getBounds().height;
+		int w = current.getBounds().width;//960
+		int h = current.getBounds().height;//570(-6)
 //		int x = current.getBounds().x;
 //		int y = current.getBounds().y;
 		//add button and label in the part
@@ -50,14 +50,14 @@ public class MainContentPart extends ContentPart{
 		btnicon.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //		System.out.println(w+":"+h+":"+x+":"+y);
 		btnicon.setBounds((int)(w*0.2), (int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
-		btnicon.setText("\u8FDB\u8D27ICON");		
+		btnicon.setText("½ø»õICON");		
 		Label label_in = new Label(this, SWT.NONE);
 		label_in.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", FONT_SIZE, SWT.NORMAL));
 		label_in.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		label_in.setBackground(new Color(getDisplay(),63,63,63));
 		label_in.setAlignment(SWT.CENTER);
 		label_in.setBounds((int)(w*0.2), (int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
-		label_in.setText("\u8FDB\u8D27");
+		label_in.setText("½ø»õ");
 		//not a good way
 		btnicon.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -80,7 +80,7 @@ public class MainContentPart extends ContentPart{
 		final Button btnicon_1 = new Button(this, SWT.NONE);
 		btnicon_1.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_1.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		btnicon_1.setText("\u9001\u8D27ICON");
+		btnicon_1.setText("ËÍ»õICON");
 		btnicon_1.setBounds((int)(w*0.2) + (int)(w*0.25), (int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
 		Label label_out = new Label(this, SWT.NONE);
 		label_out.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", FONT_SIZE, SWT.NORMAL));
@@ -88,7 +88,7 @@ public class MainContentPart extends ContentPart{
 		label_out.setBackground(new Color(getDisplay(),63,63,63));
 		label_out.setBounds((int)(w*0.2)+(int)(w*0.25), (int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
 		label_out.setAlignment(SWT.CENTER);
-		label_out.setText("\u9001\u8D27");
+		label_out.setText("ËÍ»õ");
 		btnicon_1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -109,7 +109,7 @@ public class MainContentPart extends ContentPart{
 		final Button btnicon_2 = new Button(this, SWT.NONE);
 		btnicon_2.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_2.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		btnicon_2.setText("\u76D8\u4ED3ICON");
+		btnicon_2.setText("·ÖÎöICON");
 		btnicon_2.setBounds((int)(w*0.2) + (int)(w*0.5), (int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
 		Label label_analyze = new Label(this, SWT.NONE);
 		label_analyze.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", FONT_SIZE, SWT.NORMAL));
@@ -117,7 +117,7 @@ public class MainContentPart extends ContentPart{
 		label_analyze.setBackground(new Color(getDisplay(),63,63,63));
 		label_analyze.setAlignment(SWT.CENTER);
 		label_analyze.setBounds((int)(w*0.2)+(int)(w*0.5), (int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
-		label_analyze.setText("\u76D8\u4ED3");
+		label_analyze.setText("·ÖÎö");
 		btnicon_2.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -139,7 +139,7 @@ public class MainContentPart extends ContentPart{
 		final Button btnicon_3 = new Button(this, SWT.NONE);
 		btnicon_3.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_3.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		btnicon_3.setText("\u8D27\u54C1ICON");
+		btnicon_3.setText("²úÆ·ICON");
 		btnicon_3.setBounds((int)(w*0.2), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
 		Label label_product = new Label(this, SWT.NONE);
 		label_product.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", FONT_SIZE, SWT.NORMAL));
@@ -147,7 +147,7 @@ public class MainContentPart extends ContentPart{
 		label_product.setBackground(new Color(getDisplay(),63,63,63));
 		label_product.setAlignment(SWT.CENTER);
 		label_product.setBounds((int)(w*0.2), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
-		label_product.setText("\u8D27\u54C1");
+		label_product.setText("²úÆ·");
 		btnicon_3.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -168,7 +168,7 @@ public class MainContentPart extends ContentPart{
 		final Button btnicon_4 = new Button(this, SWT.NONE);
 		btnicon_4.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_4.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		btnicon_4.setText("\u5BA2\u6237ICON");
+		btnicon_4.setText("¿Í»§ICON");
 		btnicon_4.setBounds((int)(w*0.2)+(int)(w*0.25), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
 		Label label_customer = new Label(this, SWT.NONE);
 		label_customer.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", FONT_SIZE, SWT.NORMAL));
@@ -176,7 +176,7 @@ public class MainContentPart extends ContentPart{
 		label_customer.setBackground(new Color(getDisplay(),63,63,63));
 		label_customer.setAlignment(SWT.CENTER);
 		label_customer.setBounds((int)(w*0.2)+(int)(w*0.25), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
-		label_customer.setText("\u5BA2\u6237");
+		label_customer.setText("¿Í»§");
 		btnicon_4.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -197,7 +197,7 @@ public class MainContentPart extends ContentPart{
 		Button btnicon_5 = new Button(this, SWT.NONE);
 		btnicon_5.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 14, SWT.NORMAL));
 		btnicon_5.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-		btnicon_5.setText("\u4FDD\u5BC6ICON");
+		btnicon_5.setText("±£ÃÜICON");
 		btnicon_5.setBounds((int)(w*0.2)+(int)(w*0.5), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2), (int)(w*0.1), (int)(w*0.1));
 		Label label_lock = new Label(this, SWT.NONE);
 		label_lock.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
@@ -205,7 +205,7 @@ public class MainContentPart extends ContentPart{
 		label_lock.setBackground(new Color(getDisplay(),63,63,63));
 		label_lock.setAlignment(SWT.CENTER);
 		label_lock.setBounds((int)(w*0.2)+(int)(w*0.5), (int)(h*0.2)+(int)(w*0.1)+(int)(h*0.2)+(int)(w*0.1), (int)(w*0.1), (int)(w*0.02));
-		label_lock.setText("\u4FDD\u5BC6");
+		label_lock.setText("±£ÃÜ");
 		
 		btnicon_5.addSelectionListener(new SelectionAdapter() {
 			@Override

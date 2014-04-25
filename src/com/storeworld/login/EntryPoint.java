@@ -20,15 +20,15 @@ public class EntryPoint {
 
 	public static void entry() {
 		try {
-			
-			int screenH =(int)(Constants.SCREEN_HEIGHT * 0.85);
-			int screenW =(int)(Constants.SCREEN_WIDTH * 0.8);
-//			System.out.println(screenH + ":" + screenW + "swh");
+			//fixed  with & height
+			int screenH =720;
+			int screenW =960;
+
 			Display display = Display.getDefault();
 			MainUI shell = MainUI.getMainUI_Instance(display);
 			//set the percent of the north part
 			shell.setSize(screenW, screenH);
-			shell.setRatio(0.15);
+			shell.setRatio(0.15);//no use in fixed with & height
 			shell.setup();
 			shell.setContentPart(new MainContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_MAIN);
 			shell.show_Content_main();

@@ -190,7 +190,7 @@ public class StockContentPart extends ContentPart{
 		}
 		
 		dateTime_stock.setEnabled(false);
-		table.setEnabled(false);
+		table.setEnabled(false);		
 	}
 	
 	
@@ -410,26 +410,32 @@ public class StockContentPart extends ContentPart{
 	 * initialize the table elements
 	 */
 	public void initialization(){
-		final int w = current.getBounds().width;
-		final int h = current.getBounds().height;
+		final int w = current.getBounds().width;//960
+		final int h = current.getBounds().height;//570
 		composite.setBounds(0, 0, w, h);
 		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
-		final Color base = new Color(composite.getDisplay(), 255,240,245);
+//		final Color base = new Color(composite.getDisplay(), 255,240,245);
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, (int)(w/5), h);
+//		composite_left.setBounds(0, 0, (int)(w/5), h);
+		composite_left.setBounds(0, 0, 200, h);
 		//right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
-		composite_shift = (int)(w/5);
+//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
+		composite_right.setBounds(200, 0, 760, h);
+//		composite_shift = (int)(w/5);
+		composite_shift = 200;
 		//define a table
-		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
+		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL);//shell, SWT.CHECK
 		
 		//add a new stock table
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
-		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
+//		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
+		btnNewButton.setBounds(12, 12, 176, 36);
+		btnNewButton.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		btnNewButton.setText("+   新增进货");
 		//if click, record the time, put the current into history(if exist), clear all the stock table
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
@@ -470,13 +476,17 @@ public class StockContentPart extends ContentPart{
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" 当月历史记录(在下方设置日期进行搜索)");
 		label.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
-		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
-		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
+//		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
+		label.setBackground(new Color(composite_left.getDisplay(), 0xe1, 0xe3, 0xe6));
+//		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
+		label.setBounds(0, 62, 200, 18);
 		
 		//the base composite of the left navigator
 		final Composite composite_2 = new Composite(composite_left, SWT.NONE);
-        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
-        composite_2.setBackground(new Color(composite.getDisplay(), 255,240,245));
+//        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
+//        composite_2.setBackground(new Color(composite.getDisplay(), 255,240,245));
+		composite_2.setBounds(0, 80, 200, 428);
+        composite_2.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
         composite_2.setLayout(new FillLayout());
         
         //left history part
@@ -493,7 +503,8 @@ public class StockContentPart extends ContentPart{
 		//the composite on scroll part
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
-		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
+//		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
+		composite_fn.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
 		GridLayout layout = new GridLayout(1, false);  
         layout.numColumns = 1;  
         layout.horizontalSpacing = 0;
@@ -503,31 +514,30 @@ public class StockContentPart extends ContentPart{
         composite_fn.setLayout(layout);
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         //show the history panel
-        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
-        StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
+//        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
+        Color comp_color = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);
+//        StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
+        StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color, 186, 50);//width ??
         composite_2.layout();
         //date picker
         final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
-		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
+//		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
+//        dateTime.setBackground(comp_color);//have no use, defect
+        dateTime.setBounds(12, 520, 98, 36);
 		Button btnSearch = new Button(composite_left, SWT.NONE);
 		//search the history
-		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
+//		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
+		btnSearch.setBounds(112, 520, 76, 36);
 		btnSearch.setText("查找");
+		btnSearch.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				String year = String.valueOf(dateTime.getYear());
 				int mon = dateTime.getMonth()+1;
 				String month = String.valueOf(mon);
-//				String day = String.valueOf(dateTime.getDay());
-//				int hour = dateTime.getHours()+1;
-//				int min = dateTime.getMinutes()+1;
-//				int sec = dateTime.getSeconds()+1;
-				
 				if(mon<10)
 					month = "0"+month;
-//				if(!day.startsWith("0"))
-//					day="0"+day;
 				//date to search
 				String dateSearch = year+month;
 				StockUtils.showSearchHistory(dateSearch);
@@ -536,7 +546,8 @@ public class StockContentPart extends ContentPart{
 
 		//show time in the right cmposite
 		dateTime_stock = new DateTime(composite_right, SWT.BORDER);
-		dateTime_stock.setBounds((int)(4*w/5/100), (int)(4*w/5/100), (int)(6*4*w/5/50), (int)(h/20));
+//		dateTime_stock.setBounds((int)(4*w/5/100), (int)(4*w/5/100), (int)(6*4*w/5/50), (int)(h/20));
+		dateTime_stock.setBounds(12, 12, 98, 30);
 		dateTime_stock.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
@@ -545,12 +556,12 @@ public class StockContentPart extends ContentPart{
 				StockList.changeStocksTime();
 				dateTime_stock.setEnabled(true);
 			}
-		});
-		
+		});		
 		
 		//delete or clear the table
 		btn_delete = new Button(composite_right, SWT.NONE);
-		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+//		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
+		btn_delete.setBounds(672, 12, 76, 30);
 		btn_delete.setText("删除");
 		//while editing the table, we make the delete button in-visible
 		btn_delete.setVisible(false);
@@ -576,12 +587,45 @@ public class StockContentPart extends ContentPart{
 			}
 		});
 				
-		composite_updown = (int)(h/20)+(int)(2*4*w/5/100);
+//		composite_updown = (int)(h/20)+(int)(2*4*w/5/100);
+		composite_updown = 30+24;
 		
+		//=======================================================================================
 		//sum composite
-		Composite composite_sum = new Composite(composite_right, SWT.NONE);
+		Composite composite_sum = new Composite(composite_right, SWT.BORDER);
 		composite_sum.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_sum.setBounds(0, (int)(13*h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(h/10));		
+//		composite_sum.setBounds(0, (int)(13*h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(h/10));
+		composite_sum.setBounds(24, 396, 712, 52);
+		
+		Text total = new Text(composite_sum, SWT.NONE);
+		total.setEnabled(false);
+		total.setText("总计:");
+		total.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
+		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total.setBounds(0, 0, 300, 14);
+		
+		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		total_val.setEnabled(false);
+		total_val.setText("0.000"+Constants.SPACE);
+		total_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		total_val.setBounds(412, 0, 300, 14);
+		
+		Text indeed = new Text(composite_sum, SWT.NONE);
+		indeed.setEnabled(false);
+		indeed.setText("实付:");
+		indeed.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
+		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		indeed.setBounds(0, 26, 300, 14);
+		
+		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		indeed_val.setEnabled(false);
+		indeed_val.setText(""+Constants.SPACE);
+		indeed_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+		indeed_val.setBounds(412, 26, 300, 14);
+		
+		/*
 		GridLayout gd = new GridLayout(2, true);
 		gd.horizontalSpacing = 0;
 		gd.verticalSpacing = 0;
@@ -616,12 +660,15 @@ public class StockContentPart extends ContentPart{
 		indeed_val.setText(""+Constants.SPACE);
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_val.setLayoutData(gd_text);
+		*/
 		composite_sum.layout();
 		
+		//===============================================================================
 		//button edit the history
 		btn_edit = new Button(composite_right, SWT.NONE);
 		btn_edit.setText("修改记录");
-		btn_edit.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
+//		btn_edit.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
+		btn_edit.setBounds(293, 500, 174, 40);
 		//at first, set in-visible
 		btn_edit.setVisible(false);
 		btn_edit.addSelectionListener(new SelectionAdapter() {
@@ -639,26 +686,28 @@ public class StockContentPart extends ContentPart{
 			}
 		});
 		
-		
+		//======================================================================
 		//the stock table	
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
-		table.setHeaderVisible(true);		
-		table.setBounds(0, (int)(h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(6*h/10));
+		table.setHeaderVisible(true);	
+//		table.setBounds(0, (int)(h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(6*h/10));
+		table.setBounds(12, 54, 736, 330);
 		tv = tableViewer;
 		
 		//set the columns of the table
-		int columnWidth = (int)(4*9*w/60/5);		
+//		int columnWidth = (int)(4*9*w/60/5);		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
 		newColumnTableColumn_ID.setResizable(false);
 		
 		final TableColumn newColumnTableColumn_1 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_1.setWidth(columnWidth);
+		newColumnTableColumn_1.setWidth(164);
 		newColumnTableColumn_1.setMoveable(false);
 		newColumnTableColumn_1.setResizable(false);
 		newColumnTableColumn_1.setText("品牌");
+		newColumnTableColumn_1.setAlignment(SWT.LEFT);
 //		newColumnTableColumn.setImage(new Image(display,"title.png"));
 		//add listener
 		newColumnTableColumn_1.addSelectionListener(new SelectionAdapter(){
@@ -671,10 +720,11 @@ public class StockContentPart extends ContentPart{
 		});
 
 		final TableColumn newColumnTableColumn_2 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_2.setWidth(columnWidth);
+		newColumnTableColumn_2.setWidth(212);
 		newColumnTableColumn_2.setMoveable(false);
 		newColumnTableColumn_2.setResizable(false);
 		newColumnTableColumn_2.setText("子品牌");
+		newColumnTableColumn_2.setAlignment(SWT.LEFT);
 		newColumnTableColumn_2.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -685,10 +735,11 @@ public class StockContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_3 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_3.setWidth(columnWidth);
+		newColumnTableColumn_3.setWidth(70);
 		newColumnTableColumn_3.setMoveable(false);
 		newColumnTableColumn_3.setResizable(false);
 		newColumnTableColumn_3.setText("规格");
+		newColumnTableColumn_3.setAlignment(SWT.LEFT);
 		newColumnTableColumn_3.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -699,10 +750,11 @@ public class StockContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_4 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_4.setWidth(columnWidth);
+		newColumnTableColumn_4.setWidth(50);
 		newColumnTableColumn_4.setMoveable(false);
 		newColumnTableColumn_4.setResizable(false);
 		newColumnTableColumn_4.setText("单位");
+		newColumnTableColumn_4.setAlignment(SWT.LEFT);
 		newColumnTableColumn_4.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -712,10 +764,11 @@ public class StockContentPart extends ContentPart{
 			}
 		});
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_5.setWidth(columnWidth);
+		newColumnTableColumn_5.setWidth(98);
 		newColumnTableColumn_5.setMoveable(false);
 		newColumnTableColumn_5.setResizable(false);
 		newColumnTableColumn_5.setText("单价");
+		newColumnTableColumn_5.setAlignment(SWT.RIGHT);
 		newColumnTableColumn_5.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -725,10 +778,11 @@ public class StockContentPart extends ContentPart{
 			}
 		});
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_6.setWidth(columnWidth);
+		newColumnTableColumn_6.setWidth(62);//132
 		newColumnTableColumn_6.setMoveable(false);
 		newColumnTableColumn_6.setResizable(false);
 		newColumnTableColumn_6.setText("数量");
+		newColumnTableColumn_6.setAlignment(SWT.CENTER);
 		newColumnTableColumn_6.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
@@ -740,12 +794,13 @@ public class StockContentPart extends ContentPart{
 		
 		
 		final TableColumn newColumnTableColumn_7 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
+//		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
+		newColumnTableColumn_7.setWidth(58);//columnWidth*5/9)
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_7.setText("");
 		newColumnTableColumn_7.setMoveable(false);
 		newColumnTableColumn_7.setResizable(false);		
-		
+					
 		
 		//set the editor of the table columns
 		tableViewer.setContentProvider(new StockContentProvider(tableViewer, stocklist));
@@ -756,10 +811,11 @@ public class StockContentPart extends ContentPart{
 		stocklist.addStock(stock_new);
 		
 		tableViewer.setInput(stocklist);		
-		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","price", "number", "operation"});		
+		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","price", "number", "operation"});	
 		cellEditor = new CellEditor[8];
 		cellEditor[0] = null;//ID
 		
+		int columnWidth = 50;//??
 		ComboUtils.setWidth_Col(columnWidth, 1, Constants.STOCK_TYPE_BRAND);
 //		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
 		comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
@@ -798,7 +854,6 @@ public class StockContentPart extends ContentPart{
 
 		ICellModifier modifier = new StockCellModifier(tableViewer, stocklist);
 		tableViewer.setCellModifier(modifier);
-		
 		//add Filter, no use now
 //		tableViewer.addFilter(new StockFilter());
 		

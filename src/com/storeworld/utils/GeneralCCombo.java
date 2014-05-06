@@ -65,7 +65,7 @@ public class GeneralCCombo extends Composite {
 	private  int width;
 	private  int col;
 	private String type;
-    protected ToolTip tip;
+    protected static ToolTip tip;
     private static final int ADJUST_X = 30;
 	private static final int ADJUST_Y = 20;
 
@@ -108,8 +108,12 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 			public void focusLost(FocusEvent e) {
 //				System.out.println("text focus lost");
 				boolean valid = false;
+				
+				if(GeneralCCombo.getToolTip()!=null)
+					GeneralCCombo.getToolTip().setVisible(false);
+				
 				// listener for table brand and sub_brand
-				if (col == BRAND_COLUMN || col == SUB_BRAND_COLUMN) {
+				if (col == BRAND_COLUMN || col == SUB_BRAND_COLUMN || col == SIZE_COLUMN) {
 					//stock
 					if (type.equals(Constants.STOCK_TYPE)) {
 						
@@ -158,7 +162,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 							valid = StockValidator.validateSize(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+								tip.setLocation(loc.x + ADJUST_X-10,loc.y + text.getLocation().y + ADJUST_Y);//
 								tip.setMessage(SIZE_MESSAGE);
 								tip.setVisible(true);
 								StockContentPart.getStockList().stockChanged(stock);
@@ -192,7 +196,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 
 							}
 						} else if (col == SUB_BRAND_COLUMN) {
-							valid = DeliverValidator.validateSub_Brand(text.getText());
+							valid = DeliverValidator.validateSize(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// tip.setLocation(loc.x+ADJUST_X+width*(col-2),
@@ -205,9 +209,10 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								DeliverContentPart.getDeliverList().deliverChanged(deliver);
 							}
 						}else if(col == SIZE_COLUMN){
+							valid = DeliverValidator.validateSub_Brand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
+								tip.setLocation(loc.x + ADJUST_X-10,loc.y + text.getLocation().y + ADJUST_Y);//
 								tip.setMessage(SIZE_MESSAGE);
 								tip.setVisible(true);
 								DeliverContentPart.getDeliverList().deliverChanged(deliver);
@@ -331,6 +336,10 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 	}
 
 	initAccessible();
+}
+
+public static ToolTip getToolTip(){
+	return tip;
 }
 static int checkStyle (int style) {
 	int mask = SWT.BORDER | SWT.READ_ONLY | SWT.FLAT | SWT.LEFT_TO_RIGHT | SWT.RIGHT_TO_LEFT;

@@ -1,6 +1,7 @@
 package com.storeworld.stock;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -81,6 +81,7 @@ public class StockContentPart extends ContentPart{
 	private static Text total_val=null;
 	private static DateTime dateTime_stock = null;
 	private static int rowCurrent = -1;
+	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
 	
 	private static Button btn_edit = null;
 	private static Button btn_delete = null;
@@ -122,6 +123,10 @@ public class StockContentPart extends ContentPart{
 		return total_val.getText();
 	}
 	
+	
+	public static ArrayList<Integer> getTpShift(){
+		return tpShift;
+	}
 	/**
 	 * get/set the timer value when edit the history	
 	 */
@@ -197,20 +202,7 @@ public class StockContentPart extends ContentPart{
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	/**
@@ -718,7 +710,8 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
-
+		tpShift.add(164);
+		
 		final TableColumn newColumnTableColumn_2 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_2.setWidth(212);
 		newColumnTableColumn_2.setMoveable(false);
@@ -733,7 +726,7 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
-		
+		tpShift.add(212);
 		final TableColumn newColumnTableColumn_3 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_3.setWidth(70);
 		newColumnTableColumn_3.setMoveable(false);
@@ -748,6 +741,7 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(70);
 		
 		final TableColumn newColumnTableColumn_4 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_4.setWidth(50);
@@ -763,6 +757,8 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(50);
+		
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_5.setWidth(98);
 		newColumnTableColumn_5.setMoveable(false);
@@ -777,6 +773,8 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(98);
+		
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_6.setWidth(62);//132
 		newColumnTableColumn_6.setMoveable(false);
@@ -791,7 +789,7 @@ public class StockContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
-		
+		tpShift.add(62);
 		
 		final TableColumn newColumnTableColumn_7 = new TableColumn(table, SWT.NONE);
 //		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
@@ -800,7 +798,7 @@ public class StockContentPart extends ContentPart{
 		newColumnTableColumn_7.setText("");
 		newColumnTableColumn_7.setMoveable(false);
 		newColumnTableColumn_7.setResizable(false);		
-					
+		tpShift.add(58);			
 		
 		//set the editor of the table columns
 		tableViewer.setContentProvider(new StockContentProvider(tableViewer, stocklist));
@@ -815,7 +813,7 @@ public class StockContentPart extends ContentPart{
 		cellEditor = new CellEditor[8];
 		cellEditor[0] = null;//ID
 		
-		int columnWidth = 50;//??
+		int columnWidth = 50;//now, since we locate the point by getText of the table cell
 		ComboUtils.setWidth_Col(columnWidth, 1, Constants.STOCK_TYPE_BRAND);
 //		GeneralComboCellEditor<String> comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());
 		comboboxCellEditor = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getBrands());

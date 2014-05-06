@@ -1,5 +1,6 @@
 package com.storeworld.deliver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -102,6 +102,11 @@ public class DeliverContentPart extends ContentPart{
 	private static Text text_time;
 	private static Text total_val=null;
 //	private static String TOTAL_VAL = "×Ü¼Æ(Ð¡Ð´):";
+	
+	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
+	public static ArrayList<Integer> getTpShift(){
+		return tpShift;
+	}
 	
 	public DeliverContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -1039,7 +1044,8 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
-
+		tpShift.add(164);
+		
 		final TableColumn newColumnTableColumn_2 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_2.setWidth(212);
 		newColumnTableColumn_2.setMoveable(false);
@@ -1053,6 +1059,7 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(212);
 		
 		final TableColumn newColumnTableColumn_3 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_3.setWidth(70);
@@ -1067,6 +1074,7 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(70);
 		
 		final TableColumn newColumnTableColumn_4 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_4.setWidth(50);
@@ -1081,6 +1089,8 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(50);
+		
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_5.setWidth(98);
 		newColumnTableColumn_5.setMoveable(false);
@@ -1095,6 +1105,8 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
+		tpShift.add(98);
+		
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_6.setWidth(62);
 		newColumnTableColumn_6.setMoveable(false);
@@ -1109,7 +1121,7 @@ public class DeliverContentPart extends ContentPart{
 				Utils.refreshTable(table);
 			}
 		});
-		
+		tpShift.add(62);
 		
 		final TableColumn newColumnTableColumn_7 = new TableColumn(table, SWT.NONE);
 //		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
@@ -1118,7 +1130,7 @@ public class DeliverContentPart extends ContentPart{
 		newColumnTableColumn_7.setText("");
 		newColumnTableColumn_7.setMoveable(false);
 		newColumnTableColumn_7.setResizable(false);		
-		
+		tpShift.add(58);
 		
 		//set the editor of the table columns
 		tableViewer.setContentProvider(new DeliverContentProvider(tableViewer, deliverlist));

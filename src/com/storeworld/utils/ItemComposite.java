@@ -81,6 +81,7 @@ public class ItemComposite extends Composite {
 				if(history instanceof StockHistory){
 					//if click to show history, leave edit mode
 					StockUtils.leaveEditMode();
+					StockUtils.setStatus("HISTORY");
 					
 					StockList.showHistory((StockHistory)history);
 					StockUtils.recordItemComposite(getSelf());
@@ -88,6 +89,7 @@ public class ItemComposite extends Composite {
 					
 				}else{//DeliverHistory
 					
+					DeliverUtils.setStatus("HISTORY");
 					//if click to show history, leave edit mode
 					DeliverUtils.leaveEditMode();
 					

@@ -485,14 +485,15 @@ public class DeliverContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
+					DeliverUtils.setStatus("NEW");
+					DeliverUtils.leaveEditMode();
 //				if(!gc.getText().equals("") && !gcName.equals("")){
 					DeliverUtils.setOrderNumber();//set the order number for the deliver table
 				
 					clearContent();
 					enableEditContent();
 //					disableEditContent();
-					DeliverUtils.setTime(null);
-					DeliverUtils.setStatus("NEW");
+					DeliverUtils.setTime(null);					
 				
 					table.removeAll();
 					DeliverList.removeAllDelivers();

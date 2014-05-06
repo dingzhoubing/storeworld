@@ -90,7 +90,7 @@ public class StockList {
 //				isFirst = false;
 //			}
 			//if in edit mode, change the history
-			if(StockUtils.getEditMode()){
+			if(StockUtils.getEditMode() && StockUtils.getStatus().equals("HISTORY")){
 				StockUtils.updateHistory(stockList);
 			}
 		}
@@ -313,7 +313,7 @@ public class StockList {
 					System.out.println("update stock failed");
 				}
 				//if in edit mode, change the history
-				if(StockUtils.getEditMode()){
+				if(StockUtils.getEditMode() && StockUtils.getStatus().equals("HISTORY")){
 					StockUtils.updateHistory(stockList);
 				}
 			}

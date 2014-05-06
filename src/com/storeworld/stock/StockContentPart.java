@@ -442,7 +442,7 @@ public class StockContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
-				
+				StockUtils.setStatus("NEW");
 //				StockUtils.setTime();//record the time
 				//TODO: check if has history
 				if((StockList.getStocks().size() > 1)){
@@ -467,7 +467,7 @@ public class StockContentPart extends ContentPart{
 				
 				//if entered to add a new stock, leave the edit mode
 				StockUtils.leaveEditMode();
-
+//				StockUtils.setStatus("");//no status??
 			}
 		});
 		

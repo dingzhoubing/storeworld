@@ -81,6 +81,17 @@ public class StockUtils {
 	public static boolean getEditMode(){
 		return editMode;
 	}
+	
+	private static String status = "";
+	
+	//NEW, HISTORY
+	public static void setStatus(String sta){
+		status = sta;
+	}
+	public static String getStatus(){
+		return status;
+	} 
+	
 	/**
 	 * the item composite list
 	 */
@@ -118,24 +129,41 @@ public class StockUtils {
 			int n = Integer.valueOf(number);
 			total+=(p * n);	
 		}
-		Stock st = (Stock)stocks.get(stocks.size()-2);
-		String price = st.getPrice();
-		String number = st.getNumber();
-		time_tmp = st.getTime();
-		double p = Double.valueOf(price);
-		int n = Integer.valueOf(number);
-		total+=(p * n);	
-		
-		title+=(st.getBrand());//title
-		
-		String number_total = String.valueOf(total);
-		StockHistory shis = (StockHistory)ic_record.getHistory();
-		shis.setTitle(title);
-		shis.setTime(time_tmp);
-		shis.setNumber(number_total);
-		
-		ic_record.setValue(shis.getTitle(), shis.getTimeShow(), shis.getNumber());
-		
+		if (stocks.size() < 2) {
+			String time = StockContentPart.getStockTimer();
+			String time_show = "";
+			if(!time.equals("")){
+				String month = time.substring(4, 6);
+				String day = time.substring(6, 8);
+				if(month.startsWith("0"))
+					month = month.substring(1);
+				if(day.startsWith("0"))
+					day = day.substring(1);
+				time_show =  month+"ÔÂ  " + day + "ÈÕ";
+			}
+//			StockHistory shis = (StockHistory) ic_record.getHistory();
+			ic_record.setValue("", time_show,
+					"0.0");
+		} else {//only if the size >= 2, there is a valid row 
+			Stock st = (Stock) stocks.get(stocks.size() - 2);
+			String price = st.getPrice();
+			String number = st.getNumber();
+			time_tmp = st.getTime();
+			double p = Double.valueOf(price);
+			int n = Integer.valueOf(number);
+			total += (p * n);
+
+			title += (st.getBrand());// title
+
+			String number_total = String.valueOf(total);
+			StockHistory shis = (StockHistory) ic_record.getHistory();
+			shis.setTitle(title);
+			shis.setTime(time_tmp);
+			shis.setNumber(number_total);
+
+			ic_record.setValue(shis.getTitle(), shis.getTimeShow(),
+					shis.getNumber());
+		}
 	}
 	
 	/**

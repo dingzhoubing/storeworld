@@ -94,7 +94,8 @@ public class DeliverList {
 			(iterator.next()).add(deliver);
 		
 		//if in edit mode, change the history
-		if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
+		//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
+		if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 			DeliverUtils.updateHistory(deliverList);
 		}
 	}
@@ -114,7 +115,8 @@ public class DeliverList {
 				System.out.println("remove the deliver failed");
 			}
 			//if in edit mode, change the history
-			if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
+			//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
+			if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 				DeliverUtils.updateHistory(deliverList);
 			}
 		}
@@ -180,7 +182,8 @@ public class DeliverList {
 					System.out.println("update deliver failed");
 				}
 				//if in edit mode, change the history
-				if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
+				//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
+				if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 					DeliverUtils.updateHistory(deliverList);
 				}
 			}

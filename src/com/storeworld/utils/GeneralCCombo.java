@@ -234,7 +234,8 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 					tip.setVisible(true);
 					text.setText("");
 				}else{
-					if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()){
+					//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
+					if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 						DeliverUtils.updateHistory();
 					}
 				}
@@ -247,7 +248,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 					tip.setVisible(true);
 					text.setText("");
 				}else{
-					if(DeliverUtils.getEditMode() && !DeliverUtils.getStatus().equals("EMPTY")&& !UIDataConnector.getFromCustomer()){
+					if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 						DeliverUtils.updateHistory();
 					}
 				}

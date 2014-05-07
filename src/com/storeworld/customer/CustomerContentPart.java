@@ -290,15 +290,18 @@ public class CustomerContentPart extends ContentPart{
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
+//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
+		composite_right.setBounds(200, 0, 760, h);
 		composite_shift = (int)(w/5);
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		tv=tableViewer;
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
-		final Color base = new Color(composite.getDisplay(), 255,240,245);
+//		final Color base = new Color(composite.getDisplay(), 255,240,245);
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, (int)(w/5), h);
+//		composite_left.setBounds(0, 0, (int)(w/5), h);
+		composite_left.setBounds(0, 0, 200, h);
 
 		//search button
 		Button btnNewButton = new Button(composite_left, SWT.NONE);

@@ -239,7 +239,7 @@ public class CustomerUtils {
 			CustomerContentPart.getTableViewer().addFilter(cf);
 			Utils.refreshTable(CustomerContentPart.getTableViewer().getTable());
 			break;
-		}
+		}		
 	}
 	
 	/**

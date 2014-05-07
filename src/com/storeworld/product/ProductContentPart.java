@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,14 +13,21 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.customer.CustomerFilter;
+import com.storeworld.customer.CustomerUtils;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.Utils;
@@ -41,6 +49,7 @@ public class ProductContentPart extends ContentPart{
 	private static CellEditor[] cellEditor = new CellEditor[7];
 	private static TableEditor editor = null;
 	private static TableEditor editorEdit = null;//software number keyboard
+	private static TableEditor editorDel = null;//software number keyboard
 	
 	private Composite current = null;
 	private Composite composite = null;
@@ -50,6 +59,13 @@ public class ProductContentPart extends ContentPart{
 	private int sizeColumn = 3;
 	private int repColumn = 5;
 	private int deleteButtonColumn = 6;
+	
+	private int composite_shift = 0;
+	
+	public static TableEditor getEditorDel(){
+		return editorDel;
+	}
+	
 	public ProductContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -143,9 +159,9 @@ public class ProductContentPart extends ContentPart{
 						}
 					}else if(colCurrent == deleteButtonColumn){
 						if(rowCurrent == table.getItemCount()-1){
-							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
-							if(!editor.getEditor().isDisposed())
-								editor.getEditor().setVisible(false);
+							editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editorDel.getEditor().isDisposed())
+								editorDel.getEditor().setVisible(false);
 						}
 					}
 				}
@@ -154,9 +170,9 @@ public class ProductContentPart extends ContentPart{
 					//if the deliver Button column, we disable the click
 					if(colCurrent == deleteButtonColumn){
 						if(rowCurrent == table.getItemCount()-1){
-							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
-							if(!editor.getEditor().isDisposed()){
-								editor.getEditor().setVisible(false);
+							editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
+							if(!editorDel.getEditor().isDisposed()){
+								editorDel.getEditor().setVisible(false);
 							}
 						}
 					}
@@ -182,14 +198,14 @@ public class ProductContentPart extends ContentPart{
 					}
 				}								
 				if(row >= 0){			
-					editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
-					if(!editor.getEditor().isDisposed())
-						editor.getEditor().setVisible(true);
+					editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
+					if(!editorDel.getEditor().isDisposed())
+						editorDel.getEditor().setVisible(true);
 				}else{
 					if(visibleButton_last >= 0 && visibleButton_last < table.getItemCount()){
-						editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
-						if(!editor.getEditor().isDisposed())
-							editor.getEditor().setVisible(false);
+						editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(visibleButton_last), deleteButtonColumn);
+						if(!editorDel.getEditor().isDisposed())
+							editorDel.getEditor().setVisible(false);
 					}
 				}
 			}
@@ -228,15 +244,99 @@ public class ProductContentPart extends ContentPart{
 		int h = current.getBounds().height;
 		composite.setBounds(0, 0, w, h);
 		
+		 //right part		
+		Composite composite_right  = new Composite(composite, SWT.NONE);
+		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
+//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
+		composite_right.setBounds(200, 0, 760, h);
+		composite_shift = (int)(w/5);		
+		//left side navigate
+		Composite composite_left = new Composite(composite, SWT.NONE);
+//		final Color base = new Color(composite.getDisplay(), 255,240,245);
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
+		composite_left.setBackground(base);
+//		composite_left.setBounds(0, 0, (int)(w/5), h);
+		composite_left.setBounds(0, 0, 200, h);
+
+		//search button
+		Button btnNewButton = new Button(composite_left, SWT.NONE);
+		btnNewButton.setBounds((int)(w/5/20), (int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		btnNewButton.setText("ËÑ");
+	
+		//search text
+		final Text text = new Text(composite_left, SWT.BORDER);
+		text.setBounds((int)(w/5/20)+(int)(2*3*w/5/10/3), (int)(w/5/10/2), (int)(5*w/5/10), (int)(2*w/5/10/2));		
+		//click search button
+		btnNewButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			
+				ProductFilter.setKeyword(text.getText());
+				//set clicked
+				ProductUtils.setSearchButtonClicked(true);
+				//add filter
+				ProductUtils.showSearchedProducts();
+			}
+		});	
+		
+		//area label		
+		Label lblNewLabel = new Label(composite_left, SWT.NONE);
+		lblNewLabel.setBounds((int)(w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		lblNewLabel.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
+		lblNewLabel.setBackground(base);
+		lblNewLabel.setText("Æ·ÅÆ");
+		
+		Link link_1 = new Link(composite_left, 0);
+		link_1.setBounds((int)(w/5)-(int)(4*w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		link_1.setText("<a>È«²¿</a>");
+		link_1.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 11, SWT.NORMAL));
+		link_1.setBackground(base);
+		link_1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+					ProductUtils.showAllProducts();
+				}
+		});		
+		
+		//area base composite
+		Composite composite_brand = new Composite(composite_left, SWT.NONE);
+//		composite_brand.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), (int)(2*(h-3*w/50)/5));
+		composite_brand.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), 400);
+		composite_brand.setBackground(base);
+		composite_brand.setLayout(new FillLayout());
+		
+		//area scroll composite
+		final ScrolledComposite composite_scrollbrand = new ScrolledComposite(composite_brand,  SWT.H_SCROLL | SWT.V_SCROLL);
+		composite_scrollbrand.setExpandHorizontal(true);  
+		composite_scrollbrand.setExpandVertical(true);  
+		final Composite composite_br = new Composite(composite_scrollbrand, SWT.NONE);
+		composite_scrollbrand.setContent(composite_br);
+		composite_br.setBackground(base);
+		GridLayout layout = new GridLayout();  
+        layout.numColumns = 2;  
+        layout.horizontalSpacing = 0;
+        layout.verticalSpacing = 0;
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
+        //set the size of the gridlayout
+        composite_br.setLayout(layout);  
+        composite_scrollbrand.setMinSize(composite_br.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        composite_brand.layout();
+		
+		
+		
+		
 		//define a table
-		final TableViewer tableViewer = new TableViewer(composite, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		
+		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, 0, w, h);
+//		table.setBounds(0, 0, w, h);
+		table.setBounds(0, 0, 760, h);
 		tv = tableViewer;
 		//set the columns of the table
-		int columnWidth = (int)(9*w/50);		
+//		int columnWidth = (int)(9*w/50);
+		int columnWidth = 132;
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
@@ -315,7 +415,8 @@ public class ProductContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_6.setWidth((int)(columnWidth*5/9)-2);//columnWidth*5/9)
+//		newColumnTableColumn_6.setWidth((int)(columnWidth*5/9)-2);//columnWidth*5/9)
+		newColumnTableColumn_6.setWidth(85);//columnWidth*5/9)
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_6.setText("");
 		newColumnTableColumn_6.setMoveable(false);
@@ -353,11 +454,16 @@ public class ProductContentPart extends ContentPart{
 		editorEdit.horizontalAlignment = SWT.CENTER;
 		editorEdit.grabHorizontal = true;	
 
+		editorDel = new TableEditor(table);
+	    editorDel.horizontalAlignment = SWT.CENTER;
+	    editorDel.grabHorizontal = true;
+	    
 		ICellModifier modifier = new ProductCellModifier(tableViewer, productlist);
 		tableViewer.setCellModifier(modifier);
 		
 		//add Filter, no use now
 //		tableViewer.addFilter(new ProductFilter());
+		ProductUtils.showBrandCheckBoxes(composite_br, (int)(4*w/5/10), composite_scrollbrand, tableViewer, base);
 		
 		Utils.refreshTable(table);
 		composite.setLayout(new FillLayout());

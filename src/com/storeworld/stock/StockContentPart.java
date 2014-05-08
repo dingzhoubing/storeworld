@@ -33,9 +33,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.extenddialog.ConfirmEdit;
+import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.MainUI;
-import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.GeneralCCombo;
@@ -575,6 +576,7 @@ public class StockContentPart extends ContentPart{
 //				dateTime_stock.setDate(year, month-1, day);
 				initialTimer();
 				//will not show delete button anymore
+				total_val.setText("0.000"+Constants.SPACE);
 				btn_delete.setVisible(false);
 			}
 		});
@@ -666,15 +668,25 @@ public class StockContentPart extends ContentPart{
 		btn_edit.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
-				messageBox.setMessage("点击确定进入编辑模式");
-				if (messageBox.open() == SWT.OK){ 
+//				ConfirmEdit ce = new ConfirmEdit(MainUI.getMainUI_Instance(Display.getDefault()), 0);
+				ConfirmEdit ce = new ConfirmEdit(table.getParent().getShell(), 0);
+				ce.open();
+				if(Utils.getEnter()){
 					makeHistoryEditable();
 					makeEnable();
 					btn_edit.setVisible(false);
 					btn_delete.setVisible(true);
 					StockUtils.enterEditMode();
 				}
+//				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
+//				messageBox.setMessage("点击确定进入编辑模式");
+//				if (messageBox.open() == SWT.OK){ 
+//					makeHistoryEditable();
+//					makeEnable();
+//					btn_edit.setVisible(false);
+//					btn_delete.setVisible(true);
+//					StockUtils.enterEditMode();
+//				}
 			}
 		});
 		

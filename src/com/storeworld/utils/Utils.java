@@ -179,6 +179,17 @@ public class Utils {
 	}
 	
 	/**
+	 * whether enter the edit mode or not
+	 */
+	private static boolean enter = false;
+	public static boolean getEnter(){
+		return enter;
+	}
+	public static void setEnter(boolean ent){
+		enter = ent;
+	}
+	
+	/**
 	 * if the record need change after the  software keyboard
 	 * @return
 	 */

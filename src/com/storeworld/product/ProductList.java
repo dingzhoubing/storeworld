@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.customer.CustomerUtils;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
@@ -105,6 +106,7 @@ public class ProductList {
 			}
 			//update the cache
 			DataCachePool.removeProductInfoOfCache(product.getBrand(), product.getSubBrand());
+			ProductUtils.refreshBrands();
 		}
 	}
 
@@ -148,6 +150,8 @@ public class ProductList {
 					//update the cache
 					//based on: the product/customer page will not often be changed
 					DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());
+					
+					ProductUtils.refreshBrands();
 				} catch (Exception e) {
 					System.out.println("update product failed");
 				}
@@ -158,6 +162,8 @@ public class ProductList {
 					ProductCellModifier.addNewTableRow(product);
 					
 					DataCachePool.addBrand2Sub(product.getBrand(), product.getSubBrand());
+					
+					ProductUtils.refreshBrands();
 				} catch (Exception e) {
 					System.out.println("add product failed");
 				}

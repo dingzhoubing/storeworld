@@ -1,4 +1,4 @@
-package com.storeworld.softwarekeyboard;
+package com.storeworld.extenddialog;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Text;
 import com.storeworld.customer.CustomerList;
 import com.storeworld.customer.CustomerUtils;
 import com.storeworld.deliver.DeliverUtils;
+import com.storeworld.extenddialog.SoftKeyBoard.KeyBoardAdapter;
 import com.storeworld.product.ProductUtils;
-import com.storeworld.softwarekeyboard.SoftKeyBoard.KeyBoardAdapter;
 import com.storeworld.stock.StockUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Utils;

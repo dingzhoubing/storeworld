@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.customer.CustomerContentPart;
+import com.storeworld.extenddialog.ConfirmEdit;
+import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.CoolBarPart;
 import com.storeworld.mainui.MainUI;
@@ -42,7 +44,6 @@ import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.DeliverInfoService;
-import com.storeworld.softwarekeyboard.SoftKeyBoard;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
@@ -666,15 +667,23 @@ public class DeliverContentPart extends ContentPart{
 		btn_edit.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
-				messageBox.setMessage("点击确定进入编辑模式");
-				if (messageBox.open() == SWT.OK){ 
-					
+				ConfirmEdit ce = new ConfirmEdit(table.getParent().getShell(), 0);
+				ce.open();
+				if(Utils.getEnter()){
 					enableEditContent();
 					btn_edit.setVisible(false);
 					btn_delete.setVisible(true);
 					DeliverUtils.enterEditMode();
 				}
+//				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
+//				messageBox.setMessage("点击确定进入编辑模式");
+//				if (messageBox.open() == SWT.OK){ 
+//					
+//					enableEditContent();
+//					btn_edit.setVisible(false);
+//					btn_delete.setVisible(true);
+//					DeliverUtils.enterEditMode();
+//				}
 			}
 		});
 		

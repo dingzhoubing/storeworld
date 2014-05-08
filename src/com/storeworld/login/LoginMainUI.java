@@ -185,28 +185,36 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 		if (northpart == null){
 			northpart = new NorthPart(this, SWT.NONE, null);
 			if (Math.abs((this.ratio - 0.0)) < 1e-6) {
+//				northpart.setBounds(
+//						northwestpart.getImage().getBounds().width,
+//						0,
+//						w - northwestpart.getImage().getBounds().width
+//								- northeastpart.getImage().getBounds().width
+//								- closeImage.getBounds().width
+//								- minImage.getBounds().width, 0);
 				northpart.setBounds(
-						northwestpart.getImage().getBounds().width,
 						0,
-						w - northwestpart.getImage().getBounds().width
-								- northeastpart.getImage().getBounds().width
-								- closeImage.getBounds().width
-								- minImage.getBounds().width, 0);
+						northwestpart.getImage().getBounds().height,
+						w, 0);
 			}else{
+//				northpart.setBounds(
+//						northwestpart.getImage().getBounds().width,
+//						northpart.getImage().getBounds().height,
+//						w - northwestpart.getImage().getBounds().width
+//								- northeastpart.getImage().getBounds().width
+//								- closeImage.getBounds().width
+//								- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
 				northpart.setBounds(
-						northwestpart.getImage().getBounds().width,
-						northpart.getImage().getBounds().height,
-						w - northwestpart.getImage().getBounds().width
-								- northeastpart.getImage().getBounds().width
-								- closeImage.getBounds().width
-								- minImage.getBounds().width, (int)(h * this.ratio)-northpart.getImage().getBounds().height);
+						0,
+						image_up.getBounds().height,
+						w, 124);
 //				System.out.println(northpart.getBounds().toString()+" northpart");
 			}
 //			Utils.setNorthPartComposite(northpart, NORTH_TYPE.NORTH_BOTTOM);			
 			northpart.setLayout(northLayout);
 			//show the title
 			final Label lbl_title = new Label(up, SWT.NONE);
-			lbl_title.setBounds(0, 0, (int)(5*w/18),(int)(w/18/2));
+			lbl_title.setBounds(0, 12, (int)(5*w/18),(int)(w/18/2));
 			lbl_title.setBackground(new Color(up.getDisplay(),63, 63,63));
 			lbl_title.setForeground(new Color(up.getDisplay(),255, 255,255));
 			lbl_title.setText("钱多多 - 进出货小助手");

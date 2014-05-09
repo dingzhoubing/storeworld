@@ -38,7 +38,7 @@ public class DeliverList {
 	//hash set, so make it only has one of one kind
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
-	private static DecimalFormat df = new DecimalFormat("#.###");
+	private static DecimalFormat df = new DecimalFormat("#.00");
 	
 	public DeliverList() {
 		super();
@@ -120,7 +120,7 @@ public class DeliverList {
 				DeliverUtils.updateHistory(deliverList);
 			}
 		}
-		double total = 0.000;
+		double total = 0.00;
 //		boolean has = false;
 		for(int i=0;i<deliverList.size()-1;i++){
 			Deliver st = (Deliver)(deliverList.get(i));
@@ -278,7 +278,7 @@ public class DeliverList {
 		//query database to get the history and addStock
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("deliver_time", time);
-		double total = 0.000;
+		double total = 0.00;
 		double p = 0.0;
 		int n=0;
 		try {

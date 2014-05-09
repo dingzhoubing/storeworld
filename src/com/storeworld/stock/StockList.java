@@ -32,7 +32,7 @@ public class StockList {
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final StockInfoService stockinfo = new StockInfoService();
 	private static boolean isFirst = true;
-	private static DecimalFormat df = new DecimalFormat("#.###");
+	private static DecimalFormat df = new DecimalFormat("#.00");
 	
 	public StockList() {
 		super();
@@ -117,7 +117,7 @@ public class StockList {
 		}
 		
 		//only complete record can used to compute the total value of this stock ??
-		double total = 0.000;
+		double total = 0.00;
 //		boolean has = false;
 		for(int i=0;i<stockList.size()-1;i++){
 			Stock st = (Stock)(stockList.get(i));
@@ -208,7 +208,7 @@ public class StockList {
 		//query database to get the history and addStock
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("stock_time", time);
-		double total = 0.000;
+		double total = 0.00;
 		try {
 			//remove the items
 			StockCellModifier.getTableViewer().getTable().removeAll();
@@ -336,7 +336,7 @@ public class StockList {
 			}
 
 		}
-		double total = 0.000;
+		double total = 0.00;
 //		boolean has = false;
 		for(int i=0;i<stockList.size()-1;i++){
 //			has = true;

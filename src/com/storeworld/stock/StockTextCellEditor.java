@@ -29,7 +29,7 @@ public class StockTextCellEditor extends TextCellEditor {
 	
 	private static final String SIZE_MESSAGE="规格应该以数字开头以中文或字母结尾";
 	private static final String UNIT_MESSAGE="单位应该为 1至5中文字串";
-	private static final String PRICE_MESSAGE="单价应该为整数或小数";
+	private static final String PRICE_MESSAGE="单价应该为整数或小数，精确到分";
 	private static final String NUMBER_MESSAGE="数量应该为正数";
 	
 	public StockTextCellEditor(Composite parent, int width, int col) {

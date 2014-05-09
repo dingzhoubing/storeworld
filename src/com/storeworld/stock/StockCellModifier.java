@@ -1,5 +1,7 @@
 package com.storeworld.stock;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
@@ -15,6 +17,7 @@ public class StockCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static StockList stocklist;	
 	private static Stock stock_backup = new Stock();
+	private static DecimalFormat df = new DecimalFormat("#.00");
 	
 	public StockCellModifier(TableViewer tv_tmp, StockList stocklist_tmp) {
 		tv = tv_tmp;
@@ -88,7 +91,11 @@ public class StockCellModifier implements ICellModifier {
 				return String.valueOf("");			
 		}else if (property.equals("price")) {			
 			if(s.getPrice() != null)
-				return String.valueOf(s.getPrice());
+//				return String.valueOf(s.getPrice());
+				if(s.getPrice().equals(""))
+					return "";
+				else
+					return String.valueOf(df.format(Double.valueOf(s.getPrice())));
 			else
 				return String.valueOf("");			
 		}else if (property.equals("number")) {			
@@ -170,8 +177,13 @@ public class StockCellModifier implements ICellModifier {
 			}
 			s.setUnit(newValue);
 		} else if (property.equals("price")) {
-			pricelast = s.getPrice();
-			String newValue = (String) value;
+			if(s.getPrice().equals(""))
+				pricelast = "";
+			else
+				pricelast = df.format(Double.valueOf(s.getPrice()));
+			String newValue = "";
+			if(!value.equals(""))
+				newValue = df.format(Double.valueOf((String) value));
 			if (newValue.equals("")) {
 				return;
 			}
@@ -181,7 +193,11 @@ public class StockCellModifier implements ICellModifier {
 			} else {
 				hasBeenChanged = true;
 			}
-			s.setPrice(newValue);
+//			s.setPrice(newValue);
+			if(newValue.equals(""))
+				s.setPrice("");
+			else
+				s.setPrice(df.format(Double.valueOf(newValue)));
 		} else if (property.equals("number")) {
 			numberlast = s.getNumber();
 			String newValue = (String) value;

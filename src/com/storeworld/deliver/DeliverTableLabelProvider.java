@@ -1,5 +1,7 @@
 package com.storeworld.deliver;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -19,7 +21,7 @@ public class DeliverTableLabelProvider extends LabelProvider  implements ITableL
 	private static final int UNIT_COLUMN = 4;
 	private static final int PRICE_COLUMN = 5;
 	private static final int NUMBER_COLUMN = 6;
-	
+	private static DecimalFormat df = new DecimalFormat("#.00");
 	
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Deliver){
@@ -35,7 +37,11 @@ public class DeliverTableLabelProvider extends LabelProvider  implements ITableL
 				}else if (columnIndex == UNIT_COLUMN){
 					return c.getUnit();
 				}else if (columnIndex == PRICE_COLUMN){
-					return String.valueOf(c.getPrice());
+//					return String.valueOf(c.getPrice());
+					if(c.getPrice().equals(""))
+						return "";
+					else
+						return df.format(Double.valueOf(c.getPrice()));
 				}else if (columnIndex == NUMBER_COLUMN){
 					return String.valueOf(c.getNumber());
 				}

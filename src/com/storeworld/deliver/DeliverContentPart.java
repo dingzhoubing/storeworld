@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.common.NumberConverter;
 import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.extenddialog.ConfirmEdit;
 import com.storeworld.extenddialog.SoftKeyBoard;
@@ -102,6 +103,9 @@ public class DeliverContentPart extends ContentPart{
 	private static Text text_serial;
 	private static Text text_time;
 	private static Text total_val=null;
+	
+	private static Text total_big = null;
+	
 //	private static String TOTAL_VAL = "×Ü¼Æ(Ð¡Ð´):";
 	
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
@@ -151,6 +155,7 @@ public class DeliverContentPart extends ContentPart{
 		text_serial.setText("");
 		text_time.setText("");
 		total_val.setText("");
+		total_big.setText("");
 		//make the delete button visible = false
 		for (int index=0; index < table.getItemCount(); index++) {
 			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
@@ -176,6 +181,7 @@ public class DeliverContentPart extends ContentPart{
 		text_serial.setText("");
 		text_time.setText("");
 		total_val.setText("");
+		total_big.setText("");
 		
 		gc.setEnabled(false);
 		gcName.setEnabled(false);
@@ -205,6 +211,7 @@ public class DeliverContentPart extends ContentPart{
 	 */
 	public static void setTotal(String total){
 		total_val.setText(total);
+		total_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(total));
 	}
 	public static String getTotal(){
 		return total_val.getText();
@@ -264,12 +271,7 @@ public class DeliverContentPart extends ContentPart{
 	}
 	
 	
-	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * call the software keyboard
@@ -855,7 +857,7 @@ public class DeliverContentPart extends ContentPart{
 		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total.setBounds(0, 0, 72, 15);
 		
-		Text total_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
+		total_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
 		total_big.setEnabled(false);
 		total_big.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 9, SWT.NORMAL));
 		total_big.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
@@ -1011,6 +1013,7 @@ public class DeliverContentPart extends ContentPart{
 						DeliverUtils.setTime("");
 						
 						total_val.setText("");
+						total_big.setText("");
 						btn_edit.setVisible(false);
 						
 					}else{

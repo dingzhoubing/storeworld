@@ -1,5 +1,7 @@
 package com.storeworld.deliver;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
@@ -14,7 +16,8 @@ import com.storeworld.utils.Utils;
 public class DeliverCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static DeliverList deliverlist;
-
+	private static DecimalFormat df = new DecimalFormat("#.00");
+	
 	public DeliverCellModifier(TableViewer tv_tmp, DeliverList deliverlist_tmp) {
 		tv = tv_tmp;
 		deliverlist = deliverlist_tmp;
@@ -82,8 +85,13 @@ public class DeliverCellModifier implements ICellModifier {
 			else
 				return String.valueOf("");			
 		}else if (property.equals("price")) {			
-			if(s.getPrice() != null)
-				return String.valueOf(s.getPrice());
+			if(s.getPrice() != null){
+//				return String.valueOf(s.getPrice());
+				if(s.getPrice().equals(""))
+					return "";
+				else
+					return String.valueOf(df.format(Double.valueOf(s.getPrice())));
+			}
 			else
 				return String.valueOf("");			
 		}else if (property.equals("number")) {			
@@ -166,8 +174,15 @@ public class DeliverCellModifier implements ICellModifier {
 			}
 			s.setUnit(newValue);
 		} else if (property.equals("price")) {
-			pricelast = s.getPrice();
-			String newValue = (String) value;
+//			pricelast = s.getPrice();
+//			String newValue = (String) value;
+			if(s.getPrice().equals(""))
+				pricelast = "";
+			else
+				pricelast = df.format(Double.valueOf(s.getPrice()));
+			String newValue = "";
+			if(!value.equals(""))
+				newValue = df.format(Double.valueOf((String) value));
 			if (newValue.equals("")) {
 				return;
 			}
@@ -177,7 +192,11 @@ public class DeliverCellModifier implements ICellModifier {
 			} else {
 				hasBeenChanged = true;
 			}
-			s.setPrice(newValue);
+//			s.setPrice(newValue);
+			if(newValue.equals(""))
+				s.setPrice("");
+			else
+				s.setPrice(df.format(Double.valueOf(newValue)));
 		} else if (property.equals("number")) {
 			numberlast = s.getNumber();
 			String newValue = (String) value;

@@ -1,5 +1,6 @@
 package com.storeworld.deliver;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +50,7 @@ public class DeliverUtils {
 	private static Color color_record;
 	private static int width_record;
 	private static int height_record;
-	
+	private static DecimalFormat dataformat = new DecimalFormat("#.00");
 	//item composite
 	private static ItemComposite ic_record;
 	//the table is in edit mode or not
@@ -223,7 +224,7 @@ public class DeliverUtils {
 				n = Integer.valueOf(delivers.get(i).getQuantity());
 				total+=(p * n);	
 			}
-			DeliverHistory his = new DeliverHistory(title,time_tmp,total+"", ordernumber);
+			DeliverHistory his = new DeliverHistory(title,time_tmp,dataformat.format(total), ordernumber);
 			historyList.add(his);				
 		}
 	}
@@ -298,7 +299,8 @@ public class DeliverUtils {
 			total+=(p * n);	
 		}
 		
-		String number_total = String.valueOf(total);
+//		String number_total = String.valueOf(total);
+		String number_total = dataformat.format(total);
 		
 		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
 		shis.setTitle(title);
@@ -335,7 +337,7 @@ public class DeliverUtils {
 		String name = DeliverContentPart.getName();
 		String ordernumber = DeliverContentPart.getOrderNumber();
 		title = area+" "+name;		
-		DeliverHistory his = new DeliverHistory(title,time_tmp,total+"", ordernumber);
+		DeliverHistory his = new DeliverHistory(title,time_tmp,dataformat.format(total), ordernumber);
 		
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
 		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());

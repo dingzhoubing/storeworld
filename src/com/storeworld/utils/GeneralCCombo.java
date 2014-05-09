@@ -196,7 +196,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 
 							}
 						} else if (col == SUB_BRAND_COLUMN) {
-							valid = DeliverValidator.validateSize(text.getText());
+							valid = DeliverValidator.validateSub_Brand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// tip.setLocation(loc.x+ADJUST_X+width*(col-2),
@@ -209,7 +209,7 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								DeliverContentPart.getDeliverList().deliverChanged(deliver);
 							}
 						}else if(col == SIZE_COLUMN){
-							valid = DeliverValidator.validateSub_Brand(text.getText());
+							valid = DeliverValidator.validateSize(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								tip.setLocation(loc.x + ADJUST_X-10,loc.y + text.getLocation().y + ADJUST_Y);//

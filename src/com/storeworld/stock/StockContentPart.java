@@ -450,7 +450,7 @@ public class StockContentPart extends ContentPart{
 					//and add a new line
 					table.removeAll();
 					StockList.removeAllStocks();
-					setTotal("0.000");
+					setTotal("0.00");
 				}
 				//after we add to history, initial the time
 				initialTimer();
@@ -576,7 +576,7 @@ public class StockContentPart extends ContentPart{
 //				dateTime_stock.setDate(year, month-1, day);
 				initialTimer();
 				//will not show delete button anymore
-				total_val.setText("0.000"+Constants.SPACE);
+				total_val.setText("0.00"+Constants.SPACE);
 				btn_delete.setVisible(false);
 			}
 		});
@@ -600,7 +600,7 @@ public class StockContentPart extends ContentPart{
 		
 		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("0.000"+Constants.SPACE);
+		total_val.setText("0.00"+Constants.SPACE);
 		total_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setBounds(412, 0, 300, 14);
@@ -638,7 +638,7 @@ public class StockContentPart extends ContentPart{
 		//total value
 		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("0.000"+Constants.SPACE);
+		total_val.setText("0.00"+Constants.SPACE);
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setLayoutData(gd_text);
 		//indeed text?? this part of value

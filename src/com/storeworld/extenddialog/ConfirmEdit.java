@@ -222,6 +222,7 @@ public class ConfirmEdit extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				initialStatus();
+				auth_right = false;//every time we re-initial, we initial it
 			}
 		});
 		button_reset.setBounds(160, 151, 80, 27);
@@ -234,10 +235,12 @@ public class ConfirmEdit extends Dialog {
 				if(auth_right){//auth is right
 					Utils.setEnter(true);
 					shell.dispose();
+					auth_right = false;//every time we success, we initial it
+					pw = "";
 				}else{
 					Utils.setEnter(false);
 					initialStatus();
-					label.setText(STR_FAIL);
+					label.setText(STR_FAIL);					
 				}
 			}
 		});

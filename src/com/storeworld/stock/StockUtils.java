@@ -1,5 +1,6 @@
 package com.storeworld.stock;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class StockUtils {
 	private static String time_record = "";
 	private static boolean firstTime = true;
 	private static StockFilter sf = new StockFilter();
-	
+	private static DecimalFormat df = new DecimalFormat("#.00");
 	/**
 	 *  record the composite or property for refreshing the left navigator
 	 */
@@ -117,7 +118,7 @@ public class StockUtils {
 	public static void updateHistory(ArrayList<DataInTable> stocks){
 		
 		String title = "";
-		double total = 0.000;
+		double total = 0.00;
 		String time_tmp = "";
 		for(int i=0;i<stocks.size()-2;i++){
 			Stock st = (Stock)stocks.get(i);
@@ -143,7 +144,7 @@ public class StockUtils {
 			}
 //			StockHistory shis = (StockHistory) ic_record.getHistory();
 			ic_record.setValue("", time_show,
-					"0.0");
+					"0.00");
 		} else {//only if the size >= 2, there is a valid row 
 			Stock st = (Stock) stocks.get(stocks.size() - 2);
 			String price = st.getPrice();
@@ -155,7 +156,8 @@ public class StockUtils {
 
 			title += (st.getBrand());// title
 
-			String number_total = String.valueOf(total);
+//			String number_total = String.valueOf(total);
+			String number_total = df.format(total);
 			StockHistory shis = (StockHistory) ic_record.getHistory();
 			shis.setTitle(title);
 			shis.setTime(time_tmp);
@@ -202,7 +204,8 @@ public class StockUtils {
 			
 			title+=(st.getBrand());//title
 	
-			String number_total = String.valueOf(total);
+//			String number_total = String.valueOf(total);
+			String number_total = df.format(total);
 			
 			StockHistory his = new StockHistory(title,time_tmp,number_total);
 			historyList.add(his);	

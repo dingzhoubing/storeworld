@@ -29,7 +29,7 @@ public class StockValidator {
 	//start with number, end with(out) Chinese character or 26 English character
 	private static Pattern pattern_size = Pattern.compile("^\\d+[\\u4E00-\\u9FA5\\uF900-\\uFA2DA-Za-z]*$");
 	private static Pattern pattern_unit = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]{1,5}$");
-	private static Pattern pattern_price = Pattern.compile("\\d+|^\\d+.\\d{0,4}");
+	private static Pattern pattern_price = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
 	private static Pattern pattern_number = Pattern.compile("\\d+");
 	private static final int unitColumn = 4;
 	

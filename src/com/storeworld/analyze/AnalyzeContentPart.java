@@ -1,6 +1,7 @@
 package com.storeworld.analyze;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -24,6 +25,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.utils.DataCachePool;
+import com.storeworld.utils.Utils;
+import org.eclipse.swt.events.ExpandAdapter;
+import org.eclipse.swt.events.ExpandEvent;
 
 /**
  * 盘仓界面
@@ -67,41 +72,85 @@ public class AnalyzeContentPart extends ContentPart{
 		 * left side navigate
 		 */
 		Composite composite_left = new Composite(composite, SWT.NONE);
-		final Color base = new Color(composite.getDisplay(), 255,240,245);
+//		final Color base = new Color(composite.getDisplay(), 255,240,245);
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, (int)(w/5), h);
+//		composite_left.setBounds(0, 0, (int)(w/5), h);
+		composite_left.setBounds(0, 0, 200, h);
 		composite_left.setLayout(new FillLayout());
+		Composite comp1 = null;
+		Composite comp2 = null;
+
 		//expand bar
-		ExpandBar expandBar = new ExpandBar(composite_left, SWT.V_SCROLL);  
+		ExpandBar expandBar = new ExpandBar(composite_left, SWT.V_SCROLL);  		
+		
+		final ExpandItem item1 =  new ExpandItem(expandBar, SWT.NONE);
+		final ExpandItem item2 =  new ExpandItem(expandBar, SWT.NONE);
+		
+		expandBar.addExpandListener(new ExpandAdapter() {
+			@Override
+			public void itemExpanded(ExpandEvent e) {
+				if(e.item == item1){
+					item2.setExpanded(false);
+				}else{
+					item1.setExpanded(false);
+				}
+				
+			}
+		});
+		
 	     {  
 	    	 //shipment expandbar
-	         Composite comp1 = new Composite(expandBar, SWT.NONE);  
+	         comp1 = new Composite(expandBar, SWT.NONE);  
 	         GridLayout gd = new GridLayout(1, false);
-	         gd.marginWidth=(int)(w/5/10);
+//	         gd.marginWidth=(int)(w/5/10);
+	         gd.marginWidth=10;
 	         comp1.setLayout(gd);  
 	         //used for spacing the controls
-	         Label lbl_space2 = new Label(comp1, SWT.NONE);
-	         lbl_space2.setText("");
-	         lbl_space2.setVisible(false);
+//	         Label lbl_space2 = new Label(comp1, SWT.NONE);
+//	         lbl_space2.setText("");
+//	         lbl_space2.setVisible(false);
 	         
 	         Label lbl_brand = new Label(comp1, SWT.NONE);
 	         lbl_brand.setText("品牌");
 	         
-	         CCombo combo_brand = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         final CCombo combo_brand = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         combo_brand.setVisibleItemCount(5);
 	         GridData gd_combo_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_brand.widthHint = 171;
+	         gd_combo_brand.widthHint = 151;
 	         combo_brand.setLayoutData(gd_combo_brand);
 	         
 	         final CCombo combo_subbrand = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         combo_subbrand.setText("全部子品牌");
+	         combo_subbrand.setVisibleItemCount(5);
 	         GridData gd_combo_sub_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_sub_brand.widthHint = 171;
+	         gd_combo_sub_brand.widthHint = 151;
 	         combo_subbrand.setLayoutData(gd_combo_sub_brand);
 	         combo_subbrand.setEnabled(false);
 	         
+	         combo_brand.addListener(SWT.MouseDown, new Listener() {
+
+	 			@Override
+	 			public void handleEvent(Event event) {
+	 				List<String> list = Utils.getBrands();
+	         		combo_brand.setItems(list.toArray(new String[list.size()]));	         		
+	 			}
+	         });	 
+	         combo_subbrand.addListener(SWT.MouseDown, new Listener() {
+	 			@Override
+	 			public void handleEvent(Event event) {
+	 				String brand = combo_brand.getText();
+	 				List<String> list = Utils.getSub_Brands(brand);	 						
+	 				combo_subbrand.setItems(list.toArray(new String[list.size()]));
+	 			}
+	         });
 	         combo_brand.addSelectionListener(new SelectionAdapter() {
 		         	@Override
 		         	public void widgetSelected(SelectionEvent e) {
+//		         		combo_subbrand.clearSelection();
+		         		combo_subbrand.deselectAll();
 		         		combo_subbrand.setEnabled(true);
+		         		combo_subbrand.setText("全部子品牌");
 		         	}
 		         });
 	         
@@ -110,77 +159,155 @@ public class AnalyzeContentPart extends ContentPart{
 	         lbl_space.setVisible(false);
 	         
 	         Label lbl_area = new Label(comp1, SWT.NONE);
-	         lbl_area.setText("片区");
+	         lbl_area.setText("片区/客户");
 	         
-	         CCombo combo_area = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         final CCombo combo_area = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         combo_area.setVisibleItemCount(5);
 	         GridData gd_combo_area = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_area.widthHint = 171;
+	         gd_combo_area.widthHint = 151;
 	         combo_area.setLayoutData(gd_combo_area);
 	         
 	         final CCombo combo_customer = new CCombo(comp1, SWT.BORDER|SWT.READ_ONLY);
+	         combo_customer.setText("全部客户");
+	         combo_customer.setVisibleItemCount(5);
 	         GridData gd_combo_customer = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_customer.widthHint = 171;
+	         gd_combo_customer.widthHint = 151;
 	         combo_customer.setLayoutData(gd_combo_customer);
 	         combo_customer.setEnabled(false);
 	         
+	         combo_area.addListener(SWT.MouseDown, new Listener() {
+
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				combo_area.setItems(DataCachePool.getCustomerAreas());		         		     		
+		 			}
+		         });	 
+	         combo_customer.addListener(SWT.MouseDown, new Listener() {
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				String area = combo_area.getText();
+//						System.out.println("area: "+area);
+						String[] names = DataCachePool.getCustomerNames(area);
+						if(names.length != 0){//no such areas
+							combo_customer.setItems(names);
+						}
+		 			}
+		     });
+		         
 	         combo_area.addSelectionListener(new SelectionAdapter() {
 		         	@Override
 		         	public void widgetSelected(SelectionEvent e) {
+		         		combo_customer.deselectAll();
 		         		combo_customer.setEnabled(true);
+		         		combo_customer.setText("全部客户");
 		         	}
 		         });
 	         
-	         ExpandItem item1 = new ExpandItem(expandBar, SWT.NONE);  
+//	         item1 = new ExpandItem(expandBar, SWT.NONE);  
 	         item1.setText("出货量分析");  
 	         item1.setExpanded(true);
 	         item1.setHeight((int)(h/3));// 设置Item的高度  
 	         comp1.setBackground(new Color(composite.getDisplay(), 240,255,255));
-	         item1.setControl(comp1);// setControl方法控制comp1的显现  
-	        
+	         item1.setControl(comp1);// setControl方法控制comp1的显现  	         	        
 	     }  
 	     {  
 	    	 //the profit expandbar
-	         Composite comp2 = new Composite(expandBar, SWT.NONE);  
+	         comp2 = new Composite(expandBar, SWT.NONE);  
 	         GridLayout gd = new GridLayout(1, false);
-	         gd.marginWidth=(int)(w/5/10);
+//	         gd.marginWidth=(int)(w/5/10);
+	         gd.marginWidth=10;
 	         comp2.setLayout(gd);  
 
-	         Label lbl_space2 = new Label(comp2, SWT.NONE);
-	         lbl_space2.setText("");
-	         lbl_space2.setVisible(false);
+//	         Label lbl_space2 = new Label(comp2, SWT.NONE);
+//	         lbl_space2.setText("");
+//	         lbl_space2.setVisible(false);
 	         
 	         Label lbl_brand = new Label(comp2, SWT.NONE);
 	         lbl_brand.setText("品牌");
 	         
-	         CCombo combo_brand = new CCombo(comp2, SWT.BORDER);
+	         final CCombo combo_brand = new CCombo(comp2, SWT.BORDER);
 	         GridData gd_combo_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_brand.widthHint = 171;
+	         gd_combo_brand.widthHint = 151;
 	         combo_brand.setLayoutData(gd_combo_brand);
 	         
-	         CCombo combo_subbrand = new CCombo(comp2, SWT.BORDER);
+	         final CCombo combo_subbrand = new CCombo(comp2, SWT.BORDER);
+	         combo_subbrand.setText("全部子品牌");
 	         GridData gd_combo_sub_brand = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_sub_brand.widthHint = 171;
+	         gd_combo_sub_brand.widthHint = 151;
 	         combo_subbrand.setLayoutData(gd_combo_sub_brand);
 	         
+	         combo_brand.addListener(SWT.MouseDown, new Listener() {
+
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				List<String> list = Utils.getBrands();
+		         		combo_brand.setItems(list.toArray(new String[list.size()]));	         		
+		 			}
+		         });	 
+		         combo_subbrand.addListener(SWT.MouseDown, new Listener() {
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				String brand = combo_brand.getText();
+		 				List<String> list = Utils.getSub_Brands(brand);	 						
+		 				combo_subbrand.setItems(list.toArray(new String[list.size()]));
+		 			}
+		         });
+		         combo_brand.addSelectionListener(new SelectionAdapter() {
+			         	@Override
+			         	public void widgetSelected(SelectionEvent e) {
+//			         		combo_subbrand.clearSelection();
+			         		combo_subbrand.deselectAll();
+			         		combo_subbrand.setEnabled(true);
+			         		combo_subbrand.setText("全部子品牌");
+			         	}
+			         });
+		         
 	         Label lbl_space = new Label(comp2, SWT.NONE);
 	         lbl_space.setText("");
 	         lbl_space.setVisible(false);
 	         
 	         Label lbl_area = new Label(comp2, SWT.NONE);
-	         lbl_area.setText("片区");
+	         lbl_area.setText("片区/客户");
 	         
-	         CCombo combo_area = new CCombo(comp2, SWT.BORDER);
+	         final CCombo combo_area = new CCombo(comp2, SWT.BORDER);
 	         GridData gd_combo_area = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_area.widthHint = 171;
+	         gd_combo_area.widthHint = 151;
 	         combo_area.setLayoutData(gd_combo_area);
 	         
-	         CCombo combo_customer = new CCombo(comp2, SWT.BORDER);
+	         final CCombo combo_customer = new CCombo(comp2, SWT.BORDER);
+	         combo_customer.setText("全部客户");
 	         GridData gd_combo_customer = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-	         gd_combo_customer.widthHint = 171;
+	         gd_combo_customer.widthHint = 151;
 	         combo_customer.setLayoutData(gd_combo_customer);
-	          
+	         combo_area.addListener(SWT.MouseDown, new Listener() {
+
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				combo_area.setItems(DataCachePool.getCustomerAreas());		         		     		
+		 			}
+		         });	 
+	         combo_customer.addListener(SWT.MouseDown, new Listener() {
+		 			@Override
+		 			public void handleEvent(Event event) {
+		 				String area = combo_area.getText();
+//						System.out.println("area: "+area);
+						String[] names = DataCachePool.getCustomerNames(area);
+						if(names.length != 0){//no such areas
+							combo_customer.setItems(names);
+						}
+		 			}
+		     });
+		         
+	         combo_area.addSelectionListener(new SelectionAdapter() {
+		         	@Override
+		         	public void widgetSelected(SelectionEvent e) {
+		         		combo_customer.deselectAll();
+		         		combo_customer.setEnabled(true);
+		         		combo_customer.setText("全部客户");
+		         	}
+		         }); 
   	        
-	         ExpandItem item2 = new ExpandItem(expandBar, SWT.NONE);  
+//	         item2 = new ExpandItem(expandBar, SWT.NONE);  
 	            
 	         item2.setText("利润分析");  	         
 	         item2.setHeight((int)(h/3));// 设置Item的高度  
@@ -189,8 +316,7 @@ public class AnalyzeContentPart extends ContentPart{
 	     }  
 	     expandBar.setBackground(new Color(composite.getDisplay(), 204,255,204));
 	     composite_left.layout();
-	        
-	        
+ 
 	        
 		
 
@@ -200,7 +326,8 @@ public class AnalyzeContentPart extends ContentPart{
 	    //right part base compoiste
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);		
+//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
+		composite_right.setBounds(200, 0, 760, h);
 		
 		//text area to show the tips
 		StyledText styledText = new StyledText(composite_right, SWT.BORDER);
@@ -317,6 +444,9 @@ public class AnalyzeContentPart extends ContentPart{
         composite_main.layout();
         composite_content.layout();
 //        composite_scroll.layout();
+        
+        DataCachePool.cacheProductInfo();
+        DataCachePool.cacheCustomerInfo();
 
 	}
 }

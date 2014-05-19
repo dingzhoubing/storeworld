@@ -6,7 +6,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.storeworld.analyze.ratioutils.RatioBlock;
+import com.storeworld.analyze.trendutils.TrendDataSet;
 
 /**
  * show the trend graph of the result
@@ -15,9 +15,9 @@ import com.storeworld.analyze.ratioutils.RatioBlock;
  */
 public class TrendComposite extends Composite implements AnalyzerBase{
 	
-	private RatioBlock args;
+	private TrendDataSet args;
 	
-	public TrendComposite(Composite parent, int style, RatioBlock args) {
+	public TrendComposite(Composite parent, int style, TrendDataSet args) {
 		super(parent, style);
 		this.args = args;
 

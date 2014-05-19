@@ -10,6 +10,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import com.storeworld.analyze.AnalyzerUtils.KIND;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerCellModifier;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerContentProvider;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerLabelProvider;
@@ -32,9 +34,14 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 	//the resutl table
 	private static Table table;	
 	//the content of the table
-	private static RatioResultList resultlist = new RatioResultList();
+	private RatioResultList resultlist = null;
 	//used to pass the arguments between caller and the composite
-	private RatioBlock args;
+	private RatioBlock args= null;
+	
+	private String str_col1 = "";
+	private String str_col2 = "";
+	private String str_col3 = "";
+	
 	
 	/**
 	 * 
@@ -44,10 +51,12 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 	 * @param height composite height
 	 * 
 	 */
-	public RatioComposite(Composite parent, int style, RatioBlock args) {
+	public RatioComposite(Composite parent, int style, RatioBlock args, RatioResultList resultlist) {
 		super(parent, style);
 		this.args = args;
-		resultlist = args.getRatioResultList();
+		this.resultlist = resultlist;
+		
+//		resultlist = args.getRatioResultList();
 		showComposite();
 //		this.layout();
 	}	
@@ -63,7 +72,26 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		//table title
 		Label lbl_title = new Label(this, SWT.BORDER);
 		lbl_title.setBounds(0, 0, (int)(width/10), (int)(height/20));
-		lbl_title.setText("各子品牌占比");
+		if(args.getBrand_area()){
+			if(args.getBrand_sub()){
+				lbl_title.setText("各品牌占比");
+				str_col1 = "品牌";
+			}
+			else{
+				lbl_title.setText("各子品牌占比");
+				str_col1 = "子品牌";
+			}
+		}else{
+			if(args.getArea_customer()){
+				lbl_title.setText("各片区占比");
+				str_col1 = "片区";
+			}
+			else{
+				lbl_title.setText("客户占比");
+				str_col1 = "客户";
+			}
+		}
+		
 		
 		//table to show the analyzed result
 		final TableViewer tableViewer = new TableViewer(this, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		
@@ -77,11 +105,11 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		newColumnTableColumn_1.setWidth(columnWidth*2 -5);
 		newColumnTableColumn_1.setMoveable(false);
 		newColumnTableColumn_1.setResizable(false);
-		newColumnTableColumn_1.setText("子品牌");
+		newColumnTableColumn_1.setText(str_col1);
 		newColumnTableColumn_1.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?RatioSorter.SUB_BRAND_ASC:RatioSorter.SUB_BRAND_DESC);
+				tableViewer.setSorter(asc?RatioSorter.COL1_ASC:RatioSorter.COL1_DESC);
 				asc = !asc;				
 				Utils.refreshTable(table);
 			}
@@ -91,14 +119,14 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		newColumnTableColumn_2.setWidth(columnWidth);
 		newColumnTableColumn_2.setMoveable(false);
 		newColumnTableColumn_2.setResizable(false);
-		if(args.getShipment_or_Profit())
+		if(args.getKind().equals(KIND.SHIPMENT))
 			newColumnTableColumn_2.setText("出货量");
 		else
 			newColumnTableColumn_2.setText("利润");
 		newColumnTableColumn_2.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
 			public void widgetSelected(SelectionEvent e){
-				tableViewer.setSorter(asc?RatioSorter.SHIPMENT_PROFIT_ASC:RatioSorter.SHIPMENT_PROFIT_DESC);
+				tableViewer.setSorter(asc?RatioSorter.COL2_ASC:RatioSorter.COL2_DESC);
 				asc = !asc;
 				Utils.refreshTable(table);
 			}
@@ -123,14 +151,14 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		tableViewer.setUseHashlookup(true);//spead up
 		tableViewer.setInput(resultlist);		
 		//have no use for the table which cannot be modified, just in case
-		if(args.getShipment_or_Profit())
-			tableViewer.setColumnProperties(new String[]{"sub_brand","shipment","ratio"});
-		else
-			tableViewer.setColumnProperties(new String[]{"sub_brand","profit","ratio"});
+//		if(args.getKind().equals(KIND.SHIPMENT))
+//			tableViewer.setColumnProperties(new String[]{"col1","shipment","ratio"});
+//		else
+		tableViewer.setColumnProperties(new String[]{"col2","col2","ratio"});
 		ICellModifier modifier = new RatioAnalyzerCellModifier(tableViewer, resultlist);
 		tableViewer.setCellModifier(modifier);		
 		//add Filter, no use now
-		tableViewer.addFilter(new StockFilter());
+//		tableViewer.addFilter(new StockFilter());
 		
 		Utils.refreshTable(table);	
 		Composite composite_image  = new Composite(this, SWT.BORDER);

@@ -12,11 +12,11 @@ public class RatioAnalyzerLabelProvider extends LabelProvider  implements ITable
 		if (element instanceof RatioAnalyzer){
 			RatioAnalyzer c = (RatioAnalyzer)element;
 			if(columnIndex == 0){
-				return c.getSubBrand();
+				return c.getCol1();
 			}else if(columnIndex == 1){
-				return c.getShipment_Profit();
+				return c.getCol2();
 			}else if(columnIndex == 2){
-				return c.getRatio();
+				return c.getCol3();
 			}
 		}
 		return null;

@@ -1,5 +1,7 @@
 package com.storeworld.analyze.ratioutils;
 
+import com.storeworld.analyze.AnalyzerUtils.KIND;
+
 /**
  * using this class to pass all the need args to the RatioComposite
  * @author dingyuanxiong
@@ -11,59 +13,50 @@ public class RatioBlock {
 	private int width;
 	private int height;
 
-	private String brand;
+	
 	/**
-	 * to determin the type to analyze is: shipment or profit
+	 * to determine the type to analyze is: shipment or profit
 	 * true: shipment
 	 * false: profit
 	 */
-	private boolean shipment_or_profit = true;
-	/**
-	 * to determin the type to analyze is: sub_brand or area
-	 * true: sub_brand
-	 * false: area
-	 */
-	private boolean sbrand_area;
+	private KIND kind;
 	
 	/**
-	 * the resultlist to be shown in table
+	 * if get the result of all brands or sub of a specified brand
+	 * true: all brands
+	 * false: sub of a specified brand
+	 */
+	private boolean brand_sub = false;
+	
+	/**
+	 * if get the result of all area or customers of a specified area
+	 * true: all areas
+	 * false: customer of a specified area
+	 */
+	private boolean area_customer = false;
+	
+	private String brand = "";//if brand_sub is false, set the brand
+	private String area = "";//if area_customers is false, set the area
+	
+	/**
+	 * true: brand, sub
+	 * false: area, customer
+	 */
+	private boolean brand_area = false;
+	/**
+	 * the data to be shown in table
 	 */	
-	private RatioResultList resultlist;
+//	private RatioResultList resultlist;
 	
 	public RatioBlock(){}
-	public RatioBlock(int rowHeight, int width, int height,String brand, boolean shipment_profit, 
-			boolean sbrand_area){
-		this.rowHeight = rowHeight;
-		this.width = width;
-		this.height = height;
-		this.brand = brand;
-		this.shipment_or_profit = shipment_profit;		
-		this.sbrand_area = sbrand_area;
-	}
-	public RatioBlock(int rowHeight, int width, int height,String brand, boolean shipment_profit, 
-			boolean sbrand_area,RatioResultList resultlist){
-		this.rowHeight = rowHeight;
-		this.width = width;
-		this.height = height;
-		this.brand = brand;
-		this.shipment_or_profit = shipment_profit;		
-		this.sbrand_area = sbrand_area;
-		this.resultlist = resultlist;
-	}
 	
-	public void setRatioResultList(RatioResultList resultlist){
-		this.resultlist = resultlist;
-	}
-	public RatioResultList getRatioResultList(){
-		return this.resultlist;
-	}
 	
-	public void setSbrand_Area(boolean type){
-		this.sbrand_area = type;
-	}
-	public boolean getSbrand_Area(){
-		return this.sbrand_area;
-	}
+//	public void setRatioResultList(RatioResultList resultlist){
+//		this.resultlist = resultlist;
+//	}
+//	public RatioResultList getRatioResultList(){
+//		return this.resultlist;
+//	}	
 	
 	public void setRowHeight(int height){
 		this.rowHeight = height;
@@ -86,6 +79,27 @@ public class RatioBlock {
 		return this.height;
 	}
 	
+	public void setKind(KIND kind){
+		this.kind = kind;
+	}
+	public KIND getKind(){
+		return this.kind;
+	}
+	
+	public void setBrand_sub(boolean brand_sub){
+		this.brand_sub = brand_sub;
+	}
+	public boolean getBrand_sub(){
+		return this.brand_sub;
+	}
+	
+	public void setArea_customer(boolean area_cus){
+		this.area_customer = area_cus;
+	}
+	public boolean getArea_customer(){
+		return this.area_customer;
+	}
+	
 	public void setBrand(String brand){
 		this.brand = brand;
 	}
@@ -93,12 +107,21 @@ public class RatioBlock {
 		return this.brand;
 	}
 	
-	public void setShipment_or_Profit(boolean type){
-		this.shipment_or_profit = type;
+	public void setArea(String area){
+		this.area = area;
 	}
-	public boolean getShipment_or_Profit(){
-		return this.shipment_or_profit;
+	public String getArea(){
+		return this.area;
 	}
+	
+	public void setBrand_area(boolean ba){
+		this.brand_area = ba;
+	}
+	public boolean getBrand_area(){
+		return this.brand_area;
+	}
+	
+	
 	
 	
 }

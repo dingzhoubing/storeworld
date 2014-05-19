@@ -25,14 +25,12 @@ import com.storeworld.stock.Stock;
 	@Override
 	public Object getValue(Object element, String property) {
 		RatioAnalyzer s = (RatioAnalyzer) element;		
-		if(property.equals("sub_brand")){
-			return String.valueOf(s.getSubBrand());
-		} else if (property.equals("shipment")) {
-			return String.valueOf(s.getShipment_Profit());
-		} else if (property.equals("profit")) {
-			return String.valueOf(s.getShipment_Profit());
+		if(property.equals("col1")){
+			return String.valueOf(s.getCol1());
+		} else if (property.equals("col2")) {			
+			return String.valueOf(s.getCol2());
 		}else if (property.equals("ratio")) {
-			return String.valueOf(s.getRatio());
+			return String.valueOf(s.getCol3());
 		}
 		return null;
 	}

@@ -8,52 +8,51 @@ import com.storeworld.common.DataInTable;
  *
  */
 public class RatioAnalyzer extends DataInTable{
-	private String sub_brand;
-	//it can be shipment or profit, as the type in the AnalyzerBase defined
-	private String shipment_profit;
-	private String ratio;
+	private String col1; //brand, subrand, area, customer
+	private String col2; //shipment, profit
+	private String col3; //ratio
 	
 	public RatioAnalyzer() {
 		
 	}
 
-	public RatioAnalyzer(String sub_brand, String shipment_profit,
-			String ratio) {
-		this.sub_brand = sub_brand;
-		this.shipment_profit = shipment_profit;
-		this.ratio = ratio;
+	public RatioAnalyzer(String col1, String col2,
+			String col3) {
+		this.col1 = col1;
+		this.col2 = col2;
+		this.col3 = col3;
 	}
 
 	
-	public String getSubBrand() {
-		return this.sub_brand;
+	public String getCol1() {
+		return this.col1;
 	}
 
-	public void setSubBrand(String sub_brand) {
-		this.sub_brand = sub_brand;
+	public void setCol1(String col1) {
+		this.col1 = col1;
 	}
 
-	public String getShipment_Profit() {
-		return this.shipment_profit;
+	public String getCol2() {
+		return this.col2;
 	}
 
-	public void setShipment_Profit(String shipment_profit) {
-		this.shipment_profit = shipment_profit;
+	public void setCol2(String col2) {
+		this.col2 = col2;
 	}
 
-	public String getRatio() {
-		return this.ratio;
+	public String getCol3() {
+		return this.col3;
 	}
 
-	public void setRatio(String ratio) {
-		this.ratio = ratio;
+	public void setCol3(String col3) {
+		this.col3 = col3;
 	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(this.sub_brand + " ");
-		sb.append(this.shipment_profit + " ");
-		sb.append(this.ratio);
+		sb.append(this.col1 + " ");
+		sb.append(this.col2 + " ");
+		sb.append(this.col3);
 		return sb.toString();
 	}
 }

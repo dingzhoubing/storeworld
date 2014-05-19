@@ -545,6 +545,27 @@ public class DeliverInfoService extends BaseAction{
 	}
 	
 	/**
+	 * 修改历史记录时，可以修改commonInfo
+	 */
+	public boolean updateCommonInfo(Map<String,Object> commonMap){
+		try{
+			String sql_common="update deliver_common_info dci set dci.customer_area=?,dci.customer_name=?,dci.deliver_addr=?,"
+				+"dci.deliver_time=?,dci.total_price=?,dci.real_price=?,"
+				+"dci.is_print=?,dci.telephone=?,dci.reserve1=?,dci.reserve2=?,dci.reserve3=?) values(?,?,?,?,?,?,?,?,?,?,?)";
+			
+			Object[] common_params_temp={commonMap.get("customer_area"),commonMap.get("customer_name"),commonMap.get("deliver_addr"),
+					commonMap.get("deliver_time"),commonMap.get("total_price"),commonMap.get("real_price"),commonMap.get("is_print"),commonMap.get("telephone"),commonMap.get("reserve1"),commonMap.get("reserve2"),commonMap.get("reserve3")};//来自map
+			List<Object> common_params=objectArray2ObjectList(common_params_temp);
+			int scomnum=executeUpdate(sql_common,common_params);
+			if(scomnum<1){//更新commonInfo失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+				return false;
+			}
+		}catch(Exception e){
+			throw new Exception("更新commonInfo失败！");
+		}
+		return true;
+	}
+	/**
 	 * 批量更新送货信息
 	 * @param listId
 	 * @param listMap

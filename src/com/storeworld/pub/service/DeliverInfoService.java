@@ -547,7 +547,7 @@ public class DeliverInfoService extends BaseAction{
 	/**
 	 * 修改历史记录时，可以修改commonInfo
 	 */
-	public boolean updateCommonInfo(Map<String,Object> commonMap){
+	public boolean updateCommonInfo(Map<String,Object> commonMap) throws Exception{
 		try{
 			String sql_common="update deliver_common_info dci set dci.customer_area=?,dci.customer_name=?,dci.deliver_addr=?,"
 				+"dci.deliver_time=?,dci.total_price=?,dci.real_price=?,"

@@ -98,6 +98,7 @@ public class AnalyzeContentPart extends ContentPart{
 	
 	private static ScrolledComposite composite_scroll = null;
 	private static Composite composite_content = null;
+	private static GridLayout layout_content = null;
 	
 	public AnalyzeContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -251,7 +252,9 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
-
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    		
     		//area ratio
     		RatioBlock rb2 = new RatioBlock();
     		rb2.setArea_customer(true);//all areas
@@ -262,7 +265,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
-    		
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		}
 		//case 2: brand ratio, customer ratio, trend
@@ -277,7 +281,9 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
-    		
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            
     		//customer ratio
     		RatioBlock rb2 = new RatioBlock();
     		rb2.setArea_customer(false);//all areas
@@ -289,6 +295,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 3: brand ratio, trend
 		else if(brand.equals(AnalyzerConstants.ALL_BRAND) && !area.equals(AnalyzerConstants.ALL_AREA) && !cus.equals(AnalyzerConstants.ALL_CUSTOMER)){
@@ -302,6 +310,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 4: sub brand ratio, area ratio, trend
 		else if(sub.equals(AnalyzerConstants.ALL_SUB) && area.equals(AnalyzerConstants.ALL_AREA)){
@@ -316,7 +326,9 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
-    		
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            
     		//area ratio
     		RatioBlock rb2 = new RatioBlock();
     		rb2.setArea_customer(true);//all areas
@@ -327,6 +339,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 5: sub brand ratio, customer ratio, trend
 		else if(sub.equals(AnalyzerConstants.ALL_SUB) && cus.equals(AnalyzerConstants.ALL_CUSTOMER)){
@@ -341,7 +355,9 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
-    		
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            
     		//customer ratio
     		RatioBlock rb2 = new RatioBlock();
     		rb2.setArea_customer(false);//all areas
@@ -353,6 +369,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 6: sub brand ratio, trend
 		else if(sub.equals(AnalyzerConstants.ALL_SUB) && !area.equals(AnalyzerConstants.ALL_AREA) && !cus.equals(AnalyzerConstants.ALL_CUSTOMER)){
@@ -367,6 +385,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 7: area ratio, trend
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub.equals(AnalyzerConstants.ALL_SUB) && area.equals(AnalyzerConstants.ALL_AREA)){
@@ -380,6 +400,8 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 8: customer ratio, trend
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub.equals(AnalyzerConstants.ALL_SUB) && cus.equals(AnalyzerConstants.ALL_CUSTOMER)){
@@ -394,20 +416,23 @@ public class AnalyzeContentPart extends ContentPart{
 			rrl2.initilByQuery();//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
+    		composite_content.setLayout(layout_content);
+            composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		//case 9: trend
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub.equals(AnalyzerConstants.ALL_SUB) && !area.equals(AnalyzerConstants.ALL_AREA) & !cus.equals(AnalyzerConstants.ALL_CUSTOMER)){
 			//now, just trend, do nothing here
 		}
-		//trend, always has the trend graph  		
-		TrendComposite tc = new TrendComposite(composite_content, 0, new TrendDataSet()); 
-		alys.add(tc);
-		
-		
-		
-		
-		
-		
+		if(!kind.equals(KIND.NONE)){
+			//trend, always has the trend graph  	
+			TrendDataSet ts = new TrendDataSet();
+			ts.setKind(kind);		
+			TrendComposite tc = new TrendComposite(composite_content, 0, ts); 
+			alys.add(tc);
+			composite_content.setLayout(layout_content);
+			composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		}
+				
 	}
 	
 	/**
@@ -849,9 +874,10 @@ public class AnalyzeContentPart extends ContentPart{
          * the scroll composite to show the analyzed table result and graph
          */
         final Composite composite_main = new Composite(composite_right, SWT.NONE);
-        composite_main.setBounds(0, (int)(h/8+h/100), (int)(4*w/5), (int)(7*h/8-h/100));
+//        composite_main.setBounds(0, (int)(h/8+h/100), (int)(4*w/5), (int)(7*h/8-h/100));
+        composite_main.setBounds(0, (int)(h/8+h/100), 740, (int)(7*h/8-h/100));
         
-        composite_main.setBackground(new Color(composite.getDisplay(), 255,240,245));
+        composite_main.setBackground(new Color(composite.getDisplay(), 255,250,250));
         composite_main.setLayout(new FillLayout());
         composite_scroll = new ScrolledComposite(composite_main,  SWT.NONE|SWT.V_SCROLL);//
 //		composite_scroll.setVisible(true);
@@ -866,12 +892,12 @@ public class AnalyzeContentPart extends ContentPart{
 		composite_content = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_content);
 		composite_content.setBackground(new Color(composite.getDisplay(), 255,240,245));
-		GridLayout layout_content = new GridLayout(1, false);  
+		layout_content = new GridLayout(1, false);  
 		layout_content.numColumns = 1;  
 		layout_content.horizontalSpacing = 0;
 		layout_content.verticalSpacing = 0;
-		layout_content.marginHeight = 20;//not recommended
-		layout_content.marginWidth = 20;
+		layout_content.marginHeight = 0;//not recommended
+		layout_content.marginWidth = 10;
         composite_content.setLayout(layout_content);
         composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         /**
@@ -882,6 +908,11 @@ public class AnalyzeContentPart extends ContentPart{
         	public void widgetSelected(SelectionEvent e) {
         		
         		initialTitle(TYPE.MONTH);
+        		for(int i=0;i<alys.size();i++){
+        			Composite c = (Composite)alys.get(i);
+        			c.dispose();
+        		}
+        		alys.clear();
         		showResult(TYPE.MONTH);
         	}
         });
@@ -890,6 +921,11 @@ public class AnalyzeContentPart extends ContentPart{
         	@Override
         	public void widgetSelected(SelectionEvent e) {
         		initialTitle(TYPE.SEASON);
+        		for(int i=0;i<alys.size();i++){
+        			Composite c = (Composite)alys.get(i);
+        			c.dispose();
+        		}
+        		alys.clear();
         		showResult(TYPE.SEASON);
         	}
         });
@@ -897,6 +933,11 @@ public class AnalyzeContentPart extends ContentPart{
         	@Override
         	public void widgetSelected(SelectionEvent e) {
         		initialTitle(TYPE.YEAR);
+        		for(int i=0;i<alys.size();i++){
+        			Composite c = (Composite)alys.get(i);
+        			c.dispose();
+        		}
+        		alys.clear();
         		showResult(TYPE.YEAR);
         	}
         });
@@ -905,12 +946,17 @@ public class AnalyzeContentPart extends ContentPart{
         	@Override
         	public void widgetSelected(SelectionEvent e) {
         		initialTitle(TYPE.ALL);
+        		for(int i=0;i<alys.size();i++){
+        			Composite c = (Composite)alys.get(i);
+        			c.dispose();
+        		}
+        		alys.clear();
         		showResult(TYPE.ALL);
         	}
         });
         composite_main.layout();
         composite_content.layout();
-//        composite_scroll.layout();
+//      composite_scroll.layout();
         
         DataCachePool.cacheProductInfo();
         DataCachePool.cacheCustomerInfo();

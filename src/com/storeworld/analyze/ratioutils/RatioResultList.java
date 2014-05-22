@@ -52,7 +52,24 @@ public class RatioResultList {
 	
 	//args
 	public void initilByQuery(){
+		//get the data from engine query result
+		String subbrand = "精一";
+		String shipment = "3000";
+		String ratio = "0.2";			
+		RatioAnalyzer sba = new RatioAnalyzer(subbrand, shipment, ratio);
+		resultList.add(sba);
 		
+		String subbrand2 = "特精";
+		String shipment2 = "9000";
+		String ratio2 = "0.6";			
+		RatioAnalyzer sba2 = new RatioAnalyzer(subbrand2, shipment2, ratio2);
+		resultList.add(sba2);
+		
+		String subbrand3 = "包子粉";
+		String shipment3 = "3000";
+		String ratio3 = "0.2";			
+		RatioAnalyzer sba3 = new RatioAnalyzer(subbrand3, shipment3, ratio3);
+		resultList.add(sba3);
 	}
 	/**
 	 * where we get the data in the table

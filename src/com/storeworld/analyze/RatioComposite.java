@@ -1,24 +1,38 @@
 package com.storeworld.analyze;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
 
 import com.storeworld.analyze.AnalyzerUtils.KIND;
+import com.storeworld.analyze.ratioutils.RatioAnalyzer;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerCellModifier;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerContentProvider;
 import com.storeworld.analyze.ratioutils.RatioAnalyzerLabelProvider;
+import com.storeworld.analyze.ratioutils.RatioBlock;
 import com.storeworld.analyze.ratioutils.RatioResultList;
 import com.storeworld.analyze.ratioutils.RatioSorter;
-import com.storeworld.analyze.ratioutils.RatioBlock;
-import com.storeworld.stock.StockFilter;
 import com.storeworld.utils.Utils;
 
 /**
@@ -61,14 +75,41 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 //		this.layout();
 	}	
 	
+	private File ComputeImage(){
+		DefaultPieDataset pieDataset = new DefaultPieDataset();
+		
+		ArrayList<RatioAnalyzer> results = this.resultlist.getResults();
+		for(RatioAnalyzer ra : results){
+			pieDataset.setValue(ra.getCol1(), Double.valueOf(ra.getCol3()));
+		}
+		File file = null;
+		JFreeChart chart = ChartFactory.createPieChart
+		(null, // Title
+		pieDataset, // Dataset
+		false, // Show legend
+		true, // Use tooltips
+		false // Configure chart to generate URLs?
+		);
+		if(args.getBrand_area())
+			file = new File("tmp/1.jpg");
+		else
+			file = new File("tmp/2.jpg");
+		try {
+		ChartUtilities.saveChartAsJPEG(file, chart, 370, 230);
+		} catch (Exception e) {
+		System.out.println("Problem occurred creating chart.");
+		}
+		return file; 
+		
+	}
 	public void showComposite(){
 //		int width= args.getWidth();
 //		int height = args.getHeight();
 		
-		int width= 881;
-		int height = 558;		
+		int width= 740;
+		int height = 400;		
 		this.setSize(width, height);
-		
+		this.setBackground(new Color(this.getDisplay(), 255, 250, 250));
 		//table title
 		Label lbl_title = new Label(this, SWT.BORDER);
 		lbl_title.setBounds(0, 0, (int)(width/10), (int)(height/20));
@@ -98,11 +139,12 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, (int)(height/20), (int)(3*width/5), (int)(5*height/10));
-		table.setBackground(new Color(this.getDisplay(), 255, 250, 240));
-		int columnWidth = (int)(3*width/5/4);
+//		table.setBounds(0, (int)(height/20), (int)(3*width/5), (int)(5*height/10));
+		table.setBounds(0, 20, 370, 230);
+		table.setBackground(new Color(this.getDisplay(), 255, 250, 250));
+//		int columnWidth = (int)(3*width/5/4);
 		final TableColumn newColumnTableColumn_1 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_1.setWidth(columnWidth*2 -5);
+		newColumnTableColumn_1.setWidth(125);
 		newColumnTableColumn_1.setMoveable(false);
 		newColumnTableColumn_1.setResizable(false);
 		newColumnTableColumn_1.setText(str_col1);
@@ -116,7 +158,7 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		});
 
 		final TableColumn newColumnTableColumn_2 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_2.setWidth(columnWidth);
+		newColumnTableColumn_2.setWidth(125);
 		newColumnTableColumn_2.setMoveable(false);
 		newColumnTableColumn_2.setResizable(false);
 		if(args.getKind().equals(KIND.SHIPMENT))
@@ -133,7 +175,7 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		});
 		
 		final TableColumn newColumnTableColumn_3 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_3.setWidth(columnWidth);
+		newColumnTableColumn_3.setWidth(90);
 		newColumnTableColumn_3.setMoveable(false);
 		newColumnTableColumn_3.setResizable(false);
 		newColumnTableColumn_3.setText("占比");
@@ -161,9 +203,34 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 //		tableViewer.addFilter(new StockFilter());
 		
 		Utils.refreshTable(table);	
+		
 		Composite composite_image  = new Composite(this, SWT.BORDER);
-		composite_image.setBackground(new Color(this.getDisplay(), 204, 250, 204));
-		composite_image.setBounds((int)(3*width/5), (int)(height/20), (int)(2*width/5), (int)(5*height/10));				
+		composite_image.setBackground(new Color(this.getDisplay(), 255, 250, 250));
+		composite_image.setBounds(370, 20, 370, 230);	
+		
+		ImageLoader imageLoader = new ImageLoader();
+		File imagefile = ComputeImage();
+		
+		ImageData[] data;
+		try {
+			//C:/Users/IBM_ADMIN/Desktop/钱多多v0.1_MarkMan.png
+		data = imageLoader.load(imagefile.getCanonicalPath());
+		
+		final Image imageScale = new Image(null, data[0].scaledTo(370, 230));
+		
+		Canvas canvas = new Canvas(composite_image, SWT.NONE);
+		canvas.addPaintListener(new PaintListener() {
+            public void paintControl(PaintEvent e) {
+                if(imageScale!=null)
+                    e.gc.drawImage(imageScale, 0, 0);
+            }
+        });		
+		canvas.redraw();
+		canvas.setBounds(0, 0, 370, 230);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		
 	}	
 	/**

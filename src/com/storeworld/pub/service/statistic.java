@@ -1,6 +1,7 @@
 package com.storeworld.pub.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pojo.dto.StockInfoDTO;
 import com.storeworld.utils.Utils;
 public class statistic extends BaseAction{
 	
@@ -393,6 +395,77 @@ public class statistic extends BaseAction{
 	 * @throws Exception 
 	 */
 	private ReturnObject funcPro1(String brand,String sub_brand,String start_time,String end_time) throws Exception{
+		List<StockInfoDTO> stockInfoList=new ArrayList<StockInfoDTO>();
+		String sql_stock="select si.quantity batchQuantity,si.unit_price from stock_info si order by si.stock_time desc";
+		List stock_list=null;
+		stock_list=executeQuery(sql_stock, null);
+		Map<Integer,Integer> stock_map=new HashMap<Integer,Integer>();
+		Map<String,Float> result_profit=new HashMap<String,Float>();
+		List<Map<String,Float>> resultList=null;
+		for(int j=0;j<10;j++){
+			StockInfoDTO stockInfoDto=new StockInfoDTO();
+			Map retMap=(Map) stock_list.get(j);
+			stockInfoDto.setQuantity((String)retMap.get("batchQuantity"));
+			stockInfoDto.setUnit_price((Float)retMap.get("unit_price"));
+			stockInfoList.add(stockInfoDto);
+			int num=(Integer)retMap.get("batchQuantity");
+			stock_map.put(j,num);
+		}
+		String sql_area="select dci.customer_area,di.quantity,sum(di.quantity*di.unit_price) t_price from deliver_info di,deliver_common_info dci "+
+	" where di.brand=? and di.sub_brand=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num order by dci.deliver_time desc";
+		//Float stock_price=queryStockPrice(end_time);
+		Object[] params_temp={brand,sub_brand,start_time,end_time};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List list=null;
+		List<DeliverInfoAllDTO> deliverInfoAllList = new ArrayList<DeliverInfoAllDTO>();
+			list=executeQuery(sql_area, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
+				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
+				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
+				deliverInfoDto.setTotal_price((Float)retMap.get("t_price"));
+				float deliver_totol_price=deliverInfoDto.getTotal_price();
+				int lsize=stockInfoList.size();
+				float sum_stock_price=0;
+				for(int k=0;k<lsize;k++){
+					int batchStockNum=stock_map.get(k);
+					if(batchStockNum>0){
+						int deliverNum=Integer.parseInt(deliverInfoDto.getQuantity());
+						if(deliverNum>batchStockNum){
+							//如果跨了批次，需要把当前批次的数量与进价相乘，再继续算下一进货批次
+							sum_stock_price+=stock_map.get(k)*stockInfoList.get(k).getUnit_price();
+							stock_map.put(k, 0);
+							stockInfoList.get(k).setQuantity("0");
+							deliverInfoDto.setQuantity(String.valueOf(Integer.parseInt(deliverInfoDto.getQuantity())-batchStockNum));
+							k++;
+						}
+						sum_stock_price+=deliverNum*stockInfoList.get(k).getUnit_price();
+						stock_map.put(k, batchStockNum-deliverNum);
+						int lastnum=Integer.parseInt(stockInfoList.get(k).getQuantity())-deliverNum;
+						stockInfoList.get(k).setQuantity(String.valueOf(lastnum));
+						if(result_profit.get(deliverInfoDto.getCustomer_area())==null){
+							result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price-sum_stock_price);
+						}
+						else{
+							result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price-result_profit.get(deliverInfoDto.getCustomer_area())-sum_stock_price);
+						}
+						resultList.add(result_profit);
+						break;
+					}
+				}
+				//deliverInfoAllList.add(deliverInfoDto);
+				
+			}
+			page.setItems((List)resultList);
+			ro.setReturnDTO(page);
+			return ro;
+	}
+	
+	/*private ReturnObject funcPro1(String brand,String sub_brand,String start_time,String end_time) throws Exception{
 		List list=null;
 		String sql_area="select dci.customer_area,sum(di.quantity) quantity,sum(di.quantity*di.unit_price) t_price,sum(di.reserve1) stock_total_price from deliver_info di,deliver_common_info dci "+
 	" where di.brand=? and di.sub_brand=? and dci.deliver_time>? and dci.deliver_time<? and dci.id=di.order_num group by dci.customer_area";
@@ -416,7 +489,7 @@ public class statistic extends BaseAction{
 			page.setItems((List)deliverInfoAllList);
 			ro.setReturnDTO(page);
 			return ro;
-	}
+	}*/
 	
 	/**
 	 * description:客户未选，以客户为维度

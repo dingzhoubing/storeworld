@@ -105,7 +105,7 @@ public class CoolBarPart extends NorthPart{
 //		button_out.setBounds((int)(3*w*0.03+2*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_out.setBounds(180, 20, 64, 64);
 		Label lbl_out = new Label(this, SWT.CENTER);
-		lbl_out.setText("½ø»õ");
+		lbl_out.setText("ËÍ»õ");
 		lbl_out.setBounds(180, 92, 64, 15);
 		lbl_out.setBackground(new Color(getDisplay(),21, 23,26));
 		lbl_out.setForeground(new Color(getDisplay(),255, 255,255));

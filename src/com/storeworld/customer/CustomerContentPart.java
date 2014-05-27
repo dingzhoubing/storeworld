@@ -122,10 +122,6 @@ public class CustomerContentPart extends ContentPart{
 			@Override
 			public void handleEvent(Event event) {
 				//no matter use the software keyboard or not, we need to catch the mouse point
-//				long t1 = System.currentTimeMillis();
-//				long t2=0;
-//				long t3=0;
-//				long t4=0;
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
@@ -148,8 +144,6 @@ public class CustomerContentPart extends ContentPart{
 						break;
 					}
 				}
-//				t2 = System.currentTimeMillis();
-//				System.out.println("1 cost time: "+(t2-t1)/1000);
 				//if use the soft keyboard
 				if(Utils.getUseSoftKeyBoard()){											
 					if(found){
@@ -189,8 +183,6 @@ public class CustomerContentPart extends ContentPart{
 							}
 						}
 				}
-//				t3 = System.currentTimeMillis();
-//				System.out.println("2 cost time: "+(t3-t2)/1000);
 			}else{//do not use the software keyboard
 
 				if(found){
@@ -211,8 +203,6 @@ public class CustomerContentPart extends ContentPart{
 						}
 					}
 				}
-//				t4 = System.currentTimeMillis();
-//				System.out.println("3 cost time: "+(t4-t2)/1000);
 			}
 		}			
 	});
@@ -235,21 +225,11 @@ public class CustomerContentPart extends ContentPart{
 					}
 				}								
 				if(row >= 0){
-//					if(editor.getEditor()!=null){
-//						if(!editor.getEditor().isDisposed()){
-//							editor.getEditor().setVisible(false);
-//						}
-//					}
 					editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(row), deliverButtonColumn);
 					if(!editor.getEditor().isDisposed()){
 						editor.getEditor().setVisible(true);
 					}
 					
-//					if(editorDel.getEditor()!=null){
-//						if(!editorDel.getEditor().isDisposed()){
-//							editorDel.getEditor().setVisible(false);
-//						}
-//					}
 					editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(row), deleteButtonColumn);
 					if(!editorDel.getEditor().isDisposed()){
 						editorDel.getEditor().setVisible(true);
@@ -297,10 +277,8 @@ public class CustomerContentPart extends ContentPart{
 		tv=tableViewer;
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
-//		final Color base = new Color(composite.getDisplay(), 255,240,245);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-//		composite_left.setBounds(0, 0, (int)(w/5), h);
 		composite_left.setBounds(0, 0, 200, h);
 
 		//search button
@@ -365,8 +343,6 @@ public class CustomerContentPart extends ContentPart{
         //set the size of the gridlayout
         composite_ar.setLayout(layout);  
         composite_scrollarea.setMinSize(composite_ar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//        //show the area checkbox button
-//        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
            
 		//first name label
 		Label label = new Label(composite_left, SWT.NONE);
@@ -409,11 +385,14 @@ public class CustomerContentPart extends ContentPart{
         composite_fn.setLayout(layout2);  
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));		  
         composite_fn.layout();  
-//        //show all the firstname checkbox button
-//        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
 		
 	    composite_area.layout();
 	    composite_firstname.layout();
+		
+		//whether to use the software keyboard
+		Button button_swkb = new Button(composite_left, SWT.CHECK);
+		button_swkb.setBounds(0, 545, 100, 20);
+		button_swkb.setText("ÆôÓÃÊý×Ö¼üÅÌ");
 		
 	    //==========================================================================================================
 		//define a table, right part				

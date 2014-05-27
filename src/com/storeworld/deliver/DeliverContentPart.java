@@ -9,8 +9,11 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -95,7 +98,10 @@ public class DeliverContentPart extends ContentPart{
 	
 	private static Button btnNewButton;
 	private static Button btn_delete;
-	private static Button btn_edit;
+	private static Button btn_edit;//修改
+	
+	private static Button btn_return;//退货
+	
 	private static GeneralCCombo gc;
 	private static GeneralCCombo gcName;
 	private static Text text_phone;
@@ -103,10 +109,16 @@ public class DeliverContentPart extends ContentPart{
 	private static Text text_serial;
 	private static Text text_time;
 	private static Text total_val=null;
-	
+	private static Text indeed_val = null;
 	private static Text total_big = null;
+	private static Text indeed_big=null;
 	
-//	private static String TOTAL_VAL = "总计(小写):";
+	private static Text text_title = null;
+	private static Label indeed = null;
+	private static Label indeed_lbl = null;
+	
+	private static DateTime dateTime = null;
+	private static DateTime dateTime2 = null;
 	
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
 	public static ArrayList<Integer> getTpShift(){
@@ -156,6 +168,8 @@ public class DeliverContentPart extends ContentPart{
 		text_time.setText("");
 		total_val.setText("");
 		total_big.setText("");
+		indeed_val.setText("");
+		indeed_big.setText("");
 		//make the delete button visible = false
 		for (int index=0; index < table.getItemCount(); index++) {
 			editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(index), deleteButtonColumn);
@@ -164,6 +178,12 @@ public class DeliverContentPart extends ContentPart{
 		}
 	}
 	
+	public static void resetInfo(){
+		text_title.setText("进货单");
+		indeed.setText("实收(大写)");
+		indeed_lbl.setText("实收(小写)");
+		
+	}
 	public static void enableEditContent(){
 		gc.setEnabled(true);
 		gcName.setEnabled(true);
@@ -182,6 +202,8 @@ public class DeliverContentPart extends ContentPart{
 		text_time.setText("");
 		total_val.setText("");
 		total_big.setText("");
+		indeed_val.setText("");
+		indeed_big.setText("");
 		
 		gc.setEnabled(false);
 		gcName.setEnabled(false);
@@ -217,6 +239,14 @@ public class DeliverContentPart extends ContentPart{
 		return total_val.getText();
 	}
 	
+	public static void setIndeed(String indeed){
+		indeed_val.setText(indeed);
+		indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(indeed));
+	}
+	public static String getIndeed(){
+		return indeed_val.getText();
+	}
+	
 	public static String getArea(){
 		return gc.getText();
 	}
@@ -230,10 +260,12 @@ public class DeliverContentPart extends ContentPart{
 	public static void makeHistoryEditable(){
 		btn_delete.setVisible(false);
 		btn_edit.setVisible(true);
+		btn_return.setVisible(true);
 	}
 	public static void makeHistoryUnEditable(){
 		btn_delete.setVisible(false);
 		btn_edit.setVisible(false);
+		btn_return.setVisible(false);
 	}
 	/**
 	 * make the table & time picker unable to edit
@@ -467,7 +499,7 @@ public class DeliverContentPart extends ContentPart{
 		composite.setBounds(0, 0, w, h);
 		
 		//left side navigate
-		Composite composite_left = new Composite(composite, SWT.NONE);
+		final Composite composite_left = new Composite(composite, SWT.NONE);
 //		final Color base = new Color(composite.getDisplay(), 255,240,245);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
@@ -516,6 +548,7 @@ public class DeliverContentPart extends ContentPart{
 					time = year+"-"+month+"-"+day+" "+hour+":"+min;
 					text_time.setText(time);
 					btn_edit.setVisible(false);
+					btn_return.setVisible(false);
 //				}else{
 //					
 //				}
@@ -523,7 +556,7 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		Label label = new Label(composite_left, SWT.NONE);
-		label.setText(" 当月历史记录(在下方设置日期进行搜索)");
+		label.setText(" 当月历史记录(在下方设置条件进行搜索)");
 		label.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
 //		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
 		label.setBackground(new Color(composite_left.getDisplay(), 0xe1, 0xe3, 0xe6));
@@ -534,7 +567,7 @@ public class DeliverContentPart extends ContentPart{
 		Composite composite_2 = new Composite(composite_left, SWT.NONE);
 //        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
 //        composite_2.setBackground(new Color(composite_left.getDisplay(), 255,240,245));
-		composite_2.setBounds(0, 80, 200, 428);
+		composite_2.setBounds(0, 80, 200, 410);
         composite_2.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
         composite_2.setLayout(new FillLayout());
         
@@ -565,14 +598,91 @@ public class DeliverContentPart extends ContentPart{
 //        DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
         DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color, 186, 50);
         composite_2.layout();
+        
+        
+        final CCombo area = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
+        area.setBounds(12, 492, 86, 25);
+        area.setVisibleItemCount(5);
+        area.setText("全部片区");
+
+        final CCombo cus = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
+        cus.setBounds(102, 492, 86, 25);
+        cus.setVisibleItemCount(5);
+        cus.setText("全部客户");
+        
+        area.addListener(SWT.MouseDown, new Listener() {
+			@Override
+        	public void handleEvent(Event event)  {
+				area.setItems(DataCachePool.getCustomerAreas());
+				area.add("全部片区");
+			}
+		});
+        area.addListener(SWT.MouseUp, new Listener() {
+			@Override
+        	public void handleEvent(Event event)  {
+				if(area.getText().equals("")){
+					area.setText("全部片区");
+					cus.setText("全部客户");
+					dateTime.setVisible(true);
+					dateTime2.setVisible(false);
+				}
+			}
+		});
+        
+
+        
+        cus.addListener(SWT.MouseDown, new Listener() {
+			@Override
+        	public void handleEvent(Event event) {
+				String ar = area.getText();
+				String[] names = DataCachePool.getCustomerNames(ar);
+				if(names.length != 0){//no such areas
+					cus.setItems(names);
+					cus.add("全部客户");
+				}
+				else{//the result is empty, we should remove the old items
+					String[] items = new String[0];
+					cus.setItems(items);
+					cus.add("全部客户");
+				}
+			}
+		});
+        cus.addListener(SWT.MouseUp, new Listener() {
+			@Override
+        	public void handleEvent(Event event) {
+				if(cus.getText().equals("")){
+					cus.setText("全部客户");
+					dateTime.setVisible(true);
+					dateTime2.setVisible(false);
+				}				
+			}
+		});
+        
+        cus.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				if(!cus.getText().equals("全部客户")){
+					dateTime.setVisible(false);
+					dateTime2.setVisible(true);
+				}else{
+					dateTime.setVisible(true);
+					dateTime2.setVisible(false);
+				}
+			}
+		});
+        
+        
         //date picker
-        final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
-//		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
-        dateTime.setBounds(12, 520, 98, 36);
+        dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
+        dateTime.setBounds(12, 520, 98, 30);
+        
+        dateTime2 = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
+        dateTime2.setBounds(12, 520, 98, 30);
+        dateTime2.setVisible(false);
+        
 		//search button, search the deliver history
 		Button btnSearch = new Button(composite_left, SWT.NONE);
-//		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
-		btnSearch.setBounds(112, 520, 76, 36);
+		btnSearch.setBounds(114, 520, 74, 30);
 		btnSearch.setText("查找");   
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -582,9 +692,6 @@ public class DeliverContentPart extends ContentPart{
 				String month = String.valueOf(mon);
 				int d = dateTime.getDay();
 				String day = String.valueOf(d);
-//				int hour = dateTime.getHours()+1;
-//				int min = dateTime.getMinutes()+1;
-//				int sec = dateTime.getSeconds()+1;
 				if(mon<10)
 					month = "0"+month;
 				if(d<10)
@@ -614,7 +721,7 @@ public class DeliverContentPart extends ContentPart{
 				shell.show_Content_customer();
 			}
 		});
-		btn_quick.setBounds((int)(4*w/5/25)+(int)(24*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(6*w/5/25), (int)(3*h/9/2/4));
+		btn_quick.setBounds(172, 114, 72, 22);
 		btn_quick.setText("快速查找");
 		btn_quick.setVisible(false);
 		//show & hide the quick search button
@@ -632,9 +739,8 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		//title fo the table
-		Text text_title = new Text(composite_right, SWT.CENTER);
+		text_title = new Text(composite_right, SWT.CENTER);
 		text_title.setFont(SWTResourceManager.getFont("微软雅黑", 21, SWT.NORMAL));
-//		text_title.setBounds((int)(2*4*w/5/5), (int)(4*w/5/100+h/40), (int)(4*w/5/5), (int)(3*h/20/2));
 		text_title.setBounds(305, 22, 150, 36);
 		text_title.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		text_title.setText("送货单");	
@@ -642,7 +748,6 @@ public class DeliverContentPart extends ContentPart{
 		
 		//delete button to delete the list or clear the current list
 		btn_delete = new Button(composite_right, SWT.NONE);
-//		btn_delete.setBounds((int)(364*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_delete.setBounds(672, 12, 76, 30);
 		btn_delete.setText("删除");
 		btn_delete.setVisible(false);
@@ -675,20 +780,51 @@ public class DeliverContentPart extends ContentPart{
 					enableEditContent();
 					btn_edit.setVisible(false);
 					btn_delete.setVisible(true);
+					text_title.setText("进货单");
+					indeed.setText("实收(大写)");
+					indeed_lbl.setText("实收(小写)");
+					gc.setEnabled(true);
+					gcName.setEnabled(true);
+					text_phone.setEnabled(true);
+					text_address.setEnabled(true);
+					
+					btn_return.setVisible(false);
 					DeliverUtils.enterEditMode();
 				}
-//				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
-//				messageBox.setMessage("点击确定进入编辑模式");
-//				if (messageBox.open() == SWT.OK){ 
-//					
-//					enableEditContent();
-//					btn_edit.setVisible(false);
-//					btn_delete.setVisible(true);
-//					DeliverUtils.enterEditMode();
-//				}
 			}
 		});
 		
+		btn_return = new Button(composite_right, SWT.NONE);
+		btn_return.setBounds(90, 12, 76, 30);
+		btn_return.setVisible(false);
+		btn_return.setText("退货");
+		btn_return.addSelectionListener(new SelectionAdapter() {
+			@Override
+        	public void widgetSelected(SelectionEvent e) {
+				ConfirmEdit ce = new ConfirmEdit(table.getParent().getShell(), 0);
+				ce.open();
+				if(Utils.getEnter()){
+					enableEditContent();
+					btn_return.setVisible(false);
+					btn_edit.setVisible(false);
+					DeliverUtils.enterEditMode();
+					
+					text_title.setText("退货单");
+					indeed.setText("实退(大写)");
+					indeed_lbl.setText("实退(小写)");
+					gc.setEnabled(false);
+					gcName.setEnabled(false);
+					text_phone.setEnabled(false);
+					text_address.setEnabled(false);
+					
+					//make a return mode, then, in this mode,
+					//we need to check and make sure:
+					//1. all goods are subsets of this deliver
+					//2. based on 1, on new goods, and goods number are no bigger than this deliver
+					
+				}
+			}
+		});
 		
 		composite_updown = (int)(h/3);//wait for adjust
 		//area
@@ -722,12 +858,10 @@ public class DeliverContentPart extends ContentPart{
 		lbl_cusname.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_cusname.setAlignment(SWT.CENTER);
 		lbl_cusname.setText("客户:");
-//		lbl_cusname.setBounds(0, (int)(5*h/18), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_cusname.setBounds(12, 114, 32, 22);
 
 		//customer name
 		gcName = new GeneralCCombo(composite_right, SWT.BORDER, 0, -2, Constants.DELIVER_TYPE);
-//		gcName.setBounds((int)(4*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
 		gcName.setBounds(60, 114, 112, 22);
 		gcName.setFont(SWTResourceManager.getFont("微软雅黑", 10, SWT.NORMAL));
 		gcName.setVisibleItemCount(5);
@@ -785,11 +919,9 @@ public class DeliverContentPart extends ContentPart{
 		lbl_phone.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_phone.setAlignment(SWT.CENTER);
 		lbl_phone.setText("电话:");
-//		lbl_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_phone.setBounds(252, 82, 32, 22);
 		
 		text_phone = new Text(composite_right, SWT.BORDER);
-//		text_phone.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
 		text_phone.setBounds(300, 82, 162, 22);
 		text_phone.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		text_phone.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
@@ -800,11 +932,9 @@ public class DeliverContentPart extends ContentPart{
 		lbl_address.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_address.setAlignment(SWT.CENTER);
 		lbl_address.setText("地址:");
-//		lbl_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(8*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_address.setBounds(252, 114, 32, 22);
 		
 		text_address = new Text(composite_right, SWT.BORDER);
-//		text_address.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(12*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
 		text_address.setBounds(300, 114, 162, 22);
 		text_address.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		text_address.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
@@ -816,12 +946,10 @@ public class DeliverContentPart extends ContentPart{
 		lbl_serial.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_serial.setAlignment(SWT.CENTER);
 		lbl_serial.setText("单号:");
-//		lbl_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_serial.setBounds(542, 82, 32, 22);
 		
 		text_serial = new Text(composite_right, SWT.BORDER);
 		text_serial.setEnabled(false);
-//		text_serial.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
 		text_serial.setBounds(590, 82, 158, 22);
 		text_serial.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		text_serial.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
@@ -832,12 +960,10 @@ public class DeliverContentPart extends ContentPart{
 		lbl_time.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_time.setAlignment(SWT.CENTER);
 		lbl_time.setText("时间:");
-//		lbl_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(42*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_time.setBounds(542, 114, 32, 22);
 		
 		text_time = new Text(composite_right, SWT.BORDER);
 		text_time.setEnabled(false);
-//		text_time.setBounds((int)(4*w/5/25)+(int)(24*w/5/25)+(int)(46*w/5/25), (int)(2*h/9)+(int)(h/9/2), (int)(24*w/5/25), (int)(h/9/2));
 		text_time.setBounds(590, 114, 158, 22);
 		text_time.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		text_time.setFont(SWTResourceManager.getFont("Arial", 10, SWT.NORMAL));
@@ -846,7 +972,6 @@ public class DeliverContentPart extends ContentPart{
 		//sum composite
 		Composite composite_sum = new Composite(composite_right, SWT.BORDER);
 		composite_sum.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-//		composite_sum.setBounds(0, (int)(2*h/3), (int)(4*w/5), (int)(5*h/10/4));//(int)(13*h/20)+(int)(2*4*w/5/100)
 		composite_sum.setBounds(24, 392, 712, 52);
 		
 		Label total = new Label(composite_sum, SWT.NONE);
@@ -878,7 +1003,7 @@ public class DeliverContentPart extends ContentPart{
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		total_val.setBounds(484, 0, 225, 15);
 		
-		Label indeed = new Label(composite_sum, SWT.NONE);
+		indeed = new Label(composite_sum, SWT.NONE);
 		indeed.setEnabled(false);
 		indeed.setText("实收(大写):");
 		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
@@ -886,20 +1011,20 @@ public class DeliverContentPart extends ContentPart{
 		indeed.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
 		indeed.setBounds(0, 27, 72, 15);
 		
-		Text indeed_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
+		indeed_big = new Text(composite_sum, SWT.LEFT|SWT.NONE);
 		indeed_big.setEnabled(false);
 		indeed_big.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		indeed_big.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_big.setBounds(74, 27, 252, 15);
 		
-		Label indeed_lbl = new Label(composite_sum, SWT.LEFT|SWT.NONE);
+		indeed_lbl = new Label(composite_sum, SWT.LEFT|SWT.NONE);
 		indeed_lbl.setEnabled(false);
 		indeed_lbl.setText("实收(小写):");
 		indeed_lbl.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		indeed_lbl.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_lbl.setBounds(412, 27, 72, 15);
 		
-		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		indeed_val.setEnabled(true);
 		indeed_val.setText("");
 		indeed_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
@@ -913,67 +1038,22 @@ public class DeliverContentPart extends ContentPart{
 		indeed_sign.setBackground(new Color(composite.getDisplay(), 255, 250, 250));		
 		indeed_sign.setBounds(12, 464, 150, 15);
 		
-		/*
-		GridLayout gd = new GridLayout(2, true);
-		gd.horizontalSpacing = 0;
-		gd.verticalSpacing = 0;
-		gd.marginWidth = 0;
-		gd.marginHeight = 0;
-		composite_sum.setLayout(gd);	
-		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text.widthHint = (int)((int)(4*w/5/2));
-		gd_text.heightHint = (int)(5*h/10/3/4);		
-		GridData gd_text2 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text2.widthHint = (int)((int)(4*w/5/2));
-		gd_text2.heightHint = (int)(5*h/10/3/4);		
-		GridData gd_text3 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text3.widthHint = (int)((int)(4*w/5/2));
-		gd_text3.heightHint = (int)(5*h/10/3/4);		
-		GridData gd_text4 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text4.widthHint = (int)((int)(4*w/5/2));
-		gd_text4.heightHint = (int)(5*h/10/3/4);		
-		GridData gd_text5 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text5.widthHint = (int)((int)(4*w/5/2));
-		gd_text5.heightHint = (int)(5*h/10/3/4);
-		//text total 1						
-		Text total = new Text(composite_sum, SWT.NONE);
-		total.setEnabled(false);
-		total.setText("总计(大写):");
-		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		total.setLayoutData(gd_text);
-		//text total 2
-		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
-		total_val.setEnabled(false);
-		total_val.setText("总计(小写):"+Constants.SPACE+Constants.SPACE);
-		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		total_val.setLayoutData(gd_text2);
-		//indeed 1
-		Text indeed = new Text(composite_sum, SWT.NONE);
-		indeed.setEnabled(false);
-		indeed.setText("实收(大写):");
-		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed.setLayoutData(gd_text3);		
-		//indeed 2
-		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
-		indeed_val.setEnabled(false);
-		indeed_val.setText("实收(小写):               ");
-		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed_val.setLayoutData(gd_text4);		
-		//sign
-		Text indeed_sign = new Text(composite_sum, SWT.NONE);
-		indeed_sign.setEnabled(false);
-		indeed_sign.setText("收货人签字(盖章):");
-		indeed_sign.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed_sign.setLayoutData(gd_text5);
-		new Label(composite_sum, SWT.NONE);		
-		*/
+		indeed_val.addFocusListener(new FocusAdapter(){
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(indeed_val.getText()));
+				//change the database
+			}
+			
+		});
+		
 		composite_sum.layout();
 		
 		//button print
 		Button btn_print = new Button(composite_right, SWT.NONE);
 		btn_print.setText("打印");
-//		btn_print.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
-		btn_print.setBounds(293, 500, 174, 40);
+		btn_print.setBounds(293, 500, 85, 40);
 		btn_print.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
@@ -1015,6 +1095,7 @@ public class DeliverContentPart extends ContentPart{
 						total_val.setText("");
 						total_big.setText("");
 						btn_edit.setVisible(false);
+						btn_return.setVisible(false);
 						
 					}else{
 						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
@@ -1026,12 +1107,75 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
+		//button print
+				Button btn_save = new Button(composite_right, SWT.NONE);
+				btn_save.setText("仅保存");
+				btn_save.setBounds(382, 500, 85, 40);
+				btn_save.addSelectionListener(new SelectionAdapter() {
+					@Override
+		        	public void widgetSelected(SelectionEvent e) {
+//						System.out.println("print");
+						//do more check here
+						if(DeliverList.getDelivers().size() > 1){
+							
+							//check area & name, if both are not empty, add to history, or popup an message box
+							if(!gc.getText().equals("") && !gcName.getText().equals("")){
+								
+								if(DeliverUtils.getStatus().equals("NEW")){
+									DeliverUtils.addToHistory();
+								}
+								//step 1: add the deliver common info into database
+								DeliverInfoService deliverinfo = new DeliverInfoService();
+								Map<String,Object> commonMap = new HashMap<String,Object>();
+								commonMap.put("order_num", DeliverUtils.getOrderNumber());
+								commonMap.put("customer_area", gc.getText());
+								commonMap.put("customer_name", gcName.getText());						
+								commonMap.put("deliver_addr", text_address.getText());
+								commonMap.put("deliver_time", DeliverUtils.getTime());
+								commonMap.put("telephone", text_phone.getText());
+								//if already exist, update it 
+								deliverinfo.print_voucher(commonMap);
+								
+								//status: NEW, HISTORY, EMPTY
+								DeliverUtils.setStatus("EMPTY");
+								
+								//step 2: initial the deliver page
+								//clear table
+								//and add a new line					
+								table.clearAll();
+								table.removeAll();					
+								DeliverList.removeAllDelivers();
+								clearContent();
+								disableEditContent();	
+								DeliverUtils.setTime("");
+								
+								total_val.setText("");
+								total_big.setText("");
+								btn_edit.setVisible(false);
+								btn_return.setVisible(false);
+								
+							}else{
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("收货人片区和姓名需填写完整");
+								mbox.open();						
+							}
+						}
+						
+					}
+				});
+		
+		
+		
+		//whether to use the software keyboard
+		Button button_swkb = new Button(composite_right, SWT.CHECK);
+		button_swkb.setBounds(660, 545, 100, 20);
+		button_swkb.setText("启用数字键盘");
+		
 		//===============================================================================
 		//define a table				
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-//		table.setBounds(0, (int)(h/3), (int)(4*w/5), (int)(h/3));
 		table.setBounds(12, 150, 736, 230);
 		tv = tableViewer;
 		//set the columns of the table

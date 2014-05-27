@@ -32,7 +32,7 @@ public class StockList {
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final StockInfoService stockinfo = new StockInfoService();
 	private static boolean isFirst = true;
-	private static DecimalFormat df = new DecimalFormat("#.00");
+	private static DecimalFormat df = new DecimalFormat("0.00");
 	
 	public StockList() {
 		super();
@@ -128,7 +128,8 @@ public class StockList {
 			total+=(p * n);	
 //			has = true;
 		}
-		StockContentPart.setTotal(df.format(total));	
+		StockContentPart.setTotal(df.format(total));
+		StockContentPart.setIndeed(df.format(total));
 		
 		
 	}
@@ -254,6 +255,7 @@ public class StockList {
 		
 		//show total
 		StockContentPart.setTotal(df.format(total));
+		StockContentPart.setIndeed(df.format(total));
 
 	}
 	
@@ -348,6 +350,7 @@ public class StockList {
 			total+=(p * n);						
 		}
 		StockContentPart.setTotal(df.format(total));
+		StockContentPart.setIndeed(df.format(total));
 		
 	}
 	

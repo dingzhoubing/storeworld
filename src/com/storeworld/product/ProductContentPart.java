@@ -127,21 +127,6 @@ public class ProductContentPart extends ContentPart{
 						Text text = (Text)(editorEdit.getEditor());	
 						callKeyBoard(text);
 						Product p = (Product)(table.getItem(rowCurrent).getData());
-//						if(colCurrent == sizeColumn){
-//							String sizelast = p.getSize();
-//							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-//								p.setSize(Utils.getInput()+"kg");
-//								text.setText(p.getSize());
-//								if(ProductValidator.validateSize(p.getSize())){
-//									productlist.productChanged(p);
-//									text.setText(p.getSize());
-//								}else{
-//									p.setSize(sizelast);
-//								}
-//								//initial the next click
-//								Utils.setClickButton(false);
-//							}
-//						}else 
 						if(colCurrent == repColumn){
 							String repositorylast = p.getRepository();
 							if(Utils.getClickButton() && Utils.getInputNeedChange()){
@@ -216,23 +201,6 @@ public class ProductContentPart extends ContentPart{
 		        event.height =rowHeight;
 		    }
 		});
-		//control the verify
-//		Text text = (Text)cellEditor[4].getControl();
-//		text.addVerifyListener(new VerifyListener(){
-//			public void verifyText(VerifyEvent e){
-//				String inStr = e.text;
-//				if (inStr.length() > 0){
-//					try{
-//						if(inStr.equals("°ü"))
-//							e.doit = true;
-//						else
-//							e.doit=false;
-//					}catch(Exception ep){
-//						e.doit = false;
-//					}
-//				}
-//			}
-//		});
 	}
 	
 	
@@ -247,15 +215,12 @@ public class ProductContentPart extends ContentPart{
 		 //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
 		composite_right.setBounds(200, 0, 760, h);
 		composite_shift = (int)(w/5);		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
-//		final Color base = new Color(composite.getDisplay(), 255,240,245);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-//		composite_left.setBounds(0, 0, (int)(w/5), h);
 		composite_left.setBounds(0, 0, 200, h);
 
 		//search button
@@ -300,7 +265,6 @@ public class ProductContentPart extends ContentPart{
 		
 		//area base composite
 		Composite composite_brand = new Composite(composite_left, SWT.NONE);
-//		composite_brand.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), (int)(2*(h-3*w/50)/5));
 		composite_brand.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), 400);
 		composite_brand.setBackground(base);
 		composite_brand.setLayout(new FillLayout());
@@ -323,6 +287,11 @@ public class ProductContentPart extends ContentPart{
         composite_scrollbrand.setMinSize(composite_br.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         composite_brand.layout();
 		
+		
+		//whether to use the software keyboard
+		Button button_swkb = new Button(composite_left, SWT.CHECK);
+		button_swkb.setBounds(0, 545, 100, 20);
+		button_swkb.setText("ÆôÓÃÊý×Ö¼üÅÌ");
 		
 		
 		
@@ -415,7 +384,6 @@ public class ProductContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
-//		newColumnTableColumn_6.setWidth((int)(columnWidth*5/9)-2);//columnWidth*5/9)
 		newColumnTableColumn_6.setWidth(85);//columnWidth*5/9)
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_6.setText("");
@@ -430,7 +398,6 @@ public class ProductContentPart extends ContentPart{
 		
 		
 		Product prod_new = new Product(ProductUtils.getNewLineID());//dynamic from the database
-//		ProductValidator.setNewID(ProductUtils.getNewLineID());
 		productlist.addProduct(prod_new);
 		
 		

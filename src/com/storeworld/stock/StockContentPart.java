@@ -11,6 +11,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -80,6 +83,7 @@ public class StockContentPart extends ContentPart{
 	private static GeneralComboCellEditor<String> comboboxCellEditor2 = null;//sub_brand
 	private static GeneralComboCellEditor<String> comboboxCellEditor3 = null;//size
 	private static Text total_val=null;
+	private static Text indeed_val=null;
 	private static DateTime dateTime_stock = null;
 	private static int rowCurrent = -1;
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
@@ -123,7 +127,12 @@ public class StockContentPart extends ContentPart{
 	public static String getTotal(){
 		return total_val.getText();
 	}
-	
+	public static void setIndeed(String indeed){
+		indeed_val.setText(indeed+Constants.SPACE);
+	}
+	public static String getIndeed(){
+		return indeed_val.getText();
+	}
 	
 	public static ArrayList<Integer> getTpShift(){
 		return tpShift;
@@ -451,6 +460,7 @@ public class StockContentPart extends ContentPart{
 					table.removeAll();
 					StockList.removeAllStocks();
 					setTotal("0.00");
+					setIndeed("0.00");
 				}
 				//after we add to history, initial the time
 				initialTimer();
@@ -514,13 +524,10 @@ public class StockContentPart extends ContentPart{
         composite_2.layout();
         //date picker
         final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
-//		dateTime.setBounds((int)(w/5/10/2), (int)(h-3*w/5/10), (int)(2*3*w/5/10), (int)(2*w/5/10));
-//        dateTime.setBackground(comp_color);//have no use, defect
-        dateTime.setBounds(12, 520, 98, 36);
+        dateTime.setBounds(12, 520, 98, 30);
 		Button btnSearch = new Button(composite_left, SWT.NONE);
 		//search the history
-//		btnSearch.setBounds((int)(w/5/10/2 + 2*3*w/5/10), (int)(h-3*w/5/10), (int)(3*w/5/10), (int)(2*w/5/10));
-		btnSearch.setBounds(112, 520, 76, 36);
+		btnSearch.setBounds(114, 520, 74, 30);
 		btnSearch.setText("查找");
 		btnSearch.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		btnSearch.addSelectionListener(new SelectionAdapter() {
@@ -577,11 +584,11 @@ public class StockContentPart extends ContentPart{
 				initialTimer();
 				//will not show delete button anymore
 				total_val.setText("0.00"+Constants.SPACE);
+				indeed_val.setText("0.00"+Constants.SPACE);
 				btn_delete.setVisible(false);
 			}
 		});
 				
-//		composite_updown = (int)(h/20)+(int)(2*4*w/5/100);
 		composite_updown = 30+24;
 		
 		//=======================================================================================
@@ -612,63 +619,34 @@ public class StockContentPart extends ContentPart{
 		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed.setBounds(0, 26, 300, 14);
 		
-		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
-		indeed_val.setEnabled(false);
-		indeed_val.setText(""+Constants.SPACE);
+		indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
+		indeed_val.setEnabled(true);
+		indeed_val.setText("0.00"+Constants.SPACE);
 		indeed_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		indeed_val.setBounds(412, 26, 300, 14);
-		
-		/*
-		GridLayout gd = new GridLayout(2, true);
-		gd.horizontalSpacing = 0;
-		gd.verticalSpacing = 0;
-		gd.marginWidth = 0;
-		gd.marginHeight = 0;
-		composite_sum.setLayout(gd);	
-		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text.widthHint = (int)((int)(4*w/5/2));
-		gd_text.heightHint = (int)(h/10/3);
-		//total text
-		Text total = new Text(composite_sum, SWT.NONE);
-		total.setEnabled(false);
-		total.setText("总计:");
-		total.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		total.setLayoutData(gd_text);
-		//total value
-		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
-		total_val.setEnabled(false);
-		total_val.setText("0.00"+Constants.SPACE);
-		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		total_val.setLayoutData(gd_text);
-		//indeed text?? this part of value
-		Text indeed = new Text(composite_sum, SWT.NONE);
-		indeed.setEnabled(false);
-		indeed.setText("实付:");
-		indeed.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed.setLayoutData(gd_text);		
-		//indeed value
-		Text indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
-		indeed_val.setEnabled(false);
-//		indeed_val.setText("2870"+Constants.SPACE);
-		indeed_val.setText(""+Constants.SPACE);
-		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed_val.setLayoutData(gd_text);
-		*/
+		indeed_val.addFocusListener(new FocusAdapter(){
+			//update the database here?
+			@Override
+			public void focusLost(FocusEvent e) {
+//				System.out.println("update the indeed value into the database");
+				//every time we update it in database?
+			}
+			
+		});
+				
 		composite_sum.layout();
 		
 		//===============================================================================
 		//button edit the history
 		btn_edit = new Button(composite_right, SWT.NONE);
 		btn_edit.setText("修改记录");
-//		btn_edit.setBounds((int)(17*w/50), (int)(h-4*w/50), (int)(6*w/50), (int)(2*w/50));
 		btn_edit.setBounds(293, 500, 174, 40);
 		//at first, set in-visible
 		btn_edit.setVisible(false);
 		btn_edit.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-//				ConfirmEdit ce = new ConfirmEdit(MainUI.getMainUI_Instance(Display.getDefault()), 0);
 				ConfirmEdit ce = new ConfirmEdit(table.getParent().getShell(), 0);
 				ce.open();
 				if(Utils.getEnter()){
@@ -678,24 +656,20 @@ public class StockContentPart extends ContentPart{
 					btn_delete.setVisible(true);
 					StockUtils.enterEditMode();
 				}
-//				MessageBox messageBox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL); 
-//				messageBox.setMessage("点击确定进入编辑模式");
-//				if (messageBox.open() == SWT.OK){ 
-//					makeHistoryEditable();
-//					makeEnable();
-//					btn_edit.setVisible(false);
-//					btn_delete.setVisible(true);
-//					StockUtils.enterEditMode();
-//				}
 			}
 		});
+		
+		//whether to use the software keyboard
+		Button button_swkb = new Button(composite_right, SWT.CHECK);
+		button_swkb.setBounds(660, 545, 100, 20);
+		button_swkb.setText("启用数字键盘");
+		
 		
 		//======================================================================
 		//the stock table	
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);	
-//		table.setBounds(0, (int)(h/20)+(int)(2*4*w/5/100), (int)(4*w/5), (int)(6*h/10));
 		table.setBounds(12, 54, 736, 330);
 		tv = tableViewer;
 		

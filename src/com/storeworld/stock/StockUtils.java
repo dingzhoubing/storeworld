@@ -277,6 +277,7 @@ public class StockUtils {
 		String time_tmp = getTime();
 //		int num = queryItemsFromDataBase(time_tmp);
 //		String number="50000";//fake data
+		//it should be the indeed value
 		String number = StockContentPart.getTotal().trim();
 		
 		StockHistory his = new StockHistory(title,time_tmp,number);

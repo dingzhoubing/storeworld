@@ -38,7 +38,7 @@ public class DeliverList {
 	//hash set, so make it only has one of one kind
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
-	private static DecimalFormat df = new DecimalFormat("#.00");
+	private static DecimalFormat df = new DecimalFormat("0.00");
 	
 	public DeliverList() {
 		super();
@@ -132,6 +132,7 @@ public class DeliverList {
 //			has = true;
 		}
 		DeliverContentPart.setTotal(df.format(total));	
+		DeliverContentPart.setIndeed(df.format(total));	
 	}
 
 	public void deliverChangedForUnit(Deliver deliver){
@@ -214,7 +215,8 @@ public class DeliverList {
 			total+=(p * n);	
 //			has = true;
 		}
-		DeliverContentPart.setTotal(df.format(total));	
+		DeliverContentPart.setTotal(df.format(total));
+		DeliverContentPart.setIndeed(df.format(total));	
 	}
 
 	/**
@@ -321,6 +323,7 @@ public class DeliverList {
 			Utils.refreshTable(DeliverCellModifier.getTableViewer().getTable());
 			//show total
 			DeliverContentPart.setTotal(df.format(total));
+			DeliverContentPart.setIndeed(df.format(total));	
 			
 			
 		} catch (Exception e) {

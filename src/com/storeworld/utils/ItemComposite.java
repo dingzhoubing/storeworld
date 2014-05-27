@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolTip;
 
 import com.storeworld.common.History;
+import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverHistory;
 import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
@@ -95,6 +96,7 @@ public class ItemComposite extends Composite {
 					
 					DeliverList.showHistory((DeliverHistory)history);
 					DeliverUtils.recordItemComposite(getSelf());
+					DeliverContentPart.resetInfo();
 				}
 				
 			}

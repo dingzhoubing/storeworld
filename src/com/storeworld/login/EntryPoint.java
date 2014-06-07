@@ -20,6 +20,10 @@ public class EntryPoint {
 
 	public static void entry() {
 		try {
+			
+			Thread thread = new Thread(new DataBaseService());
+			thread.start();
+			
 			//fixed  with & height
 			int screenH =720;
 			int screenW =960;

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.storeworld.login.DataBaseService;
 import com.storeworld.pojo.dto.*;
 import com.storeworld.utils.*;
 import com.mysql.jdbc.Connection;
@@ -34,12 +35,30 @@ public class BaseAction {
     	}catch(ClassNotFoundException e){
     		e.printStackTrace();
     	}
-    	try{
-    		connection = (Connection) DriverManager.getConnection(Constants.URL,Constants.USERNAME,Constants.PASSWORD);
-    		//connection.setAutoCommit(false);   // 设置连接不自动提交，即用该连接进行的操作都不更新到数据库  
-    	}catch(SQLException e){
-    		e.printStackTrace();
-    	}
+    	int count=0;
+    	//we can try 3 time at most
+		while (count < 3) {
+			try {
+				connection = (Connection) DriverManager.getConnection(
+						Constants.URL, Constants.USERNAME, Constants.PASSWORD);
+				if(connection != null)
+					break;
+				// connection.setAutoCommit(false); //
+				// 设置连接不自动提交，即用该连接进行的操作都不更新到数据库
+			} catch (SQLException e) {
+//				e.printStackTrace();
+				count++;
+				//try to start the service again, and record the proc
+				//avoid if user kill the service
+				Thread thread = new Thread(new DataBaseService());
+				thread.start();				
+				
+				Thread.sleep(200);
+			}
+		}
+		if(connection == null){
+			//do something
+		}
     	return connection;
 	}
     

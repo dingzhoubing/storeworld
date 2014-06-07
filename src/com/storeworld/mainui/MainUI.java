@@ -1,5 +1,8 @@
 package com.storeworld.mainui;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ControlEvent;
@@ -25,6 +28,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.login.DataBaseService;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
@@ -491,6 +495,23 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	@Override
 	public void dispose() {
 		try {
+			//kill the process
+			if(DataBaseService.getProc() != null){
+				try {
+					Process process = Runtime.getRuntime().exec("taskList");
+					Scanner in = new Scanner(process.getInputStream());
+					while (in.hasNextLine()) {
+					    String temp = in.nextLine();
+					    if (temp.contains("mysqld.exe")) {
+					        temp = temp.replaceAll(" ", "");
+					        String pid = temp.substring(10, temp.indexOf("Console"));
+					        Runtime.getRuntime().exec("tskill " + pid);
+					    }
+					}
+				} catch (IOException e) {
+					System.out.println("kill the database pid failed");
+				}		
+			}
 			northwestpart.dispose();
 			northeastpart.dispose();			
 			southwestpart.dispose();

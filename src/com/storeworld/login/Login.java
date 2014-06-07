@@ -19,6 +19,9 @@ public class Login {
 	public static void login() {
 		try {
 			
+			Thread thread = new Thread(new DataBaseService());
+			thread.start();
+			
 			int screenH =Constants.LOGIN_HEIGHT;
 			int screenW =Constants.LOGIN_WIDTH;
 			Display display = Display.getDefault();

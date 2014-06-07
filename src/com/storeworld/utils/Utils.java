@@ -38,6 +38,17 @@ public class Utils {
 	private static String inputRecord = "";
 	private static boolean inputNeedChange = false;
 	private static boolean clickButton = false;
+	
+	//indeed key board
+	private static String indeedRecord = "";
+	private static boolean indeedNeedChange = false;
+	private static boolean indeedClickButton = false;
+	
+	//return key board, no use now
+	private static String returnRecord = "";
+	private static boolean returnNeedChange = false;
+	private static boolean returnClickButton = false;
+	
 	private static boolean useSoftKeyBoard = true;
 	private static GoodsInfoService goodsinfo = new GoodsInfoService();
 //	private static int waitForListener = 0;
@@ -160,8 +171,8 @@ public class Utils {
 	 * @return
 	 */
 	public static boolean getUseSoftKeyBoard(){
-//		return useSoftKeyBoard;
-		return false;
+		return useSoftKeyBoard;
+//		return false;
 	}
 	public static void settUseSoftKeyBoard(boolean use){
 		useSoftKeyBoard = use;
@@ -176,6 +187,24 @@ public class Utils {
 	}
 	public static void setClickButton(boolean click){
 		clickButton = click;
+	}
+	
+	/**
+	 * if click the button of  indeed keyboard
+	 * @return
+	 */
+	public static boolean getIndeedClickButton(){
+		return indeedClickButton;
+	}
+	public static void setIndeedClickButton(boolean click){
+		indeedClickButton = click;
+	}
+	
+	public static boolean getReturnClickButton(){
+		return returnClickButton;
+	}
+	public static void setReturnClickButton(boolean click){
+		returnClickButton = click;
 	}
 	
 	/**
@@ -200,6 +229,25 @@ public class Utils {
 		inputNeedChange = need;
 	}
 	
+	
+	/**
+	 * if the record need change after the  indeed keyboard
+	 * @return
+	 */
+	public static boolean getIndeedNeedChange(){
+		return indeedNeedChange;
+	}
+	public static void setIndeedNeedChange(boolean ret){
+		indeedNeedChange = ret;
+	}
+	
+	public static boolean getReturnNeedChange(){
+		return returnNeedChange;
+	}
+	public static void setReturnNeedChange(boolean ret){
+		returnNeedChange = ret;
+	}
+	
 	/**
 	 * record and read the text of the software keyboard
 	 * @return
@@ -210,6 +258,25 @@ public class Utils {
 	public static void setInput(String input){
 		inputRecord = input;
 	}
+	
+	/**
+	 * record and read the text of the indeed keyboard
+	 * @return
+	 */
+	public static String getIndeed(){
+		return indeedRecord;
+	}
+	public static void setIndeed(String input){
+		indeedRecord = input;
+	}
+	
+	public static String getReturn(){
+		return returnRecord;
+	}
+	public static void setReturn(String input){
+		returnRecord = input;
+	}
+	
 	/**
 	 * to judge it's lock or unlock, and change the status 
 	 */

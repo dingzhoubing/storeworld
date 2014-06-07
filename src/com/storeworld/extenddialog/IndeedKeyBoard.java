@@ -13,19 +13,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.storeworld.customer.CustomerContentPart;
-import com.storeworld.customer.CustomerList;
-import com.storeworld.customer.CustomerUtils;
-import com.storeworld.deliver.DeliverContentPart;
-import com.storeworld.deliver.DeliverUtils;
-import com.storeworld.extenddialog.SoftKeyBoard.KeyBoardAdapter;
-import com.storeworld.product.ProductContentPart;
-import com.storeworld.product.ProductUtils;
-import com.storeworld.stock.StockContentPart;
-import com.storeworld.stock.StockUtils;
-import com.storeworld.utils.Constants;
 import com.storeworld.utils.Utils;
-import com.storeworld.utils.Constants.FUNCTION;
 
 /**
  * the popup software keyboard
@@ -33,29 +21,22 @@ import com.storeworld.utils.Constants.FUNCTION;
  * @author dingyuanxiong
  *
  */
-public class SoftKeyBoard extends Dialog {
+public class IndeedKeyBoard extends Dialog {
 
 	protected Object result;
 	protected Shell shell;
 	protected Text text;
-	protected Shell pShell;
-	private int ux = 0;
-	private int uy = 0;
-	private int dx = 0;
-	private int dy = 0;
-	private boolean up = false;
-	private int KB_WIDTH = 136;
-	private int KB_HEIGHT = 190;
-	private int Adjust_y = 20;
-	private int Adjust_x = 3;
-	//layout_adjust means: the north part has a height, so the main part y is not right
-	private int layout_adjust = 0;
-	//composite_shift means: the left navigate has a width, so the main part x is not right
-	private int composite_shift = 0;
-	//composite_updown means: the right part itself has a up/down shift, like the stock page
-	private int composite_updown = 0;
+	protected Shell pShell;	
+	
 	private Text text_1;
 	private Button btnCheckButton;
+	
+	private int shift_updown=0;
+	private int shift_lr = 0;
+	private int sx = 0;
+	private int sy = 0;
+	private int width = 136;
+	private int height = 176;
 	
 	public static void setNumber(Text text, String number) {
 		String cur_str = text.getText();
@@ -92,31 +73,21 @@ public class SoftKeyBoard extends Dialog {
 	
 	//not a good way, some hard code in this
 	public void setPosition(Rectangle srect, Rectangle rect) {
-		int sx = srect.x;
-		int sy = srect.y;
-		if((sy + rect.y + layout_adjust + Adjust_y-1 + composite_updown) > KB_HEIGHT){
-			ux = sx + rect.x + Adjust_x + composite_shift;
-			uy = sy + rect.y + layout_adjust +composite_updown - KB_HEIGHT;// + Adjust_x
-			up = true;
-		}else{
-			dx = sx + rect.x + Adjust_x + composite_shift;
-			dy = sy + rect.y + layout_adjust + composite_updown + rect.height - Adjust_y+4;// + Adjust_x
-			up = false;
-		}
-//		System.out.println("result bounds: "+ ux+" "+uy+" "+KB_WIDTH+" "+KB_HEIGHT);
-
+		Composite sum = this.text.getParent();
+		Composite right = sum.getParent();
+		
+		
+		//what's the value
+		this.sx = rect.x + rect.width - this.width + right.getBounds().x + sum.getBounds().x + this.pShell.getBounds().x + shift_lr;
+		this.sy = rect.y + right.getBounds().y + sum.getBounds().y + this.pShell.getBounds().y -10 - rect.height + shift_updown;
 	}
 	
-	public SoftKeyBoard(Text text, Shell parent, int style, int composite_shift, int composite_updown) {		
+	public IndeedKeyBoard(Text text, Shell parent, int style, int shift_updown, int shift_lr) {		
 		super(parent, style);
 		this.text = text;
 		this.pShell = parent;
-//		System.out.println("text bounds: "+text.getBounds());
-//		System.out.println("parent shell bounds: "+pShell.getBounds());
-		layout_adjust = (int)(Constants.SCREEN_HEIGHT * 0.85 * 0.15);//make it from a function
-		this.composite_shift = composite_shift;
-		this.composite_updown = composite_updown;
-//		System.out.println("text parent bounds: "+text.getParent().getParent().getBounds());
+		this.shift_updown = shift_updown;
+		this.shift_lr = shift_lr;
 		setPosition(this.pShell.getBounds(), this.text.getBounds());
 	}
 
@@ -142,7 +113,7 @@ public class SoftKeyBoard extends Dialog {
 	 */
 	private void createContents() {
 		shell = new Shell(getParent(), getStyle());
-		shell.setSize(136, 216);
+		shell.setSize(width, height);
 		shell.addShellListener(new ShellAdapter() {
 			@Override
 			public void shellDeactivated(ShellEvent e) {
@@ -151,54 +122,26 @@ public class SoftKeyBoard extends Dialog {
 			}
 		});
 		// the area of the keyboard
-		if(up)
-			shell.setBounds(this.ux, this.uy, KB_WIDTH, KB_HEIGHT);
-		else
-			shell.setBounds(this.dx, this.dy + Adjust_y, KB_WIDTH, KB_HEIGHT);
-
+		shell.setBounds(sx, sy, width, height);
+		
+		
 		// the OK button of the keyboard
 		Button button = new Button(shell, SWT.NONE);
 		button.setBounds(94, 140, 36, 27);
-		button.setText("确定");
+		button.setText("\u786E\u5B9A");
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if(!text_1.getText().trim().equals(""))
 				{					
 					//only set value when input into the value box
-					Utils.setInputNeedChange(true);
-					Utils.setInput(text_1.getText());
+					Utils.setIndeedNeedChange(true);
+					Utils.setIndeed(text_1.getText());
 				}else{
-					Utils.setInputNeedChange(false);
+					Utils.setIndeedNeedChange(false);
 				}
-				Utils.setClickButton(true);
-				if(btnCheckButton.getSelection()){
-					Utils.settUseSoftKeyBoard(false);
-					//do this to make the text cell editor works better
-					switch(Utils.getFunction()){
-					case STOCK:
-//						StockUtils.refreshTableData();
-						break;
-					case DELIVER:
-//						DeliverUtils.refreshTableData();
-						break;
-					case ANALYZE:
-						//do nothing now
-						break;
-					case PRODUCT:
-//						ProductUtils.refreshTableData();
-						break;
-					case CUSTOMER:
-//						CustomerUtils.refreshTableData();
-						break;
-					default:
-						break;
-					}
-					
-				}
-				else{
-					Utils.settUseSoftKeyBoard(true);
-				}
+				Utils.setIndeedClickButton(true);
+				
 				shell.dispose();
 			}
 		});
@@ -272,61 +215,5 @@ public class SoftKeyBoard extends Dialog {
 		text_1 = new Text(shell, SWT.BORDER);
 		text_1.setBounds(5, 140, 88, 27);
 		
-		btnCheckButton = new Button(shell, SWT.CHECK);
-		btnCheckButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if(btnCheckButton.getSelection()){
-					Utils.settUseSoftKeyBoard(false);
-					switch(Utils.getFunction()){
-					case STOCK:
-						StockUtils.refreshTableData();
-						StockContentPart.getButtonSWKB().setSelection(false);
-						break;
-					case DELIVER:
-						DeliverUtils.refreshTableData();
-						DeliverContentPart.getButtonSWKB().setSelection(false);
-						break;
-					case ANALYZE:
-						//do nothing now
-						break;
-					case PRODUCT:
-						ProductUtils.refreshTableData();
-						ProductContentPart.getButtonSWKB().setSelection(false);
-						break;
-					case CUSTOMER:
-						CustomerUtils.refreshTableData();
-						CustomerContentPart.getButtonSWKB().setSelection(false);
-						break;
-					default:
-						break;
-					}
-				}
-				else{
-					Utils.settUseSoftKeyBoard(true);
-					switch(Utils.getFunction()){
-					case STOCK:
-						StockContentPart.getButtonSWKB().setSelection(true);
-						break;
-					case DELIVER:
-						DeliverContentPart.getButtonSWKB().setSelection(true);
-						break;
-					case ANALYZE:
-						//do nothing now
-						break;
-					case PRODUCT:
-						ProductContentPart.getButtonSWKB().setSelection(true);
-						break;
-					case CUSTOMER:
-						CustomerContentPart.getButtonSWKB().setSelection(true);
-						break;
-					default:
-						break;
-					}
-				}
-			}
-		});
-		btnCheckButton.setBounds(5, 171, 98, 17);
-		btnCheckButton.setText("不再使用");
 	}
 }

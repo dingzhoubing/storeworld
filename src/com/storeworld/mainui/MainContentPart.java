@@ -73,6 +73,10 @@ public class MainContentPart extends ContentPart{
 				shell.show_North_index();
 				Utils.setFunctinLast(FUNCTION.STOCK);
 				shell.show_Content_stock();
+				
+				if(Utils.getUseSoftKeyBoard()){
+					StockContentPart.getButtonSWKB().setSelection(true);
+				}
 			}
 		});
 		
@@ -102,6 +106,10 @@ public class MainContentPart extends ContentPart{
 				shell.show_North_index();
 				Utils.setFunctinLast(FUNCTION.DELIVER);
 				shell.show_Content_deliver();
+				
+				if(Utils.getUseSoftKeyBoard()){
+					DeliverContentPart.getButtonSWKB().setSelection(true);
+				}
 			}
 		});
 		
@@ -161,6 +169,10 @@ public class MainContentPart extends ContentPart{
 				shell.show_North_index();
 				Utils.setFunctinLast(FUNCTION.PRODUCT);
 				shell.show_Content_product();
+				
+				if(Utils.getUseSoftKeyBoard()){
+					ProductContentPart.getButtonSWKB().setSelection(true);
+				}
 			}
 		});
 		
@@ -190,6 +202,10 @@ public class MainContentPart extends ContentPart{
 				shell.show_North_index();
 				Utils.setFunctinLast(FUNCTION.CUSTOMER);
 				shell.show_Content_customer();
+				
+				if(Utils.getUseSoftKeyBoard()){
+					CustomerContentPart.getButtonSWKB().setSelection(true);
+				}
 			}
 		});
 		

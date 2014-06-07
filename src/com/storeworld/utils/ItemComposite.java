@@ -93,6 +93,7 @@ public class ItemComposite extends Composite {
 					DeliverUtils.setStatus("HISTORY");
 					//if click to show history, leave edit mode
 					DeliverUtils.leaveEditMode();
+					DeliverUtils.leaveReturnMode();
 					
 					DeliverList.showHistory((DeliverHistory)history);
 					DeliverUtils.recordItemComposite(getSelf());

@@ -61,6 +61,8 @@ public class ProductContentPart extends ContentPart{
 	private int deleteButtonColumn = 6;
 	
 	private int composite_shift = 0;
+	private int composite_updown = 38;
+	private static Button button_swkb = null;
 	
 	public static TableEditor getEditorDel(){
 		return editorDel;
@@ -78,11 +80,15 @@ public class ProductContentPart extends ContentPart{
 		return tv;
 	}
 		
+	public static Button getButtonSWKB(){
+		return button_swkb;
+	}
+	
 	/**
 	 * call the software keyboard
 	 */
 	public void callKeyBoard(Text text){
-		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, 0, 0);
+		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, composite_updown);
 		skb.open();
 	}
 	/**
@@ -216,7 +222,7 @@ public class ProductContentPart extends ContentPart{
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 		composite_right.setBounds(200, 0, 760, h);
-		composite_shift = (int)(w/5);		
+		composite_shift = 200;		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
@@ -289,11 +295,21 @@ public class ProductContentPart extends ContentPart{
 		
 		
 		//whether to use the software keyboard
-		Button button_swkb = new Button(composite_left, SWT.CHECK);
+		button_swkb = new Button(composite_left, SWT.CHECK);
 		button_swkb.setBounds(0, 545, 100, 20);
 		button_swkb.setText("ÆôÓÃÊý×Ö¼üÅÌ");
-		
-		
+		button_swkb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(button_swkb.getSelection()){
+					Utils.settUseSoftKeyBoard(true);
+				}
+				else{
+					ProductUtils.refreshTableData();
+					Utils.settUseSoftKeyBoard(false);
+				}
+			}
+		});
 		
 		//define a table
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK		

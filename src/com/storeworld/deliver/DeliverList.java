@@ -109,11 +109,15 @@ public class DeliverList {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).remove(deliver);
-			try {
-				deliverinfo.deleteDeliverInfo(Integer.valueOf(deliver.getID()));
-			} catch (Exception e) {
-				System.out.println("remove the deliver failed");
-			}
+			//update the database only if we are not in the return mode
+//			if (!DeliverUtils.getReturnMode()) {
+				try {
+					deliverinfo.deleteDeliverInfo(Integer.valueOf(deliver
+							.getID()));
+				} catch (Exception e) {
+					System.out.println("remove the deliver failed");
+				}
+//			}
 			//if in edit mode, change the history
 			//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
 			if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
@@ -174,14 +178,19 @@ public class DeliverList {
 			(iterator.next()).update(deliver);
 			
 			if(!DeliverValidator.checkID(deliver.getID())){
-				//update the database here				
-				try {
-					deliverinfo.updateDeliverInfo(deliver.getID(), common, st);
-					//if the brand, sub are new, we update the product cache !!
-					//if area, name are new, update the customer cache(if user click print button) !!
-				} catch (Exception e) {
-					System.out.println("update deliver failed");
-				}
+				//update the database here		
+//				if (!DeliverUtils.getReturnMode()) {
+					try {
+						deliverinfo.updateDeliverInfo(deliver.getID(), common,
+								st);
+						// if the brand, sub are new, we update the product
+						// cache !!
+						// if area, name are new, update the customer cache(if
+						// user click print button) !!
+					} catch (Exception e) {
+						System.out.println("update deliver failed");
+					}
+//				}
 				//if in edit mode, change the history
 				//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
 				if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){

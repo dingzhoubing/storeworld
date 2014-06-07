@@ -1,9 +1,11 @@
 package com.storeworld.deliver;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -39,6 +41,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.storeworld.common.NumberConverter;
 import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.extenddialog.ConfirmEdit;
+import com.storeworld.extenddialog.IndeedKeyBoard;
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.CoolBarPart;
@@ -48,6 +51,8 @@ import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.DeliverInfoService;
+import com.storeworld.returndeliver.ReturnComposite;
+import com.storeworld.returndeliver.ReturnItemComposite;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
@@ -100,7 +105,7 @@ public class DeliverContentPart extends ContentPart{
 	private static Button btnNewButton;
 	private static Button btn_delete;
 	private static Button btn_edit;//修改
-	
+	private static Button btn_save;
 	private static Button btn_return;//退货
 	
 	private static GeneralCCombo gc;
@@ -121,7 +126,15 @@ public class DeliverContentPart extends ContentPart{
 	private static DateTime dateTime = null;
 	private static DateTime dateTime2 = null;
 	
+	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+	private static DecimalFormat df = new DecimalFormat("0.00");
+	private static ReturnComposite composite_return = null;
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
+	private static Button button_swkb = null;
+	
+	private static CCombo area = null;
+	private static CCombo cus = null;
+	
 	public static ArrayList<Integer> getTpShift(){
 		return tpShift;
 	}
@@ -132,6 +145,10 @@ public class DeliverContentPart extends ContentPart{
 		current = parent;		
 		initialization();
 		addListenerForTable();
+	}
+	
+	public static Button getButtonSWKB(){
+		return button_swkb;
 	}
 	
 	/**
@@ -183,7 +200,7 @@ public class DeliverContentPart extends ContentPart{
 		text_title.setText("进货单");
 		indeed.setText("实收(大写)");
 		indeed_lbl.setText("实收(小写)");
-		
+		btn_save.setVisible(true);
 	}
 	public static void enableEditContent(){
 		gc.setEnabled(true);
@@ -304,7 +321,33 @@ public class DeliverContentPart extends ContentPart{
 	}
 	
 	
-
+	public void doSearch(){
+		if (dateTime.isVisible()) {
+			String year = String.valueOf(dateTime.getYear());
+			int mon = dateTime.getMonth() + 1;
+			String month = String.valueOf(mon);
+			int d = dateTime.getDay();
+			String day = String.valueOf(d);
+			if (mon < 10)
+				month = "0" + month;
+			if (d < 10)
+				day = "0" + day;
+			// date to search
+			String dateSearch = year + month + day;
+			DeliverUtils.showSearchHistory(dateSearch, "", "");
+		}else{
+			String year = String.valueOf(dateTime2.getYear());
+			int mon = dateTime2.getMonth() + 1;
+			String month = String.valueOf(mon);					
+			if (mon < 10)
+				month = "0" + month;
+			// date to search
+			String dateSearch = year + month;
+			String str_area = area.getText();
+			String str_cus = cus.getText();
+			DeliverUtils.showSearchHistory(dateSearch, str_area, str_cus);
+		}
+	} 
 	
 	/**
 	 * call the software keyboard
@@ -348,6 +391,7 @@ public class DeliverContentPart extends ContentPart{
 				}	
 				
 				if(found){
+					
 					if(Utils.getUseSoftKeyBoard()){
 						if(colCurrent == priceColumn || colCurrent == numberColumn){
 							//cannot reuse the editor, make cause unstable
@@ -528,6 +572,7 @@ public class DeliverContentPart extends ContentPart{
 				
 					DeliverUtils.setStatus("NEW");
 					DeliverUtils.leaveEditMode();
+					DeliverUtils.leaveReturnMode();
 //				if(!gc.getText().equals("") && !gcName.equals("")){
 					DeliverUtils.setOrderNumber();//set the order number for the deliver table
 				
@@ -601,12 +646,12 @@ public class DeliverContentPart extends ContentPart{
         composite_2.layout();
         
         
-        final CCombo area = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
+        area = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
         area.setBounds(12, 492, 86, 25);
         area.setVisibleItemCount(5);
         area.setText("全部片区");
 
-        final CCombo cus = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
+        cus = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
         cus.setBounds(102, 492, 86, 25);
         cus.setVisibleItemCount(5);
         cus.setText("全部客户");
@@ -688,18 +733,8 @@ public class DeliverContentPart extends ContentPart{
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-				String year = String.valueOf(dateTime.getYear());
-				int mon = dateTime.getMonth()+1;
-				String month = String.valueOf(mon);
-				int d = dateTime.getDay();
-				String day = String.valueOf(d);
-				if(mon<10)
-					month = "0"+month;
-				if(d<10)
-					day="0"+day;
-				//date to search
-				String dateSearch = year+month+day;
-				DeliverUtils.showSearchHistory(dateSearch);
+				
+				doSearch();
 			}
 		});
 		
@@ -709,7 +744,7 @@ public class DeliverContentPart extends ContentPart{
 		btn_quick.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("jump into customer page, can filter the customer by already exist options(todo)");
+//				System.out.println("jump into customer page, can filter the customer by already exist options(todo)");
 				//jump into the customer page
 				Utils.setFunctin(FUNCTION.CUSTOMER);
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
@@ -757,6 +792,7 @@ public class DeliverContentPart extends ContentPart{
         	public void widgetSelected(SelectionEvent e) {
 //				//first leave the edit mode, avoid update the table
 				DeliverUtils.leaveEditMode();
+				DeliverUtils.leaveReturnMode();
 				//clear table
 				table.removeAll();
 				DeliverList.removeAllDelivers();
@@ -768,7 +804,6 @@ public class DeliverContentPart extends ContentPart{
 		});
 		
 		btn_edit = new Button(composite_right, SWT.NONE);
-//		btn_edit.setBounds((int)(12*w/500), (int)(4*w/5/100), (int)(3*4*w/5/50), (int)(h/20));
 		btn_edit.setBounds(12, 12, 76, 30);
 		btn_edit.setText("修改");
 		btn_edit.setVisible(false);
@@ -808,7 +843,10 @@ public class DeliverContentPart extends ContentPart{
 					enableEditContent();
 					btn_return.setVisible(false);
 					btn_edit.setVisible(false);
-					DeliverUtils.enterEditMode();
+//					DeliverUtils.enterEditMode();
+					
+					//cannot save the return now, in the future, there may exist return module
+					btn_save.setVisible(false);
 					
 					text_title.setText("退货单");
 					indeed.setText("实退(大写)");
@@ -818,10 +856,23 @@ public class DeliverContentPart extends ContentPart{
 					text_phone.setEnabled(false);
 					text_address.setEnabled(false);
 					
+					DeliverUtils.enterReturnMode();
+					composite_return.setVisible(true);
+					composite_return.showDelivers(DeliverList.getDelivers());
+					table.setVisible(false);
+					
+					//reset the summary
+					total_val.setText("");
+					total_big.setText("");
+					indeed_val.setText("");
+					indeed_big.setText("");
+					
 					//make a return mode, then, in this mode,
 					//we need to check and make sure:
 					//1. all goods are subsets of this deliver
 					//2. based on 1, on new goods, and goods number are no bigger than this deliver
+					
+					
 					
 				}
 			}
@@ -1040,13 +1091,27 @@ public class DeliverContentPart extends ContentPart{
 		indeed_sign.setBounds(12, 464, 150, 15);
 		
 		indeed_val.addFocusListener(new FocusAdapter(){
-
 			@Override
-			public void focusLost(FocusEvent e) {
-				indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(indeed_val.getText()));
-				//change the database
-			}
-			
+			public void focusGained(FocusEvent e) {
+				btnNewButton.forceFocus();				
+				IndeedKeyBoard inkb = new IndeedKeyBoard(indeed_val, table.getParent().getShell(), 0, 0, 0);
+				inkb.open();
+				if(Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()){
+					String txt = Utils.getIndeed();
+					//reasonable value
+					if(pattern_indeed_val.matcher(txt).matches()){	
+						String format_str = df.format(Double.valueOf(txt));
+						indeed_val.setText(format_str);
+						indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(format_str));
+					}else{
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("数值应为整数或两位小数");
+						mbox.open();
+					}
+					//initial the next click
+					Utils.setIndeedClickButton(false);
+				}
+			}	
 		});
 		
 		composite_sum.layout();
@@ -1058,7 +1123,56 @@ public class DeliverContentPart extends ContentPart{
 		btn_print.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-//				System.out.println("print");
+				
+				//if in return mode
+				if(DeliverUtils.getReturnMode()){
+					//1. print the table
+					//++++++++++++++do the print
+					//++++++++++++++
+					//2. update the deliver table
+					ArrayList<ReturnItemComposite> items = ReturnComposite.getReturnItems();
+					for(int i=0;i<items.size();i++){
+						ReturnItemComposite rc = items.get(i);
+						//the number has to be changed, we update the database
+						if(rc.getCheck() && !rc.getReturnNumber().equals("0")){
+							Map<String, Object> common = new HashMap<String ,Object>();
+							Map<String, Object> st = new HashMap<String ,Object>();
+							st.put("id", rc.getID());
+							st.put("brand", rc.getBrand());
+							st.put("sub_brand", rc.getSub());
+							st.put("standard", rc.getProdSize());
+							st.put("unit", rc.getUnit());							
+							st.put("order_num", rc.getOrderNumber());
+							st.put("unit_price", rc.getPrice());
+							int deli = Integer.valueOf(rc.getDeliverNumber());
+							int ret = Integer.valueOf(rc.getReturnNumber());
+							st.put("quantity", (deli-ret));
+							DeliverInfoService deliverinfo = new DeliverInfoService();	
+							
+							if((deli-ret) == 0){
+								try {
+									deliverinfo.deleteDeliverInfo(Integer.valueOf(rc
+											.getID()));
+								} catch (Exception e1) {
+									System.out.println("remove the deliver failed");
+								}
+							}else{
+							try {
+								deliverinfo.updateDeliverInfo(rc.getID(), common,st);								
+								} catch (Exception e1) {
+										System.out.println("update deliver failed");
+								}
+							}
+						}
+					}
+					
+					DeliverUtils.leaveReturnMode();
+					doSearch();
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("退货成功");
+					mbox.open();
+					
+				}else{
 				//do more check here
 				if(DeliverList.getDelivers().size() > 1){
 					
@@ -1079,6 +1193,11 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("telephone", text_phone.getText());
 						//if already exist, update it 
 						deliverinfo.print_voucher(commonMap);
+//						try {
+//							deliverinfo.updateCommonInfo(commonMap);
+//						} catch (Exception e1) {
+//							e1.printStackTrace();
+//						}
 						
 						//status: NEW, HISTORY, EMPTY
 						DeliverUtils.setStatus("EMPTY");
@@ -1097,19 +1216,20 @@ public class DeliverContentPart extends ContentPart{
 						total_big.setText("");
 						btn_edit.setVisible(false);
 						btn_return.setVisible(false);
-						
+						//show the save button?
+						btn_save.setVisible(true);
 					}else{
 						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 						mbox.setMessage("收货人片区和姓名需填写完整");
 						mbox.open();						
 					}
 				}
-				
+				}
 			}
 		});
 		
 		//button print
-				Button btn_save = new Button(composite_right, SWT.NONE);
+				btn_save = new Button(composite_right, SWT.NONE);
 				btn_save.setText("仅保存");
 				btn_save.setBounds(382, 500, 85, 40);
 				btn_save.addSelectionListener(new SelectionAdapter() {
@@ -1136,7 +1256,13 @@ public class DeliverContentPart extends ContentPart{
 								commonMap.put("telephone", text_phone.getText());
 								//if already exist, update it 
 								deliverinfo.print_voucher(commonMap);
-								
+//								try {
+//									deliverinfo.updateCommonInfo(commonMap);
+//								} catch (Exception e1) {
+//									// TODO Auto-generated catch block
+//									e1.printStackTrace();
+//								}
+//								
 								//status: NEW, HISTORY, EMPTY
 								DeliverUtils.setStatus("EMPTY");
 								
@@ -1168,10 +1294,25 @@ public class DeliverContentPart extends ContentPart{
 		
 		
 		//whether to use the software keyboard
-		Button button_swkb = new Button(composite_right, SWT.CHECK);
+		button_swkb = new Button(composite_right, SWT.CHECK);
 		button_swkb.setBounds(660, 545, 100, 20);
 		button_swkb.setText("启用数字键盘");
-		
+		button_swkb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(button_swkb.getSelection()){
+					Utils.settUseSoftKeyBoard(true);
+				}
+				else{
+					DeliverUtils.refreshTableData();
+					Utils.settUseSoftKeyBoard(false);
+				}
+			}
+		});
+		//define the return Composite
+		composite_return = new ReturnComposite(composite_right, SWT.BORDER);		
+		composite_return.setBounds(12, 150, 736, 230);
+		composite_return.setVisible(false);
 		//===============================================================================
 		//define a table				
 		table = tableViewer.getTable();

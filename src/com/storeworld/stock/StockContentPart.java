@@ -1,9 +1,11 @@
 package com.storeworld.stock;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -13,7 +15,8 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -36,7 +39,9 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.common.NumberConverter;
 import com.storeworld.extenddialog.ConfirmEdit;
+import com.storeworld.extenddialog.IndeedKeyBoard;
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.MainUI;
@@ -90,7 +95,10 @@ public class StockContentPart extends ContentPart{
 	
 	private static Button btn_edit = null;
 	private static Button btn_delete = null;
-	
+	private static DecimalFormat df = new DecimalFormat("0.00");
+	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+	private static Button btnNewButton = null;
+	private static Button button_swkb = null;
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -122,13 +130,13 @@ public class StockContentPart extends ContentPart{
 		return stocklist;
 	}
 	public static void setTotal(String total){
-		total_val.setText(total+Constants.SPACE);
+		total_val.setText(total);//+Constants.SPACE
 	}
 	public static String getTotal(){
 		return total_val.getText();
 	}
 	public static void setIndeed(String indeed){
-		indeed_val.setText(indeed+Constants.SPACE);
+		indeed_val.setText(indeed);//+Constants.SPACE
 	}
 	public static String getIndeed(){
 		return indeed_val.getText();
@@ -136,6 +144,10 @@ public class StockContentPart extends ContentPart{
 	
 	public static ArrayList<Integer> getTpShift(){
 		return tpShift;
+	}
+	
+	public static Button getButtonSWKB(){
+		return button_swkb;
 	}
 	/**
 	 * get/set the timer value when edit the history	
@@ -210,11 +222,6 @@ public class StockContentPart extends ContentPart{
 	
 	
 	
-	
-	
-
-	
-	
 	/**
 	 * call the software keyboard
 	 */
@@ -228,11 +235,12 @@ public class StockContentPart extends ContentPart{
 	 */
 	public void addListenerForTable(){
 		//refactor
+		
 		table.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
-				
+
 				Point pt = new Point(event.x, event.y);
 				int rowCount = table.getItemCount();
 				int colCount = table.getColumnCount();
@@ -355,7 +363,6 @@ public class StockContentPart extends ContentPart{
 					
 				}	
 			}
-			
 		});
 		
 		
@@ -434,7 +441,7 @@ public class StockContentPart extends ContentPart{
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL);//shell, SWT.CHECK
 		
 		//add a new stock table
-		Button btnNewButton = new Button(composite_left, SWT.NONE);
+		btnNewButton = new Button(composite_left, SWT.NONE);
 //		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setBounds(12, 12, 176, 36);
 		btnNewButton.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
@@ -583,13 +590,13 @@ public class StockContentPart extends ContentPart{
 //				dateTime_stock.setDate(year, month-1, day);
 				initialTimer();
 				//will not show delete button anymore
-				total_val.setText("0.00"+Constants.SPACE);
-				indeed_val.setText("0.00"+Constants.SPACE);
+				total_val.setText("0.00");//+Constants.SPACE
+				indeed_val.setText("0.00");//+Constants.SPACE
 				btn_delete.setVisible(false);
 			}
 		});
 				
-		composite_updown = 30+24;
+		composite_updown = 30+24+37;
 		
 		//=======================================================================================
 		//sum composite
@@ -607,10 +614,10 @@ public class StockContentPart extends ContentPart{
 		
 		total_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		total_val.setEnabled(false);
-		total_val.setText("0.00"+Constants.SPACE);
+		total_val.setText("0.00");//+Constants.SPACE
 		total_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		total_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		total_val.setBounds(412, 0, 300, 14);
+		total_val.setBounds(412, 0, 298, 14);
 		
 		Text indeed = new Text(composite_sum, SWT.NONE);
 		indeed.setEnabled(false);
@@ -621,16 +628,31 @@ public class StockContentPart extends ContentPart{
 		
 		indeed_val = new Text(composite_sum, SWT.RIGHT|SWT.NONE);
 		indeed_val.setEnabled(true);
-		indeed_val.setText("0.00"+Constants.SPACE);
+		indeed_val.setText("0.00");//+Constants.SPACE
 		indeed_val.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		indeed_val.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		indeed_val.setBounds(412, 26, 300, 14);
+		indeed_val.setBounds(412, 26, 298, 14);
 		indeed_val.addFocusListener(new FocusAdapter(){
-			//update the database here?
+			
 			@Override
-			public void focusLost(FocusEvent e) {
-//				System.out.println("update the indeed value into the database");
-				//every time we update it in database?
+			public void focusGained(FocusEvent e) {
+				btnNewButton.forceFocus();				
+				IndeedKeyBoard inkb = new IndeedKeyBoard(indeed_val, table.getParent().getShell(), 0, 0, 0);
+				inkb.open();
+				if(Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()){
+					String txt = Utils.getIndeed();
+					//reasonable value
+					if(pattern_indeed_val.matcher(txt).matches()){	
+						String format_str = df.format(Double.valueOf(txt));
+						indeed_val.setText(format_str);						
+					}else{
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("数值应为整数或两位小数");
+						mbox.open();
+					}
+					//initial the next click
+					Utils.setIndeedClickButton(false);
+				}
 			}
 			
 		});
@@ -660,11 +682,22 @@ public class StockContentPart extends ContentPart{
 		});
 		
 		//whether to use the software keyboard
-		Button button_swkb = new Button(composite_right, SWT.CHECK);
+		button_swkb = new Button(composite_right, SWT.CHECK);
 		button_swkb.setBounds(660, 545, 100, 20);
 		button_swkb.setText("启用数字键盘");
-		
-		
+		button_swkb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(button_swkb.getSelection()){
+					Utils.settUseSoftKeyBoard(true);
+				}
+				else{
+					StockUtils.refreshTableData();
+					Utils.settUseSoftKeyBoard(false);
+				}
+			}
+		});
+
 		//======================================================================
 		//the stock table	
 		table = tableViewer.getTable();

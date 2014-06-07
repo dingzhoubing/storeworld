@@ -57,14 +57,14 @@ public class CustomerContentPart extends ContentPart{
 	
 	//the shift width of the table, determine the location of the soft keyboard
 	private int composite_shift = 0;
-	
+	private int composite_updown = 38;
 	//since there is a column: deliver button, the tooltip need to shift
 	private int column_shift = 0;
 	
 	private int phoneColumn = 4;
 	private int deliverButtonColumn = 1;
 	private int deleteButtonColumn = 6;
-	
+	private static Button button_swkb = null;
 	private static Listener listener = null;
 	
 
@@ -103,11 +103,13 @@ public class CustomerContentPart extends ContentPart{
 	 * call the software keyboard
 	 */
 	public void callKeyBoard(Text text){
-		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, 0);
+		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, composite_updown);
 		skb.open();
 	}
 	
-	
+	public static Button getButtonSWKB(){
+		return button_swkb;
+	}
 	
 	/**
 	 * add all kinds of listener of the table
@@ -272,7 +274,7 @@ public class CustomerContentPart extends ContentPart{
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
 //		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
 		composite_right.setBounds(200, 0, 760, h);
-		composite_shift = (int)(w/5);
+		composite_shift = 200;
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		tv=tableViewer;
 		//left side navigate
@@ -390,10 +392,21 @@ public class CustomerContentPart extends ContentPart{
 	    composite_firstname.layout();
 		
 		//whether to use the software keyboard
-		Button button_swkb = new Button(composite_left, SWT.CHECK);
+		button_swkb = new Button(composite_left, SWT.CHECK);
 		button_swkb.setBounds(0, 545, 100, 20);
 		button_swkb.setText("ÆôÓÃÊý×Ö¼üÅÌ");
-		
+		button_swkb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(button_swkb.getSelection()){
+					Utils.settUseSoftKeyBoard(true);
+				}
+				else{
+					CustomerUtils.refreshTableData();
+					Utils.settUseSoftKeyBoard(false);
+				}
+			}
+		});
 	    //==========================================================================================================
 		//define a table, right part				
 		table = tableViewer.getTable();

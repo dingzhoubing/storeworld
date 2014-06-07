@@ -55,6 +55,7 @@ public class DeliverUtils {
 	private static ItemComposite ic_record;
 	//the table is in edit mode or not
 	private static boolean editMode = false;
+	private static boolean returnMode = false;
 	private static String status = "";
 	
 	//NEW, HISTORY, EMPTY
@@ -65,7 +66,9 @@ public class DeliverUtils {
 		return status;
 	} 
 	
-	
+	/**
+	 * edit mode, if we click edit
+	 */
 	public static void enterEditMode(){
 		editMode = true;
 	}
@@ -74,6 +77,19 @@ public class DeliverUtils {
 	}
 	public static boolean getEditMode(){
 		return editMode;
+	}
+	
+	/**
+	 * return mode, if we click return
+	 */
+	public static void enterReturnMode(){
+		returnMode = true;
+	}
+	public static void leaveReturnMode(){
+		returnMode = false;
+	}
+	public static boolean getReturnMode(){
+		return returnMode;
 	}
 	
 	/**
@@ -389,7 +405,7 @@ public class DeliverUtils {
 	}
 	
 	
-	public static void showSearchHistory(String dateSearch){
+	public static void showSearchHistory(String dateSearch, String area, String cus){
 		//remove the navigator panel, clear all the result
 		for(int i=0;i<itemList.size();i++)
 			itemList.get(i).dispose();
@@ -399,6 +415,14 @@ public class DeliverUtils {
 		//add search result
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("deliver_time", dateSearch);
+		//no customer specified, means, all customers
+		if(cus.equals("")){
+			map.put("customer_area", "");
+			map.put("customer_name", "");
+		}else{
+			map.put("customer_area", area);
+			map.put("customer_name", cus);
+		}
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		try {
 			ReturnObject ret = deliverinfo.queryDeliverInfoByInputDelivertime(map);

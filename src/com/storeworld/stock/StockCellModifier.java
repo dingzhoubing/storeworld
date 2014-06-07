@@ -182,8 +182,14 @@ public class StockCellModifier implements ICellModifier {
 			else
 				pricelast = df.format(Double.valueOf(s.getPrice()));
 			String newValue = "";
-			if(!value.equals(""))
-				newValue = df.format(Double.valueOf((String) value));
+			if(!value.equals("")){
+//				newValue = df.format(Double.valueOf((String) value));
+				try{
+					newValue = df.format(Double.valueOf((String) value));
+				}catch(NumberFormatException e){
+					newValue = (String) value;
+				}
+			}
 			if (newValue.equals("")) {
 				return;
 			}
@@ -197,7 +203,7 @@ public class StockCellModifier implements ICellModifier {
 			if(newValue.equals(""))
 				s.setPrice("");
 			else
-				s.setPrice(df.format(Double.valueOf(newValue)));
+				s.setPrice(newValue);
 		} else if (property.equals("number")) {
 			numberlast = s.getNumber();
 			String newValue = (String) value;

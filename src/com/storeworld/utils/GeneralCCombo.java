@@ -155,8 +155,9 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
 							}else{
-								stock.setSize("");
-								StockContentPart.getStockList().stockChanged(stock);
+								//need to do anything?
+//								stock.setSize("");
+//								StockContentPart.getStockList().stockChanged(stock);
 							}
 						}else if(col == SIZE_COLUMN){
 							valid = StockValidator.validateSize(text.getText());
@@ -205,8 +206,9 @@ public GeneralCCombo (Composite parent, int style, int the_width, int the_col, S
 								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
 							}else{
-								deliver.setSize("");
-								DeliverContentPart.getDeliverList().deliverChanged(deliver);
+								//need to do anything
+//								deliver.setSize("");
+//								DeliverContentPart.getDeliverList().deliverChanged(deliver);
 							}
 						}else if(col == SIZE_COLUMN){
 							valid = DeliverValidator.validateSize(text.getText());

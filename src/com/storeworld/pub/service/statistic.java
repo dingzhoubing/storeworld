@@ -453,20 +453,17 @@ public class statistic extends BaseAction{
 							stock_map.put(k, batchStockNum-deliverNum);
 							int lastnum=Integer.parseInt(stockInfoList.get(k).getQuantity())-deliverNum;
 							stockInfoList.get(k).setQuantity(String.valueOf(lastnum));
+							break;
 						}
-						
-						if(result_profit.get(deliverInfoDto.getCustomer_area())==null){
-							result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price-sum_stock_price);
-						}
-						else{
-							result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price+result_profit.get(deliverInfoDto.getCustomer_area())-sum_stock_price);
-						}
-						resultList.add(result_profit);
-						break;
 					}
 				}
-				//deliverInfoAllList.add(deliverInfoDto);
-				
+				if(result_profit.get(deliverInfoDto.getCustomer_area())==null){
+					result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price-sum_stock_price);
+				}
+				else{
+					result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price+result_profit.get(deliverInfoDto.getCustomer_area())-sum_stock_price);
+				}
+				resultList.add(result_profit);			
 		}
 		page.setItems((List)resultList);
 		ro.setReturnDTO(page);
@@ -561,20 +558,17 @@ public class statistic extends BaseAction{
 						stock_map.put(k, batchStockNum-deliverNum);
 						int lastnum=Integer.parseInt(stockInfoList.get(k).getQuantity())-deliverNum;
 						stockInfoList.get(k).setQuantity(String.valueOf(lastnum));
+						break;
 					}
-					
-					if(result_profit.get(deliverInfoDto.getCustomer_name())==null){
-						result_profit.put(deliverInfoDto.getCustomer_name(), deliver_totol_price-sum_stock_price);
-					}
-					else{
-						result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price+result_profit.get(deliverInfoDto.getCustomer_name())-sum_stock_price);
-					}
-					resultList.add(result_profit);
-					break;
 				}
 			}
-			//deliverInfoAllList.add(deliverInfoDto);
-			
+			if(result_profit.get(deliverInfoDto.getCustomer_name())==null){
+				result_profit.put(deliverInfoDto.getCustomer_name(), deliver_totol_price-sum_stock_price);
+			}
+			else{
+				result_profit.put(deliverInfoDto.getCustomer_area(), deliver_totol_price+result_profit.get(deliverInfoDto.getCustomer_name())-sum_stock_price);
+			}
+			resultList.add(result_profit);			
 	}
 	page.setItems((List)resultList);
 	ro.setReturnDTO(page);

@@ -32,12 +32,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.common.DataInTable;
 import com.storeworld.common.NumberConverter;
 import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.extenddialog.ConfirmEdit;
@@ -49,6 +51,7 @@ import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.printer.PrintHandler;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.returndeliver.ReturnComposite;
@@ -131,7 +134,6 @@ public class DeliverContentPart extends ContentPart{
 	private static ReturnComposite composite_return = null;
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
 	private static Button button_swkb = null;
-	
 	private static CCombo area = null;
 	private static CCombo cus = null;
 	
@@ -1127,8 +1129,8 @@ public class DeliverContentPart extends ContentPart{
 				//if in return mode
 				if(DeliverUtils.getReturnMode()){
 					//1. print the table
-					//++++++++++++++do the print
-					//++++++++++++++
+					ArrayList<DataInTable> ds = new ArrayList<DataInTable>();					
+					ds.clear();
 					//2. update the deliver table
 					ArrayList<ReturnItemComposite> items = ReturnComposite.getReturnItems();
 					for(int i=0;i<items.size();i++){
@@ -1144,6 +1146,8 @@ public class DeliverContentPart extends ContentPart{
 							st.put("unit", rc.getUnit());							
 							st.put("order_num", rc.getOrderNumber());
 							st.put("unit_price", rc.getPrice());
+							Deliver d = new Deliver(rc.getID(), rc.getBrand(), rc.getSub(), rc.getProdSize(), rc.getUnit(), rc.getPrice(), rc.getReturnNumber());
+							ds.add(d);							
 							int deli = Integer.valueOf(rc.getDeliverNumber());
 							int ret = Integer.valueOf(rc.getReturnNumber());
 							st.put("quantity", (deli-ret));
@@ -1165,6 +1169,12 @@ public class DeliverContentPart extends ContentPart{
 							}
 						}
 					}
+							    	
+
+			    	
+					//how to get the indeed value
+					PrintHandler ph = new PrintHandler(ds, true, 0.00);
+					ph.doPrint();
 					
 					DeliverUtils.leaveReturnMode();
 					doSearch();
@@ -1182,6 +1192,15 @@ public class DeliverContentPart extends ContentPart{
 						if(DeliverUtils.getStatus().equals("NEW")){
 							DeliverUtils.addToHistory();
 						}
+						
+						ArrayList<DataInTable> ds = new ArrayList<DataInTable>();
+						ds.clear();
+						//the last one will not print
+						ds.addAll(DeliverList.getDelivers().subList(0, DeliverList.getDelivers().size()-1));
+						//how to get the indeed value
+						PrintHandler ph = new PrintHandler(ds, true, 0.00);
+						ph.doPrint();
+						
 						//step 1: add the deliver common info into database
 						DeliverInfoService deliverinfo = new DeliverInfoService();
 						Map<String,Object> commonMap = new HashMap<String,Object>();
@@ -1192,7 +1211,7 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("deliver_time", DeliverUtils.getTime());
 						commonMap.put("telephone", text_phone.getText());
 						//if already exist, update it 
-						deliverinfo.print_voucher(commonMap);
+//						deliverinfo.print_voucher(commonMap);
 //						try {
 //							deliverinfo.updateCommonInfo(commonMap);
 //						} catch (Exception e1) {
@@ -1228,6 +1247,8 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
+
+    	
 		//button print
 				btn_save = new Button(composite_right, SWT.NONE);
 				btn_save.setText("½ö±£´æ");

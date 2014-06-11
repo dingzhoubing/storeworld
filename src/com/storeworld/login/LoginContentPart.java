@@ -1,5 +1,7 @@
 package com.storeworld.login;
 
+import java.io.IOException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -9,6 +11,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.database.PasswordHandler;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
@@ -39,6 +42,7 @@ public class LoginContentPart extends ContentPart{
 	private Button button_8;
 	private Button button_9;
 	private Button button_0;
+	private Button reset;
 	private Label lbl_tips;
 	
 	private static int counter = 1;
@@ -46,13 +50,32 @@ public class LoginContentPart extends ContentPart{
 	private static String pwSecond = "";
 	Composite current = null;
 	
-	private String password = "";
+//	private String password = "";
 	private boolean first = false;
-	private boolean firstInput = false;
+	private static boolean firstInput = false;
+	
+	private boolean resetPW = false;
+	
+	private boolean wrongcase = false;
 	public LoginContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);
 		current = parent;
 		initialization();
+	}
+	
+	
+	public boolean getFirst(){
+		return first;
+	}
+	public void setFirst(boolean ft){
+		this.first = ft;
+	}
+	
+	public boolean getResetPW(){
+		return resetPW;
+	}
+	public void setResetPW(boolean ft){
+		this.resetPW = ft;
 	}
 	
 	class PasswordSelectionAdapter extends SelectionAdapter{
@@ -63,7 +86,11 @@ public class LoginContentPart extends ContentPart{
 		}
 		@Override
 		public void widgetSelected(SelectionEvent e) {
-			setValue(this.val);
+			if(!wrongcase)
+				setValue(this.val);
+			else{
+				//do nothing				
+			}
 		}
 		
 	}
@@ -72,7 +99,7 @@ public class LoginContentPart extends ContentPart{
 		lbl_tips.setText("");
 		switch(counter){
 		case 1:
-			text1.setText("   *");
+			text1.setText("*");
 			if(!firstInput)
 				pwFirst+=val;
 			else
@@ -80,7 +107,7 @@ public class LoginContentPart extends ContentPart{
 			counter++;
 			break;
 		case 2:
-			text2.setText("   *");
+			text2.setText("*");
 			if(!firstInput)
 				pwFirst+=val;
 			else
@@ -88,7 +115,7 @@ public class LoginContentPart extends ContentPart{
 			counter++;
 			break;
 		case 3:
-			text3.setText("   *");
+			text3.setText("*");
 			if(!firstInput)
 				pwFirst+=val;
 			else
@@ -96,7 +123,7 @@ public class LoginContentPart extends ContentPart{
 			counter++;
 			break;
 		case 4:
-			text4.setText("   *");
+			text4.setText("*");
 			if(!firstInput)
 				pwFirst+=val;
 			else
@@ -110,7 +137,7 @@ public class LoginContentPart extends ContentPart{
 		if(!Utils.getStatus()){//login
 		//not the first time
 		if(!first){
-			if(pwFirst.equals("1234")){//by default, it should be password
+			if(pwFirst.equals(PasswordHandler.getPassword())){//by default, it should be password
 				counter = 1;
 				pwFirst = "";
 				LoginMainUI.setInstanceNull();
@@ -127,6 +154,7 @@ public class LoginContentPart extends ContentPart{
 			}		
 		}else{
 			if(!firstInput){
+				if(!getResetPW()){
 				lbl_tips.setText("请您再次输入同样的数字，此数字将作为您以后的登陆密码");
 				text1.setText("");
 				text2.setText("");
@@ -134,6 +162,31 @@ public class LoginContentPart extends ContentPart{
 				text4.setText("");
 				counter = 1;			
 				firstInput = true;
+				}else{//reset the pw, we need to check the input old pw
+					if(pwFirst.equals(PasswordHandler.getPassword())){//pw is right as the old one
+						lbl_tips.setText("密码验证正确， 请输入新密码");
+						counter = 1;
+						pwFirst = "";
+						pwSecond = "";
+						firstInput = false;
+						text1.setText("");
+						text2.setText("");
+						text3.setText("");
+						text4.setText("");		
+						setResetPW(false);//no need to validate the old pw any more
+						
+					}else{
+						lbl_tips.setText("密码验证错误，请重新输入");
+						counter = 1;
+						pwFirst = "";
+						pwSecond = "";
+						firstInput = false;
+						text1.setText("");
+						text2.setText("");
+						text3.setText("");
+						text4.setText("");	
+					}
+				}
 			}else{
 				if(!pwFirst.equals(pwSecond)){
 					lbl_tips.setText("您兩次輸入的密碼不相同，請重新輸入并確認密碼");
@@ -147,9 +200,10 @@ public class LoginContentPart extends ContentPart{
 					pwSecond = "";
 				}else{
 					counter = 1;
+					setPasswordStored(pwFirst);
+					PasswordHandler.setPassword(pwFirst);
 					pwFirst = "";
 					pwSecond = "";
-					setPasswordStored();
 					LoginMainUI.setInstanceNull();
 					current.getParent().dispose();			
 					EntryPoint.entry();
@@ -157,7 +211,7 @@ public class LoginContentPart extends ContentPart{
 			}
 		}
 	}else{//unlock
-		if(pwFirst.equals("1234")){//by default, it should be password
+		if(pwFirst.equals(PasswordHandler.getPassword())){//by default, it should be password
 			counter = 1;
 			pwFirst = "";
 			LoginMainUI.setInstanceNull();
@@ -179,13 +233,16 @@ public class LoginContentPart extends ContentPart{
 	}
 	}
 	
-	private void setPasswordStored(){
-		//set the password into databse
+	private void setPasswordStored(String pw){
+//		PasswordHandler ph = new PasswordHandler();
+		PasswordHandler.setPasswordStored(pw);
 	}
 	private String getPasswordStored(){
-		password = "12";
+		
+//		PasswordHandler ph = new PasswordHandler();
+		String password = PasswordHandler.getPasswordStored();
 		return password;
-		//check from the database
+		
 	}
 
 	public void initialization(){
@@ -197,22 +254,22 @@ public class LoginContentPart extends ContentPart{
 		lbl_tips.setText("");
 		
 		
-		text1 = new Text(this, SWT.BORDER | SWT.WRAP);
+		text1 = new Text(this, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		text1.setEnabled(false);
 		text1.setEditable(false);
 		text1.setFont(SWTResourceManager.getFont("微软雅黑", 15, SWT.BOLD));
 		text1.setBounds(180, 50, 50, 30);
-		text2 = new Text(this, SWT.BORDER | SWT.WRAP);
+		text2 = new Text(this, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		text2.setEnabled(false);
 		text2.setEditable(false);
 		text2.setFont(SWTResourceManager.getFont("微软雅黑", 15, SWT.BOLD));
 		text2.setBounds(230, 50, 50, 30);
-		text3 = new Text(this, SWT.BORDER | SWT.WRAP);
+		text3 = new Text(this, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		text3.setEnabled(false);
 		text3.setEditable(false);
 		text3.setFont(SWTResourceManager.getFont("微软雅黑", 15, SWT.BOLD));
 		text3.setBounds(280, 50, 50, 30);
-		text4 = new Text(this, SWT.BORDER | SWT.WRAP);
+		text4 = new Text(this, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		text4.setEnabled(false);
 		text4.setEditable(false);
 		text4.setFont(SWTResourceManager.getFont("微软雅黑", 15, SWT.BOLD));
@@ -269,11 +326,47 @@ public class LoginContentPart extends ContentPart{
 		button_0.setBounds(255, 305, 50, 50);
 		button_0.setText("0");
 		
+		reset = new Button(this, SWT.NONE);
+		reset.addSelectionListener(new SelectionAdapter(){
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+//				this.first = true;
+				setFirst(true);
+				setResetPW(true);
+				lbl_tips.setText("重置密码，请您输入旧密码");
+				counter = 1;
+				pwFirst = "";
+				pwSecond = "";
+				firstInput = false;
+				text1.setText("");
+				text2.setText("");
+				text3.setText("");
+				text4.setText("");
+			}
+			
+		});
+		reset.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
+		reset.setBounds(530, 385, 50, 30);
+		reset.setText("重置密码");
+		
+		
 		this.setBackgroundColor(new Color(getDisplay(), 63, 63, 63));
 		
-		if(getPasswordStored().equals("")){
+		String pw = getPasswordStored();
+		if(pw.equals("-1")){
 			this.first = true;
 			lbl_tips.setText("这是您首次登陆系统，请您输入初始密码，初始密码为任意四位数");
+			reset.setVisible(false);
+		}else if(pw.equals("-2")){
+			this.wrongcase = true;
+			lbl_tips.setText("请联系客服");
+			reset.setVisible(false);
+		}else{
+			reset.setVisible(true);
+			this.first = false;			
+			lbl_tips.setText("请输入密码");
+			PasswordHandler.setPassword(pw);//set the password
 		}
 						
 	}

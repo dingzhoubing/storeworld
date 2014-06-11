@@ -22,7 +22,7 @@ public class Login {
 			Thread thread = new Thread(new DataBaseService());
 			thread.start();
 			
-			int screenH =Constants.LOGIN_HEIGHT;
+			int screenH =Constants.LOGIN_HEIGHT+50;
 			int screenW =Constants.LOGIN_WIDTH;
 			Display display = Display.getDefault();
 			LoginMainUI shell = LoginMainUI.getMainUI_Instance(display);

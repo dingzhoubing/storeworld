@@ -62,6 +62,7 @@ public class BaseAction {
     	return connection;
 	}
     
+    
     /**
      * get the next id we need in table
      * @param tablename

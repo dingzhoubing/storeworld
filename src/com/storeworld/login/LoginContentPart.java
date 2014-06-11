@@ -1,25 +1,32 @@
 package com.storeworld.login;
 
-import java.io.IOException;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.analyze.AnalyzeContentPart;
+import com.storeworld.customer.CustomerContentPart;
 import com.storeworld.database.PasswordHandler;
+import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.CoolBarPart;
 import com.storeworld.mainui.MainUI;
-import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.product.ProductContentPart;
+import com.storeworld.stock.StockContentPart;
 import com.storeworld.utils.Utils;
-
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Label;
+import com.storeworld.utils.Constants.CONTENT_TYPE;
+import com.storeworld.utils.Constants.NORTH_TYPE;
 
 /**
  * the logic of login
@@ -44,6 +51,8 @@ public class LoginContentPart extends ContentPart{
 	private Button button_0;
 	private Button reset;
 	private Label lbl_tips;
+	
+	private ProgressBar progressBar;
 	
 	private static int counter = 1;
 	private static String pwFirst = "";
@@ -141,8 +150,11 @@ public class LoginContentPart extends ContentPart{
 				counter = 1;
 				pwFirst = "";
 				LoginMainUI.setInstanceNull();
-				current.getParent().dispose();			
-				EntryPoint.entry();				
+				progressBar.setVisible(true);
+				
+				EntryPoint.entry(progressBar, current.getParent());									
+//				shell.open();				
+//				current.getParent().dispose();
 			}else{
 				lbl_tips.setText("您输入的密码不正确，请重试");
 				text1.setText("");
@@ -205,8 +217,11 @@ public class LoginContentPart extends ContentPart{
 					pwFirst = "";
 					pwSecond = "";
 					LoginMainUI.setInstanceNull();
-					current.getParent().dispose();			
-					EntryPoint.entry();
+//					current.getParent().dispose();			
+//					EntryPoint.entry(progressBar);
+					progressBar.setVisible(true);					
+					EntryPoint.entry(progressBar, current.getParent());	
+					
 				}
 			}
 		}
@@ -217,7 +232,11 @@ public class LoginContentPart extends ContentPart{
 			LoginMainUI.setInstanceNull();
 			current.getParent().dispose();		
 			Utils.changeStatus();//be false again
-			MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+			//show the progress bar here to identify the progress 
+			//TODO:
+//			progressBar.setVisible(true);
+//			progressBar.setSelection(5);
+			MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());						
 			shell.setActive();
 //			System.out.println("shell is null: " + (shell==null));
 			shell.setVisible(true);
@@ -347,8 +366,14 @@ public class LoginContentPart extends ContentPart{
 			
 		});
 		reset.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
-		reset.setBounds(530, 385, 50, 30);
+		reset.setBounds(530, 365, 50, 30);
 		reset.setText("重置密码");
+		
+		progressBar = new ProgressBar(this, SWT.HORIZONTAL);
+		progressBar.setBounds(10, 400, 570, 15);
+		progressBar.setMaximum(100);
+		progressBar.setMinimum(0);
+		progressBar.setVisible(false);
 		
 		
 		this.setBackgroundColor(new Color(getDisplay(), 63, 63, 63));
@@ -357,7 +382,7 @@ public class LoginContentPart extends ContentPart{
 		if(pw.equals("-1")){
 			this.first = true;
 			lbl_tips.setText("这是您首次登陆系统，请您输入初始密码，初始密码为任意四位数");
-			reset.setVisible(false);
+			reset.setVisible(false);//
 		}else if(pw.equals("-2")){
 			this.wrongcase = true;
 			lbl_tips.setText("请联系客服");

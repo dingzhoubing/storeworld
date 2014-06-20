@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+
 import com.storeworld.database.BaseAction;
+import com.storeworld.database.DataBaseCommonInfo;
+import com.storeworld.mainui.MainUI;
+import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.GoodsInfo;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.product.Product;
+import com.storeworld.product.ProductCellModifier;
+import com.storeworld.product.ProductUtils;
 import com.storeworld.utils.Utils;
 
 public class GoodsInfoService extends BaseAction{
@@ -21,42 +30,104 @@ public class GoodsInfoService extends BaseAction{
 	 * @return
 	 * @throws Exception
 	 */
-	public Boolean addGoodsInfo(Map<String,Object> map) throws Exception{
-
+	public int addGoodsInfo(Map<String,Object> map) throws Exception{
+		//return type, 0 means normal, -1 means exist such goods
+		int type = 0;
 	 try{
 		//1.获得输入的用户信息值，放入param中，ADD your code below:
 		boolean isExist=isExistGoodsInfo(map);
 		if(isExist){
-			throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard"));
+			type = -1;//this good already exist
+			return type;
 		}
 		String sql="insert into goods_info(brand,sub_brand,unit_price,unit,standard,reserve1,reserve2,reserve3,repertory) values(?,?,?,?,?,?,?,?,?)";
 		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),map.get("unit"),map.get("standard"),map.get("reserve1"),map.get("reserve2"),map.get("reserve3"),map.get("repertory")};//来自map
 		List<Object> params=objectArray2ObjectList(params_temp);
 		//2.调用接口执行插入
-		BaseAction tempAction=new BaseAction();
+//		BaseAction tempAction=new BaseAction();
 		int snum=executeUpdate(sql,params);
 		if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
-			throw new Exception("新增用户信息失败，请检查数据!");
-				/*MessageBox box=new MessageBox();
-				box.setMessage("插入记录失败！");
-				box.open();
-				return;*/
-			}
-		}catch (Exception e) {
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
-			throw new Exception("新增货品信息失败!"+e.getMessage());
+			type = -2;	//insert failed, but no exception?
+			return type;
 		}
-	 return true;
+		}catch (Exception e) {
+			throw e;
+		}
+	 return type;
 	}
 
 	/**
-	 * description:判断是否存在相同的记录
+	 * 增加一条货品信息，处理的步骤包括：
+	 * 1.根据界面输入的货品信息（已放入map中），查货品信息表，判断是否已经存在相同的记录
+	 * 2.如果存在，抛出异常，如不存在，执行插入。
 	 * @param map
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean isExistGoodsInfo(Map<String,Object> map) throws Exception{
+	public int addGoodsInfoAndUpdate(Map<String,Object> map) throws Exception{
+		//return type, 0 means normal, -1 means exist such goods
+		int type = 0;
+	 try{
+		//1.获得输入的用户信息值，放入param中，ADD your code below:
+		boolean isExist=isExistGoodsInfoAndUpdate(map);
+		if(isExist){
+			type = -1;//this good already exist, do not insert
+			return type;
+		}
+		//not exist 
+		String sql="insert into goods_info(brand,sub_brand,unit_price,unit,standard,reserve1,reserve2,reserve3,repertory) values(?,?,?,?,?,?,?,?,?)";
+		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),map.get("unit"),map.get("standard"),map.get("reserve1"),map.get("reserve2"),map.get("reserve3"),map.get("repertory")};//来自map
+		List<Object> params=objectArray2ObjectList(params_temp);
+		//2.调用接口执行插入
+//		BaseAction tempAction=new BaseAction();
+		int snum=executeUpdate(sql,params);
+		if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+			type = -2;	//insert failed, but no exception?
+			return type;
+		}
+		}catch (Exception e) {
+			throw e;
+		}
+	 return type;
+	}
+	
+	public int minusGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+		//return type, 0 means normal, -1 means exist such goods
+		int type = 0;
+		try{
+			//1.获得输入的用户信息值，放入param中，ADD your code below:
+			type=isExistGoodsInfoAndMinus(mapold, map, gapold, gapnew);
+			if(type == -1){				
+				return type;
+			}else if(type == -2){
+				//do something here?
+			}
+	 	}catch(Exception e){
+	 		System.out.println("minus goods info and update failed");
+	 	}
+	 
+		return type;
+	}
+	
+	//check if the old map is the same product as new map 
+	private boolean checkProductSame(Map<String,Object> mapold, Map<String,Object> map){
+		String brand_old = String.valueOf(mapold.get("brand"));
+		String subbrand_old = String.valueOf(mapold.get("sub_brand"));
+		String size_old = String.valueOf(mapold.get("standard"));
+		
+		String brand_new = String.valueOf(map.get("brand"));
+		String subbrand_new = String.valueOf(map.get("sub_brand"));
+		String size_new = String.valueOf(map.get("standard"));
+		
+		if(brand_old.equals(brand_new) && subbrand_old.equals(subbrand_new) && size_old.equals(size_new))
+			return true;
+		else
+			return false;		
+	}
+	
+	private int isExistGoodsInfoAndMinus(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+		int ret = 0;
+		
 		BaseAction tempAction=new BaseAction();
 		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
 		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
@@ -66,13 +137,360 @@ public class GoodsInfoService extends BaseAction{
 		try{
 			list=tempAction.executeQuery(sql, params);
 		}catch(Exception e){
-			throw new Exception("查询是否已存在将要插入的记录出现异常"+e.getMessage());
+			throw e;//throw it up?
+		}
+		if(list==null||list.size()==0)
+		{
+			//no such goods, no repository, prevent this.???
+			ret = -1;
+			return ret;
+		}
+		//if the new good exist:
+		//if the new good not the same as old good, update new good & old good
+		//else update the old good 		
+		String newUnit = String.valueOf(map.get("unit"));		
+		if(checkProductSame(mapold, map)){			
+			Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+			String Repo = String.valueOf(mapRes.get("repertory"));
+			String id = String.valueOf(mapRes.get("id"));
+			int repo_number = Integer.valueOf(Repo);
+			int new_deliver_num = Integer.valueOf(String.valueOf(map.get("quantity")));
+			int old_deliver_num = Integer.valueOf(String.valueOf(mapold.get("quantity")));
+			if(new_deliver_num > repo_number){
+				ret = -2;// for this deliver, repository is not enough
+				return ret;
+			}else{
+				//				
+				int new_repo = repo_number - (new_deliver_num - old_deliver_num);
+				String sql_update="update goods_info gi set gi.unit=?,gi.repertory=? where gi.id=?";
+				Object[] params_update={newUnit,String.valueOf(new_repo),id};
+				List<Object> params_do=objectArray2ObjectList(params_update);				
+				int rows=executeUpdate(sql_update,params_do);
+				
+				Product p = new Product();
+				p.setID(id);
+				p.setBrand(String.valueOf(map.get("brand")));
+				p.setSubBrand(String.valueOf(map.get("sub_brand")));
+				p.setSize(String.valueOf(map.get("standard")));
+				p.setUnit(newUnit);	
+				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
+				ProductCellModifier.getProductList().productChangedThree(p);
+			}
+		}else{
+			//old map is not the same product as new map
+			//update old product & new product
+			//step 1: update old map product			
+			String sql_oldmap_product="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
+			Object[] params_tmp_oldmap_product={mapold.get("brand"),mapold.get("sub_brand"),mapold.get("standard")};
+			List<Object> params_oldmap_product=objectArray2ObjectList(params_tmp_oldmap_product);
+			//System.out.println(params);
+			List list_oldmap_product=tempAction.executeQuery(sql_oldmap_product, params_oldmap_product);
+			
+			//if the old map product does not exist anymore, add it
+			if(list_oldmap_product==null||list_oldmap_product.size()==0){
+				
+				String sql_insert_old="insert into goods_info(brand,sub_brand,unit_price,unit,standard,reserve1,reserve2,reserve3,repertory) values(?,?,?,?,?,?,?,?,?)";
+				Object[] params_temp_insert_old={mapold.get("brand"),mapold.get("sub_brand"),mapold.get("unit_price"),mapold.get("unit"),mapold.get("standard"),mapold.get("reserve1"),mapold.get("reserve2"),mapold.get("reserve3"),mapold.get("quantity")};
+				List<Object> params_insert_old=objectArray2ObjectList(params_temp_insert_old);
+				int snum=executeUpdate(sql_insert_old,params_insert_old);
+				
+				Product p = new Product();
+				p.setID(ProductUtils.getNewLineID());
+				p.setBrand(String.valueOf(mapold.get("brand")));
+				p.setSubBrand(String.valueOf(mapold.get("sub_brand")));
+				p.setSize(String.valueOf(mapold.get("standard")));
+				p.setUnit(String.valueOf(mapold.get("unit")));	
+				p.setRepository(String.valueOf(mapold.get("quantity")));//initial it's empty, not null
+				ProductCellModifier.getProductList().productChangedTwo(p);
+			}else{//if the old map product exist, update the repo number
+				
+				Map<String,Object> mapRes = (Map<String,Object>)list_oldmap_product.get(0);
+				String Repo = String.valueOf(mapRes.get("repertory"));
+				String id = String.valueOf(mapRes.get("id"));
+				int repo_number = Integer.valueOf(Repo);
+				int old_deliver_num = Integer.valueOf(String.valueOf(mapold.get("quantity")));
+				int new_repo = repo_number + old_deliver_num;
+				
+				String sql_update="update goods_info gi set gi.unit=?,gi.repertory=? where gi.id=?";
+				Object[] params_update={newUnit,String.valueOf(new_repo),id};
+				List<Object> params_do=objectArray2ObjectList(params_update);				
+				int rows=executeUpdate(sql_update,params_do);
+				
+				Product p = new Product();
+				p.setID(id);
+				p.setBrand(String.valueOf(map.get("brand")));
+				p.setSubBrand(String.valueOf(map.get("sub_brand")));
+				p.setSize(String.valueOf(map.get("standard")));
+				p.setUnit(newUnit);	
+				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
+				ProductCellModifier.getProductList().productChangedThree(p);
+			}
+			
+			//update the new map product(exist new map product in goods_info)
+			Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+			String Repo = String.valueOf(mapRes.get("repertory"));
+			String id = String.valueOf(mapRes.get("id"));
+			int repo_number = Integer.valueOf(Repo);
+			int new_deliver_num = Integer.valueOf(String.valueOf(map.get("quantity")));
+			if(new_deliver_num > repo_number){//new map product not enough
+				ret=-2;
+				return ret;
+			}else{
+				
+				int new_repo = repo_number - new_deliver_num;
+				String sql_update="update goods_info gi set gi.unit=?,gi.repertory=? where gi.id=?";
+				Object[] params_update={newUnit,String.valueOf(new_repo),id};
+				List<Object> params_do=objectArray2ObjectList(params_update);				
+				int rows=executeUpdate(sql_update,params_do);
+				
+				Product p = new Product();
+				p.setID(id);
+				p.setBrand(String.valueOf(map.get("brand")));
+				p.setSubBrand(String.valueOf(map.get("sub_brand")));
+				p.setSize(String.valueOf(map.get("standard")));
+				p.setUnit(newUnit);	
+				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
+				ProductCellModifier.getProductList().productChangedThree(p);
+
+			}
+
+		}		
+		
+		return ret;
+	}
+	
+	public int addGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+		//return type, 0 means normal, -1 means exist such goods
+		int type = 0;
+	 try{
+		//1.获得输入的用户信息值，放入param中，ADD your code below:
+		boolean isExist=isExistGoodsInfoAndUpdate(mapold, map, gapold, gapnew);
+		if(isExist){
+			type = -1;//this good already exist
+			return type;
+		}
+		//not exist
+		String sql="insert into goods_info(brand,sub_brand,unit_price,unit,standard,reserve1,reserve2,reserve3,repertory) values(?,?,?,?,?,?,?,?,?)";
+		Object[] params_temp={map.get("brand"),map.get("sub_brand"),map.get("unit_price"),map.get("unit"),map.get("standard"),map.get("reserve1"),map.get("reserve2"),map.get("reserve3"),map.get("quantity")};//来自map
+		List<Object> params=objectArray2ObjectList(params_temp);
+		//2.调用接口执行插入
+//		BaseAction tempAction=new BaseAction();
+		int snum=executeUpdate(sql,params);
+		if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+			type = -2;	//insert failed, but no exception?
+			return type;
+		}
+		}catch (Exception e) {
+			throw e;
+		}
+	 
+		Product p = new Product();
+		p.setID(ProductUtils.getNewLineID());
+		p.setBrand(String.valueOf(map.get("brand")));
+		p.setSubBrand(String.valueOf(map.get("sub_brand")));
+		p.setSize(String.valueOf(map.get("standard")));
+		p.setUnit(String.valueOf(map.get("unit")));	
+		p.setRepository(String.valueOf(map.get("quantity")));//initial it's empty, not null
+
+		ProductCellModifier.getProductList().productChangedTwo(p);
+	 
+	 return type;
+	}
+	
+	private boolean isExistGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+		BaseAction tempAction=new BaseAction();
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		//System.out.println(params);
+		List list=null;
+		try{
+			list=tempAction.executeQuery(sql, params);
+		}catch(Exception e){
+			throw e;//throw it up?
+		}
+		if(list==null||list.size()==0)
+		{
+			//new product is not exist, find out the old one, update it
+			//find out the one need to minus the stock number
+			String sql_u="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
+			Object[] params_u={mapold.get("brand"),mapold.get("sub_brand"),mapold.get("standard")};
+			List<Object> params_exe=objectArray2ObjectList(params_u);
+			//System.out.println(params);
+			List list_u=null;
+			try{
+				list_u=tempAction.executeQuery(sql_u, params_exe);
+			}catch(Exception e){
+				throw e;//throw it up?
+			}
+			Map<String,Object> map_u = (Map<String,Object>)list_u.get(0); 
+			
+			//no such product, first we need to minus the old repo, and insert the new  
+			String oldRepo = String.valueOf(map_u.get("repertory"));
+			String id = String.valueOf(map_u.get("id"));
+			
+			int new_repo = Integer.valueOf(oldRepo) - (gapold);//add gap
+			String str_new_repo = "";
+			if(new_repo >= 0){
+				str_new_repo = String.valueOf(new_repo); 
+			}else{
+				str_new_repo = "0";
+			}
+			 
+			
+			String sql_update="update goods_info gi set gi.repertory=? where gi.id=?";
+			Object[] params_update={str_new_repo,id};
+			List<Object> params_do=objectArray2ObjectList(params_update);
+			
+			int rows=executeUpdate(sql_update,params_do);
+			
+			Product p = new Product();
+			p.setID(id);
+			p.setBrand(String.valueOf(map_u.get("brand")));
+			p.setSubBrand(String.valueOf(map_u.get("sub_brand")));
+			p.setSize(String.valueOf(map_u.get("standard")));
+			p.setUnit(String.valueOf(map_u.get("unit")));	
+			p.setRepository(str_new_repo);//initial it's empty, not null
+			ProductCellModifier.getProductList().productChangedThree(p);
+			
+			final String brand = p.getBrand();
+			final String sub = p.getSubBrand();
+			final String size = p.getSize();
+			if(new_repo < 0){
+				Display.getDefault().syncExec(new Runnable() {
+	    		    public void run() {
+	    		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage(String.format("更新库存后发现库存数目小于零，请检查并更新 品牌:%s，子品牌:%s， 规格:%s 的库存",brand, sub, size));
+						mbox.open();	
+	    		    }
+	        	});		
+			}
+			
+			return false;
+		}
+		//new product is exist, find out the new product and update it
+		//update the unit and repository
+		String newUnit = String.valueOf(map.get("unit"));
+		
+		Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+		String oldRepo = String.valueOf(mapRes.get("repertory"));
+		String id = String.valueOf(mapRes.get("id"));
+		
+		int new_repo = Integer.valueOf(oldRepo) + (gapnew-gapold);//add gap
+		String str_new_repo = String.valueOf(new_repo);
+		
+		String sql_update="update goods_info gi set gi.unit=?,gi.repertory=? where gi.id=?";
+		Object[] params_update={newUnit,str_new_repo,id};
+		List<Object> params_do=objectArray2ObjectList(params_update);
+		
+		int rows=executeUpdate(sql_update,params_do);
+		
+		Product p = new Product();
+		p.setID(id);
+		p.setBrand(String.valueOf(map.get("brand")));
+		p.setSubBrand(String.valueOf(map.get("sub_brand")));
+		p.setSize(String.valueOf(map.get("standard")));
+		p.setUnit(newUnit);	
+		p.setRepository(str_new_repo);//initial it's empty, not null
+		ProductCellModifier.getProductList().productChangedThree(p);
+		
+		
+		if(rows!=1){
+			throw new Exception("更新库存信息失败");
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * description:判断是否存在相同的记录, 是则更新货品表
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean isExistGoodsInfoAndUpdate(Map<String,Object> map) throws Exception{
+		BaseAction tempAction=new BaseAction();
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		//System.out.println(params);
+		List list=null;
+		try{
+			list=tempAction.executeQuery(sql, params);
+		}catch(Exception e){
+			throw e;//throw it up?
+		}
+		if(list==null||list.size()==0)
+		{			
+			return false;
+		}
+		//update the unit and repository
+		String newUnit = String.valueOf(map.get("unit"));
+		String addRepo = String.valueOf(map.get("quantity"));
+		
+		Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+		String oldRepo = String.valueOf(mapRes.get("repertory"));
+		String id = String.valueOf(mapRes.get("id"));
+		
+		int new_repo = Integer.valueOf(addRepo) + Integer.valueOf(oldRepo);
+		String str_new_repo = String.valueOf(new_repo);
+		
+		String sql_update="update goods_info gi set gi.unit=?,gi.repertory=? where gi.id=?";
+		Object[] params_update={newUnit,str_new_repo,id};
+		List<Object> params_do=objectArray2ObjectList(params_update);
+		
+		int rows=executeUpdate(sql_update,params_do);
+		
+		Product p = new Product();
+		p.setID(id);
+		p.setBrand(String.valueOf(map.get("brand")));
+		p.setSubBrand(String.valueOf(map.get("sub_brand")));
+		p.setSize(String.valueOf(map.get("standard")));
+		p.setUnit(newUnit);	
+		p.setRepository(str_new_repo);//initial it's empty, not null
+		ProductCellModifier.getProductList().productChangedThree(p);
+		
+		
+		if(rows!=1){
+			throw new Exception("更新库存信息失败");
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * description:判断是否存在相同的记录
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean isExistGoodsInfo(Map<String,Object> map) throws Exception{
+		BaseAction tempAction=new BaseAction();
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		//System.out.println(params);
+		List list=null;
+		try{
+			list=tempAction.executeQuery(sql, params);
+		}catch(Exception e){
+			throw e;//throw it up?
 		}
 		if(list==null||list.size()==0)
 		{
 			return false;
 		}
-
+		//if run to here, return true
+		//if the unit is not the same, update the product
+//		String newUnit = String.valueOf(map.get("unit"));
+//		Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+//		String oldUnit = String.valueOf(mapRes.get("unit"));
+//		if(!oldUnit.equals(newUnit)){
+//			
+//		}
+		
 		return true;
 	}
 	/**
@@ -119,22 +537,22 @@ public class GoodsInfoService extends BaseAction{
 	 * @return
 	 * @throws Exception 
 	 */
-	public boolean batchAddGoodsInfo (List<Map<String,Object>> listMap) throws Exception{
-		boolean ret_total=true;//执行批量插入的返回值
-		int num=listMap.size();
-		try{
-			for(int j=0;j<num;j++){
-				boolean ret_one=addGoodsInfo(listMap.get(j));//执行一次插入的结果
-				if(ret_one==false){
-					ret_total=false;
-					return ret_total;
-				}
-			}
-		}catch(Exception e){
-			throw new Exception("执行批量新增货品信息异常！");
-		}
-		return ret_total;
-	}
+//	public boolean batchAddGoodsInfo (List<Map<String,Object>> listMap) throws Exception{
+//		boolean ret_total=true;//执行批量插入的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=addGoodsInfo(listMap.get(j));//执行一次插入的结果
+//				if(ret_one==false){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//	}
 
 	/**
 	 * Description:删除某一条货品信息
@@ -242,6 +660,41 @@ public class GoodsInfoService extends BaseAction{
 
 	}
 
+	
+	public ReturnObject queryProductInfoByID(String id){
+		List list=null;
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<GoodsInfoDTO> goodsInfoList = new ArrayList<GoodsInfoDTO>();
+		String sql="select * from goods_info ci where id=?";
+		Object[] params_temp={id};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			list=executeQuery(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				GoodsInfoDTO goodsInfoDto=new GoodsInfoDTO();
+				goodsInfoDto.setId((String.valueOf(retMap.get("id"))));
+				goodsInfoDto.setBrand((String) retMap.get("brand"));
+				goodsInfoDto.setRepertory((String) retMap.get("repertory"));
+				goodsInfoDto.setReserve1((String) retMap.get("reserve1"));
+				goodsInfoDto.setReserve2((String) retMap.get("reserve2"));
+				goodsInfoDto.setReserve3((String) retMap.get("reserve3"));
+				goodsInfoDto.setStandard((String) retMap.get("standard"));
+				goodsInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				goodsInfoDto.setUnit((String) retMap.get("unit"));
+				goodsInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				goodsInfoList.add(goodsInfoDto);
+			}
+			page.setItems((List)goodsInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			System.out.println("query product info by id failed");
+		}
+		return ro;
+		
+	}
+	
 	/**
 	 * description：查询所有货品信息，不带查询条件
 	 * @return

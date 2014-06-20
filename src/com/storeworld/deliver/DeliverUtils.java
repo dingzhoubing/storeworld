@@ -33,6 +33,7 @@ import com.storeworld.utils.Utils;
  */
 public class DeliverUtils {
 	
+	private static boolean detailTimer = true;
 	private static String newLineID = "";
 	private static int currentBrandLine=0;
 	private static String current_sub_brand = "";
@@ -50,7 +51,7 @@ public class DeliverUtils {
 	private static Color color_record;
 	private static int width_record;
 	private static int height_record;
-	private static DecimalFormat dataformat = new DecimalFormat("#.00");
+	private static DecimalFormat dataformat = new DecimalFormat("0.00");
 	//item composite
 	private static ItemComposite ic_record;
 	//the table is in edit mode or not
@@ -195,9 +196,10 @@ public class DeliverUtils {
 		} catch (Exception e) {
 			System.out.println("query deliver info by default deliver time failed");
 		}
-		
-		
-		
+	}
+	
+	public static void setOrderNumber(String ordernum){
+		orderNumber = ordernum;
 	}
 	public static String getOrderNumber(){
 		if(DeliverUtils.getEditMode()){
@@ -227,10 +229,18 @@ public class DeliverUtils {
 			String title = "";
 			double total = 0.000;
 			String time_tmp = "";
+			String indeed="";
+			String is_print = "";
 			ArrayList<DeliverInfoAllDTO> delivers = delivermap.get(key);
 			String area = delivers.get(0).getCustomer_area();
 			String name = delivers.get(0).getCustomer_name();
 			String ordernumber = delivers.get(0).getOrder_num();
+			indeed = delivers.get(0).getUni_reserve1();//get the indeed
+			if(indeed == null)
+				indeed = "";
+			is_print = delivers.get(0).getIs_print();
+			if(is_print == null)
+				is_print = "";
 			title = area+" "+name;
 			double p = 0.0;
 			int n = 0;
@@ -240,7 +250,8 @@ public class DeliverUtils {
 				n = Integer.valueOf(delivers.get(i).getQuantity());
 				total+=(p * n);	
 			}
-			DeliverHistory his = new DeliverHistory(title,time_tmp,dataformat.format(total), ordernumber);
+			
+			DeliverHistory his = new DeliverHistory(title,time_tmp, dataformat.format(total), ordernumber, indeed, is_print);
 			historyList.add(his);				
 		}
 	}
@@ -292,7 +303,7 @@ public class DeliverUtils {
 		title = area+" "+name;
 		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
 		shis.setTitle(title);		
-		ic_record.setValue(shis.getTitle());
+		ic_record.setValue(shis.getTitleShow());
 	}
 	
 	public static void updateHistory(ArrayList<DataInTable> delivers){
@@ -317,13 +328,13 @@ public class DeliverUtils {
 		
 //		String number_total = String.valueOf(total);
 		String number_total = dataformat.format(total);
-		
+		//indeed is the same as total when update the table
 		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
 		shis.setTitle(title);
 //		shis.setTime(time_tmp);
 		shis.setNumber(number_total);
-		
-		ic_record.setValue(shis.getTitle(), shis.getTimeShow(), shis.getNumber());
+		shis.setIndeed(number_total);//the same as total
+		ic_record.setValue(shis.getTitleShow(), shis.getTimeShow(), shis.getValueShow());
 		
 	}
 
@@ -353,10 +364,11 @@ public class DeliverUtils {
 		String name = DeliverContentPart.getName();
 		String ordernumber = DeliverContentPart.getOrderNumber();
 		title = area+" "+name;		
-		DeliverHistory his = new DeliverHistory(title,time_tmp,dataformat.format(total), ordernumber);
+		String indeed = DeliverContentPart.getIndeed().trim();
+		DeliverHistory his = new DeliverHistory(title,time_tmp,dataformat.format(total), ordernumber, indeed, "");
 		
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
-		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+		ic.setValue(his.getTitleShow(), his.getTimeShow(), his.getValueShow());
 		itemList.add(ic);
 		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
@@ -392,7 +404,7 @@ public class DeliverUtils {
 		for (int i = 0; i < historyList.size(); i++) {
 			DeliverHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
-			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			ic.setValue(his.getTitleShow(), his.getTimeShow(), his.getValueShow());
 			itemList.add(ic);
 			composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT));
@@ -449,7 +461,7 @@ public class DeliverUtils {
 		for (int i = 0; i < historyList.size(); i++) {
 			DeliverHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
-			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			ic.setValue(his.getTitleShow(), his.getTimeShow(), his.getValueShow());
 			itemList.add(ic);
 			composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT));
@@ -509,5 +521,12 @@ public class DeliverUtils {
 		return current_sub_brand;
 	}
 	
+	
+	public static void setDetailTimer(boolean detail){
+		detailTimer = detail;
+	}
+	public static boolean getDetailTimer(){
+		return detailTimer;
+	}
 		
 }

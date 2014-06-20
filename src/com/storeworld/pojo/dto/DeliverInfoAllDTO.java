@@ -29,7 +29,7 @@ public class DeliverInfoAllDTO extends ObjectExternalizable{
 	private String common_reserve1;
 	private String common_reserve2;
 	private String common_reserve3;
-	private Float uni_reserve1;
+	private String uni_reserve1;//Float
 	private String uni_reserve2;
 	private String uni_reserve3;
 
@@ -62,7 +62,7 @@ public class DeliverInfoAllDTO extends ObjectExternalizable{
 		this.common_reserve1 = readUTF(in);
 		this.common_reserve2 = readUTF(in);
 		this.common_reserve3 = readUTF(in);
-		this.uni_reserve1 = readFloat(in);
+		this.uni_reserve1 = readUTF(in);
 		this.uni_reserve2 = readUTF(in);
 		this.uni_reserve3 = readUTF(in);
 	}
@@ -94,7 +94,7 @@ public class DeliverInfoAllDTO extends ObjectExternalizable{
 		writeUTF(out, this.common_reserve1);
 		writeUTF(out, this.common_reserve2);
 		writeUTF(out, this.common_reserve3);
-		writeFloat(out, this.uni_reserve1);
+		writeUTF(out, this.uni_reserve1);
 		writeUTF(out, this.uni_reserve2);
 		writeUTF(out, this.uni_reserve3);
 
@@ -238,11 +238,11 @@ public class DeliverInfoAllDTO extends ObjectExternalizable{
 		this.common_reserve3 = common_reserve3;
 	}
 
-	public Float getUni_reserve1() {
+	public String getUni_reserve1() {
 		return uni_reserve1;
 	}
 
-	public void setUni_reserve1(Float uni_reserve1) {
+	public void setUni_reserve1(String uni_reserve1) {
 		this.uni_reserve1 = uni_reserve1;
 	}
 

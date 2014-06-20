@@ -157,6 +157,7 @@ public class Utils {
 			for(int i=0;i<list.size();i++){
 				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
 				sizes.add(cDTO.getStandard());
+				break;//one is ok
 			}			
 		} catch (Exception e) {
 			System.out.println("query the sizes with brand&sub failed");

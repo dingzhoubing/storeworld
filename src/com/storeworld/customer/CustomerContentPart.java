@@ -412,10 +412,11 @@ public class CustomerContentPart extends ContentPart{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, 0, (int)(4*w/5), h);
+//		table.setBounds(0, 0, (int)(4*w/5), h);
+		table.setBounds(0, 0, 760, h);
 		
 		//set the columns of the table
-		int columnWidth = (int)(4*9*w/40/5- 4*w/40/5);		
+		int columnWidth = 144;		
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
@@ -423,7 +424,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		//the new column for delivering 
 		final TableColumn newColumnTableColumn_Deliver = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_Deliver.setWidth((int)(4*4*w/40/5));
+		newColumnTableColumn_Deliver.setWidth(85);
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_Deliver.setText("");
 		newColumnTableColumn_Deliver.setMoveable(false);
@@ -490,7 +491,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_5.setWidth((int)((int)(4*9*w/40/5)*4/9)-3);//columnWidth*5/9)
+		newColumnTableColumn_5.setWidth(85);
 //		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_5.setText("");
 		newColumnTableColumn_5.setMoveable(false);

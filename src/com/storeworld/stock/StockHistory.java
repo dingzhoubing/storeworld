@@ -9,15 +9,18 @@ import com.storeworld.common.History;
  *
  */
 public class StockHistory extends History {
-	String title;
-	String time;
-	String time_show;
-	String number;
+	String title = "";
+	String time = "";
+	String time_show = "";
+	String number = "";
+	String indeed = "";
 	
-	StockHistory(String title, String time, String number){
+	
+	StockHistory(String title, String time, String number, String indeed){
 		this.title = title;
 		this.time = time;
 		this.number = number;
+		this.indeed = indeed;
 	}
 	
 	public void setTitle(String title){
@@ -29,6 +32,9 @@ public class StockHistory extends History {
 	public void setNumber(String number){
 		this.number = number;
 	}
+	public void setIndeed(String indeed){
+		this.indeed = indeed;
+	}
 	public String getTitle(){
 		return this.title;
 	}
@@ -37,6 +43,9 @@ public class StockHistory extends History {
 	}
 	public String getNumber(){
 		return this.number;
+	}
+	public String getIndeed(){
+		return this.indeed;
 	}
 	public String getTimeShow(){
 		if(!time.equals("")){
@@ -53,6 +62,13 @@ public class StockHistory extends History {
 		
 	}
 
+	public String getValueShow(){
+		//this means the indeed is the same as number
+		if(indeed.equals(""))
+			return number;
+		else
+			return indeed;
+	}
 	@Override
 	public boolean equals(Object obj) {
 		StockHistory his = (StockHistory)obj;

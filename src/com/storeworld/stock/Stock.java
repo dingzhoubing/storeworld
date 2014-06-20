@@ -17,6 +17,7 @@ public class Stock extends DataInTable{
 	private String number="";
 	private String time = "";
 	
+	private String indeed = "";
 	public Stock(){
 		
 	}
@@ -99,6 +100,14 @@ public class Stock extends DataInTable{
 	public void setNumber(String number){
 		this.number = number;
 	}
+	
+	public String getIndeed(){
+		return this.indeed;
+	}
+	public void setIndeed(String indeed){
+		this.indeed = indeed;
+	}
+	
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();

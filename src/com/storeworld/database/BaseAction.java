@@ -32,8 +32,8 @@ public class BaseAction {
     	Connection connection=null;
     	try{
     		Class.forName(Constants.DRIVER);
-    	}catch(ClassNotFoundException e){
-    		e.printStackTrace();
+    	}catch (ClassNotFoundException e){    		
+    		throw new Exception(DataBaseCommonInfo.DRIVER_NOT_FOUND);
     	}
     	int count=0;
     	//we can try 3 time at most
@@ -112,17 +112,24 @@ public class BaseAction {
     */
     public int executeUpdate(String sql,List<Object> param) throws Exception {
     	int snum=0;
-        Connection connection = this.getConnection();
+    	Connection connection = null;
+    	try{
+    		connection = this.getConnection();
+    	}catch (Exception e1) {
+			throw new Exception(DataBaseCommonInfo.CONNECTION_FAILED);
+		}
         PreparedStatement preparedStatement = null;
         
         try{
-        	preparedStatement=connection.prepareStatement(sql);
-            for(int i =0;i<param.size();i++){
-                preparedStatement.setObject(i+1, param.get(i));
-            }
-            snum= preparedStatement.executeUpdate();
+			if (connection != null) {
+				preparedStatement = connection.prepareStatement(sql);
+				for (int i = 0; i < param.size(); i++) {
+					preparedStatement.setObject(i + 1, param.get(i));
+				}
+				snum = preparedStatement.executeUpdate();
+			}
         }catch(SQLException e){
-        	e.printStackTrace();
+        	throw new Exception(DataBaseCommonInfo.EXE_UPDATE_FAILED);
         }finally{
         	this.closeAll(connection, preparedStatement, null);
         }
@@ -152,9 +159,7 @@ public List executeQuery(String sql, List<Object> param) throws Exception {
 			try {
 				connection = this.getConnection();
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				throw new Exception("建立数据库连接失败！");
+				throw new Exception(DataBaseCommonInfo.CONNECTION_FAILED);
 			}
             try {
             	 preparedStatement = connection.prepareStatement(sql);
@@ -179,15 +184,11 @@ public List executeQuery(String sql, List<Object> param) throws Exception {
                                list.add(map);
                       }
              } catch (SQLException e) {
-                      e.printStackTrace();
-                      throw new Exception("执行数据库查询操作失败！");
+            	 throw new Exception(DataBaseCommonInfo.EXE_QUERY_FAILED);
              }finally{
-                      this.closeAll(connection, preparedStatement, rs);
+                 this.closeAll(connection, preparedStatement, rs);
              }
             return list;
-            /*page.setItems(list);
-            ro.setReturnDTO(page);
-            return ro;*/
    }
    
    /**

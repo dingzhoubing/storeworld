@@ -1,5 +1,7 @@
 package com.storeworld.customer;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
@@ -10,9 +12,16 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
+import com.storeworld.pojo.dto.CustomerInfoDTO;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.utils.Utils;
 /**
  * the remove button in customer page
@@ -27,7 +36,7 @@ public class CustomerButtonCellEditor extends CellEditor {
     protected int rowHeight = 0;
     private static TableEditor editor = null;
     private static final int deliverButtonColumn = 1;
-    
+    private static CustomerInfoService customerinfo = new CustomerInfoService();
     public CustomerButtonCellEditor() {
         setStyle(0);
     }
@@ -62,6 +71,7 @@ public class CustomerButtonCellEditor extends CellEditor {
         button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+
 				int ptY = button.getBounds().y+1;//make it always not equals the up one
 				int rowCount = table.getItemCount();				
 				int index = table.getTopIndex();	
@@ -70,6 +80,20 @@ public class CustomerButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Customer c = (Customer)(table.getItem(index).getData());	
+						
+						ReturnObject ret = customerinfo.queryCustomerInfoByID(c.getID());
+						Pagination page = (Pagination) ret.getReturnDTO();
+						List<Object> list = page.getItems();
+						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
+						String old_area = cDTO.getCustomer_area();
+						String old_name = cDTO.getCustomer_name();
+						String old_tele = cDTO.getTelephone();
+						String old_addr = cDTO.getCustomer_addr();
+												
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+				    	messageBox.setMessage(String.format("片区:%s， 客户:%s 将不在统计中出现，同时将不出现于送货表中，确定删除？",
+				    			old_area, old_name));		    		    	
+				    	if (messageBox.open() == SWT.OK){
 						CellEditor[] cellEditor = CustomerContentPart.getCellEditor();
 						editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(index), deliverButtonColumn);
 						if(!editor.getEditor().isDisposed()){
@@ -80,6 +104,16 @@ public class CustomerButtonCellEditor extends CellEditor {
 						Utils.refreshTable(table);											
 								 
 						break;
+				    	}else{
+				    		//reset the customer info
+				    		Customer cus = new Customer();
+				    		cus.setID(c.getID());//new row in fact
+				    		cus.setArea(old_area);
+				    		cus.setName(old_name);
+				    		cus.setPhone(old_tele);
+				    		cus.setAddress(old_addr);
+	    					CustomerCellModifier.getCustomerList().customerChangedThree(cus);
+				    	}
 					}
 				}
 			}

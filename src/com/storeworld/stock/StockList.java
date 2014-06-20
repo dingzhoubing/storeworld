@@ -9,11 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
+import com.storeworld.pub.service.GoodsInfoService;
 import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.ItemComposite;
@@ -58,7 +64,7 @@ public class StockList {
 			System.out.println("failed");
 		}
 		//no record
-		if(newID.equals("-1"))
+		if(newID.equals("-1") || newID.equals(""))
 			newID="1";//empty
 		//by the list of Customer from database
 		StockUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
@@ -75,6 +81,9 @@ public class StockList {
 	public static ArrayList<DataInTable> getStocks() {
 		return stockList;
 	}
+	
+	
+	
 	
 	/**
 	 * add a stock in table UI
@@ -106,7 +115,7 @@ public class StockList {
 		while (iterator.hasNext()){
 			(iterator.next()).remove(stock);
 			try {
-				stockinfo.deleteStockInfo(stock.getID());
+				stockinfo.deleteStockInfo(stock.getID(), stock);
 			} catch (Exception e) {
 				System.out.println("remove the stock failed");
 			}
@@ -141,6 +150,7 @@ public class StockList {
 		StockInfoService stockinfo = new StockInfoService();
 		String time_current = StockContentPart.getStockTimer();
 		List<String> listid = new ArrayList<String>();
+		ArrayList<Stock> stocks = new ArrayList<Stock>();
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("stock_time", time_current);
 		
@@ -151,6 +161,13 @@ public class StockList {
 			for(int i=0;i<list.size();i++){
 				StockInfoDTO cDTO = (StockInfoDTO) list.get(i);
 				listid.add(cDTO.getId());
+				Stock s = new Stock();
+				//three is enough
+				s.setBrand(cDTO.getBrand());
+				s.setSubBrand(cDTO.getSub_brand());
+				s.setSize(cDTO.getStandard());
+				s.setNumber(cDTO.getQuantity());
+				stocks.add(s);
 			}
 		} catch (Exception e) {
 			System.out.println("in remove Currenthistory, query stocks by time failed");			
@@ -158,7 +175,7 @@ public class StockList {
 		
 		try {
 			//delete the stocks from database
-			stockinfo.batchDeleteStockInfo(listid);
+			stockinfo.batchDeleteStockInfo(listid, stocks);
 		} catch (Exception e) {
 			System.out.println("in remove Currenthistory, batch delete stocks failed");	
 		}
@@ -206,6 +223,8 @@ public class StockList {
 		
 		//show the clicked stock history
 		String time = history.getTime();
+		StockUtils.setTime(time);
+		String indeed = history.getIndeed();
 		//query database to get the history and addStock
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("stock_time", time);
@@ -255,7 +274,10 @@ public class StockList {
 		
 		//show total
 		StockContentPart.setTotal(df.format(total));
-		StockContentPart.setIndeed(df.format(total));
+		if(indeed.equals(""))
+			StockContentPart.setIndeed(df.format(total));
+		else
+			StockContentPart.setIndeed(indeed);
 
 	}
 	
@@ -266,6 +288,45 @@ public class StockList {
 		}
 	}
 
+	private boolean checkSameStock(Stock stock){
+		boolean ret = false;
+		for(int i=0;i<stockList.size()-1;i++){
+			Stock stmp = (Stock)stockList.get(i);
+			//a different stock
+			if(!stmp.getID().equals(stock.getID())){
+				if(stock.getBrand().equals(stmp.getBrand()) && stock.getSubBrand().equals(stmp.getSubBrand()) 
+						&&stock.getSize().equals(stmp.getSize())){
+					ret = true;
+					break;
+				}				
+			}			
+		}		
+		return ret;
+	}
+	
+	public void stockChangedThree(Stock stock){
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			(iterator.next()).update(stock);	
+			
+			for(int i=0;i<stockList.size();i++){
+				Stock s = (Stock)(stockList.get(i));
+				if(s.getID().equals(stock.getID())){
+					s.setBrand(stock.getBrand());
+					s.setSubBrand(stock.getSubBrand());
+					s.setSize(stock.getSize());
+					s.setUnit(stock.getUnit());
+					s.setPrice(stock.getPrice());
+					s.setNumber(stock.getNumber());
+					//time and indeed?
+					break;
+				}				
+			}			
+			StockUtils.refreshTableData();
+			
+		}
+	}
+	
 	/**
 	 * update the stock table
 	 * @param stock
@@ -306,53 +367,185 @@ public class StockList {
 			stock.setTime(String.valueOf(st.get("stock_time")));
 			(iterator.next()).update(stock);
 			
-			if(!StockValidator.checkID(stock.getID())){
-				//update the database here				
+			if(!StockValidator.checkID(stock.getID()) && StockValidator.rowLegal(stock) && StockValidator.rowComplete(stock) ){//not the new line
+				
+				//update the database here					
+				int ret = 0;
 				try {
-					stockinfo.updateStockInfo(stock.getID(), st);
+					if(checkSameStock(stock)){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+	    		    	messageBox.setMessage(String.format("存在相同的货品在该进货表中，请重新选择！"));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){	    		    		
+	    		    		Stock s = new Stock();
+	    					s.setID(stock.getID());//new row in fact
+	    					s.setBrand(stock.getBrand());
+	    					s.setSubBrand("");
+	    					s.setSize("");
+	    					s.setUnit(stock.getUnit());	
+	    					s.setNumber(stock.getNumber());//initial it's empty, not null
+	    					s.setPrice(stock.getPrice());
+//	    					s.setTime(time);time and indeed?
+	    					StockCellModifier.getStockList().stockChangedThree(s);
+	    					ret = -1;//in this way, we do not update history
+	    		    	}
+					}else{
+						
+						GoodsInfoService goodsinfo = new GoodsInfoService();
+						boolean exist = goodsinfo.isExistGoodsInfo(st);
+						if(exist){
+							stockinfo.updateStockInfo(stock.getID(), st);
+							DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+						}else{
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
+		    		    	messageBox.setMessage(String.format("库存中不存在品牌:%s，子品牌:%s， 规格:%s 的商品，确定要加入库存吗？点击确定继续，点击取消重新选择", 
+		    		    			stock.getBrand(), stock.getSubBrand(), stock.getSize()));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){
+		    		    		stockinfo.updateStockInfo(stock.getID(), st);
+								DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+		    		    	}else{
+		    		    		Stock s = new Stock();
+		    					s.setID(stock.getID());//new row in fact
+		    					s.setBrand(stock.getBrand());
+		    					s.setSubBrand("");
+		    					s.setSize("");
+		    					s.setUnit(stock.getUnit());	
+		    					s.setNumber(stock.getNumber());//initial it's empty, not null
+		    					s.setPrice(stock.getPrice());
+//		    					s.setTime(time);time and indeed?
+		    					StockCellModifier.getStockList().stockChangedThree(s);
+		    					ret = -1;//in this way, we do not update history
+		    		    	}							
+						}
+					}					
+					
 					//if the brand, sub are new, we update the product cache !!
 				} catch (Exception e) {
+					//message box will do in the future
 					System.out.println("update stock failed");
 				}
 				//if in edit mode, change the history
-				if(StockUtils.getEditMode() && StockUtils.getStatus().equals("HISTORY")){
+				if(StockUtils.getEditMode() && StockUtils.getStatus().equals("HISTORY") && ret ==0){
 					StockUtils.updateHistory(stockList);
 				}
 			}
 			if(StockValidator.checkID(stock.getID()) && StockValidator.rowLegal(stock) && StockValidator.rowComplete(stock)){				
 				try {
-					stockinfo.addStockInfo(st);
-//					StockUtils.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
-					DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
-					//if also add into the product table, we should update the productlist
-					//every time we enter the product/customer page, we should refresh the table
-					//to show the data from stock, deliver page
-					StockCellModifier.addNewTableRow(stock);
+					//exist the same stock in this table
+					if(checkSameStock(stock)){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+	    		    	messageBox.setMessage(String.format("存在相同的货品在该进货表中，请重新选择！"));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){
+	    		    		
+	    		    		Stock s = new Stock();
+	    					s.setID(stock.getID());//new row in fact
+	    					s.setBrand(stock.getBrand());
+	    					s.setSubBrand("");
+	    					s.setSize("");
+	    					s.setUnit(stock.getUnit());	
+	    					s.setNumber(stock.getNumber());//initial it's empty, not null
+	    					s.setPrice(stock.getPrice());
+	    					StockCellModifier.getStockList().stockChangedThree(s);		    		    		
+	    		    	}						
+					}else{//do not have such product in this table
+						
+
+    		    		GoodsInfoService goodsinfo = new GoodsInfoService();
+						boolean exist = goodsinfo.isExistGoodsInfo(st);
+						
+						if(exist){
+							int ret = stockinfo.addStockInfo(st);//???a mass of the return, need to fix
+							if(ret == -1 || ret == -2){
+								//insert into stock info failed						
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+								mbox.setMessage("数据库操作失败");
+								mbox.open();	
+							}else{//successful
+								//need to update the product table
+								//insert into the cache anyway
+								DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+								//create a new line
+								StockCellModifier.addNewTableRow(stock);							
+							}
+						}else{
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
+		    		    	messageBox.setMessage(String.format("库存中不存在品牌:%s，子品牌:%s， 规格:%s 的商品，确定要加入库存吗？点击确定继续，点击取消重新选择", 
+		    		    			stock.getBrand(), stock.getSubBrand(), stock.getSize()));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){
+		    		    		int ret = stockinfo.addStockInfo(st);//
+								if(ret == -1 || ret == -2){
+									//insert into stock info failed						
+									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+									mbox.setMessage("数据库操作失败");
+									mbox.open();	
+								}else{//successful
+									//need to update the product table
+									//insert into the cache anyway
+									DataCachePool.addBrand2Sub(stock.getBrand(), stock.getSubBrand());
+									//create a new line
+									StockCellModifier.addNewTableRow(stock);							
+								}
+		    		    	}else{
+		    		    		Stock s = new Stock();
+		    					s.setID(stock.getID());//new row in fact
+		    					s.setBrand(stock.getBrand());
+		    					s.setSubBrand("");
+		    					s.setSize("");
+		    					s.setUnit(stock.getUnit());	
+		    					s.setNumber(stock.getNumber());//initial it's empty, not null
+		    					s.setPrice(stock.getPrice());
+//		    					s.setTime(time);time and indeed?
+		    					StockCellModifier.getStockList().stockChangedThree(s);		    					
+		    		    	}		
+						}
+					}
 				} catch (Exception e) {
-					System.out.println("add stock failed");
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+					mbox.setMessage("操作失败");
+					mbox.open();	
+					
 				}
 //				//if in edit mode, change the history
 //				if(StockUtils.getEditMode()){
 //					StockUtils.updateHistory(stockList);
 //				}
+				boolean updateSum = true;
+				double total = 0.00;
+				for(int i=0;i<stockList.size()-1;i++){
+					Stock stin = (Stock)(stockList.get(i));
+					String price = stin.getPrice();
+					String number = stin.getNumber();
+					if(!(StockValidator.rowLegal(stin) && StockValidator.rowComplete(stin))){
+						updateSum = false;
+						break;
+					}	
+					double p = Double.valueOf(price);
+					int n = Integer.valueOf(number);
+					total+=(p * n);						
+				}
+				if(updateSum){
+					StockContentPart.setTotal(df.format(total));
+					StockContentPart.setIndeed(df.format(total));
+				}
 			}
 
 		}
-		double total = 0.00;
-//		boolean has = false;
-		for(int i=0;i<stockList.size()-1;i++){
-//			has = true;
-			Stock st = (Stock)(stockList.get(i));
-			String price = st.getPrice();
-			String number = st.getNumber();
-			double p = Double.valueOf(price);
-			int n = Integer.valueOf(number);
-			total+=(p * n);						
-		}
-		StockContentPart.setTotal(df.format(total));
-		StockContentPart.setIndeed(df.format(total));
+
 		
 	}
+	
+	public static void updateStocksByTime(String time, String indeed){
+		
+		try {
+			stockinfo.updateStocksIndeedByTime(time, indeed);
+		} catch (Exception e) {
+			System.out.println("update the indeed failed");
+		}
+		
+		
+	}
+	
+	
+	
 	
 	/**
 	 * if we change the timer, update table&database stock time

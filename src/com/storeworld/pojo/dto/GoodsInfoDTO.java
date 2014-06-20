@@ -8,16 +8,16 @@ import com.storeworld.framework.ObjectExternalizable;
 
 public class GoodsInfoDTO extends ObjectExternalizable{
 
-	private String id;
-	private String brand;
-	private String sub_brand;
+	private String id="";
+	private String brand="";
+	private String sub_brand="";
 	private Float unit_price;
-	private String unit;
-	private String standard;
-	private String repertory; 
-	private String reserve1;
-	private String reserve2;
-	private String reserve3;
+	private String unit="";
+	private String standard="";
+	private String repertory=""; 
+	private String reserve1="";
+	private String reserve2="";
+	private String reserve3="";
 
 	/**
 	 * 

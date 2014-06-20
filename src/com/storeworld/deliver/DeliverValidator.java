@@ -158,6 +158,9 @@ public class DeliverValidator {
 			
 			if(!p.getBrand().equals("") && !p.getSubBrand().equals("") && !p.getSize().equals("")){
 
+				if(!p.getUnit().equals("")){
+					//already has one unit
+				}else{
 				//set the unit
 				//here, only set once!!!
 				Map<String, Object> prod = new HashMap<String, Object>();
@@ -179,7 +182,7 @@ public class DeliverValidator {
 					System.out.println("query the unit with brand&sub&size failed");
 				}				
 				DeliverCellModifier.getDeliverList().deliverChangedForUnit(p);
-
+				}
 				return true;
 			}else{
 				return false;

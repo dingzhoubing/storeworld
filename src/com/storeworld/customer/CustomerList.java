@@ -8,14 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.deliver.DeliverContentPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.product.Product;
+import com.storeworld.product.ProductCellModifier;
+import com.storeworld.product.ProductUtils;
 import com.storeworld.pub.service.CustomerInfoService;
+import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.stock.StockCellModifier;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
@@ -72,7 +81,7 @@ public class CustomerList{
 		}
 		//-1 means no record now, get null by show table status where Name="?"
 		//no record
-		if(newID.equals("-1"))
+		if(newID.equals("-1") || newID.equals(""))
 			newID="1";//empty
 		//by the list of Customer from database
 		CustomerUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));//no need to +1
@@ -126,6 +135,61 @@ public class CustomerList{
 		}
 	}
 	
+	public void customerChangedThree(Customer customer) {
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			(iterator.next()).update(customer);	
+			
+			for(int i=0;i<customerList.size();i++){
+				Customer c = (Customer)(customerList.get(i));
+				if(c.getID().equals(customer.getID())){
+					c.setArea(customer.getArea());
+					c.setName(customer.getName());
+					c.setPhone(customer.getPhone());
+					c.setAddress(customer.getAddress());					
+					break;
+				}				
+			}
+			
+			CustomerUtils.refreshTableData();
+			
+		}
+	}
+	
+	public void customerChangedTwo(Customer customer) {
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			(iterator.next()).update(customer);
+			Customer c = (Customer)(customerList.get(customerList.size()-1));			
+			c.setArea(customer.getArea());
+			c.setName(customer.getName());
+			c.setPhone(customer.getPhone());
+			c.setAddress(customer.getAddress());
+			
+			CustomerCellModifier.addNewTableRow(customer);
+			DataCachePool.addArea2Names(customer.getArea(), customer.getName());
+			CustomerUtils.refreshAreas_FirstName();			
+			CustomerUtils.refreshTableData();
+			
+		}
+	}
+	
+	
+	private boolean checkSameCustomer(Customer customer){
+		boolean ret = false;
+		for(int i=0;i<customerList.size()-1;i++){
+			Customer stmp = (Customer)customerList.get(i);
+			//a different stock
+			if(!stmp.getID().equals(customer.getID())){
+				if(stmp.getArea().equals(customer.getArea()) && stmp.getName().equals(customer.getName())){
+					ret = true;
+					break;
+				}				
+			}			
+		}		
+		return ret;
+	}
+	
 	/**
 	 * update the info of a customer
 	 * @param customer
@@ -142,32 +206,85 @@ public class CustomerList{
 			cus.put("customer_name", customer.getName());
 			cus.put("telephone", customer.getPhone());
 			cus.put("customer_addr", customer.getAddress());
-			if(!CustomerValidator.checkID(customer.getID())){
+			if(!CustomerValidator.checkID(customer.getID()) && CustomerValidator.rowLegal(customer)){
 				//update the database here				
 				try {
-					//before update the database, record the old area/name, for updating the cache
-					Map<String, Object> cus_old = new HashMap<String, Object>();
-					cus_old.put("id", customer.getID());
-					ReturnObject ret = cusinfo.queryCustomerInfo(cus_old);
-					Pagination page = (Pagination) ret.getReturnDTO();
-					List<Object> list = page.getItems();
-					String old_area="";
-					String old_name="";
-					//it should contains only one element, or something wrong
-					if(!list.isEmpty()){
-						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
-						old_area = cDTO.getCustomer_area();
-						old_name = cDTO.getCustomer_name();
+					if(checkSameCustomer(customer)){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+	    		    	messageBox.setMessage(String.format("存在相同的客户在客户表中，请重新填写！"));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){	    		    		
+	    		    		Customer c = new Customer();
+	    		    		c.setID(customer.getID());
+	    		    		c.setArea("");
+	    		    		c.setName("");
+	    		    		c.setPhone(customer.getPhone());
+	    		    		c.setAddress(customer.getAddress());	    					
+	    					CustomerCellModifier.getCustomerList().customerChangedThree(c);
+	    		    	}						
 					}else{
-						System.out.println("query a customer with an exist ID returns empty");
-					}
-					
-					cusinfo.updateCustomerInfo(customer.getID(), cus);
+						
+						//before update the database, record the old area/name, for updating the cache
+						Map<String, Object> cus_old = new HashMap<String, Object>();
+						cus_old.put("id", customer.getID());
+						ReturnObject ret = cusinfo.queryCustomerInfo(cus_old);
+						Pagination page = (Pagination) ret.getReturnDTO();
+						List<Object> list = page.getItems();
+						String old_area="";
+						String old_name="";
+						String old_tele = "";
+						String old_addr = "";
+						Map<String, Object> cus_rec = new HashMap<String, Object>();
+						//it should contains only one element, or something wrong
+						if(!list.isEmpty()){
+							CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
+							old_area = cDTO.getCustomer_area();
+							old_name = cDTO.getCustomer_name();
+							old_tele = cDTO.getTelephone();
+							old_addr = cDTO.getCustomer_addr();
+							cus_rec.put("customer_area", old_area);
+							cus_rec.put("customer_name", old_name);
+							cus_rec.put("telephone", old_tele);
+							cus_rec.put("customer_addr", old_addr);
+						}else{
+							System.out.println("query a customer with an exist ID returns empty");
+						}
+						
+						if(customer.getArea().equals(old_area) && customer.getName().equals(old_name) 
+								&& customer.getPhone().equals(old_tele) && customer.getAddress().equals(old_addr)){
+							//do nothing?
+						}else{
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
+		    		    	messageBox.setMessage(String.format("片区:%s，客户:%s 的信息将被修改，送货表中将会发生相应更新，确认要操作吗？", old_area, old_name));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){	
+		    		    		
+		    		    		
+		    		    		cusinfo.updateCustomerInfo(customer.getID(), cus);
+		    					//old area, old name, new area, new name
+		    					DataCachePool.updateCustomerInfoOfCache(old_area, old_name, customer.getArea(), customer.getName());	
+		    					CustomerUtils.refreshAreas_FirstName();
+		    							    					
+		    					//update all deliver info and current deliver table
+								DeliverInfoService deliverinfo = new DeliverInfoService();
+								deliverinfo.updateAllDeliverInfoForCustomerChanged(cus, cus_rec);
+//								sp.setStatus("更新送货表", 75);
+								
+								DeliverContentPart.reNewDeliver();
+								DeliverContentPart.reNewDeliverHistory();
+//								sp.setStatus("更新进货界面", 100);
+								
+		    		    		
+		    		    	}else{
+		    		    		Customer c = new Customer();
+		    					c.setID(customer.getID());//new row in fact
+		    					c.setArea(old_area);
+		    					c.setName(old_name);
+		    					c.setPhone(old_tele);
+		    					c.setAddress(old_addr);
+		    					CustomerCellModifier.getCustomerList().customerChangedThree(c);
+		    		    	}
 
-					//old area, old name, new area, new name
-					DataCachePool.updateCustomerInfoOfCache(old_area, old_name, customer.getArea(), customer.getName());	
-					//need??
-					CustomerUtils.refreshAreas_FirstName();
+						}
+					}					
 				} catch (Exception e) {
 					System.out.println("update customer failed");
 				}
@@ -175,12 +292,25 @@ public class CustomerList{
 			}
 			if(CustomerValidator.checkID(customer.getID()) && CustomerValidator.rowLegal(customer)){				
 				try {
-					cusinfo.addCustomerInfo(cus);
-					CustomerCellModifier.addNewTableRow(customer);
-					//add the new info to the cache
-					DataCachePool.addArea2Names(customer.getArea(), customer.getName());
-					
-					CustomerUtils.refreshAreas_FirstName();
+					if(checkSameCustomer(customer)){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+	    		    	messageBox.setMessage(String.format("存在相同的客户在客户表中，请重新填写！"));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){	    		    		
+	    		    		Customer c = new Customer();
+	    		    		c.setID(customer.getID());
+	    		    		c.setArea("");
+	    		    		c.setName("");
+	    		    		c.setPhone(customer.getPhone());
+	    		    		c.setAddress(customer.getAddress());	    					
+	    					CustomerCellModifier.getCustomerList().customerChangedThree(c);
+	    		    	}						
+					}else{
+						cusinfo.addCustomerInfo(cus);
+						CustomerCellModifier.addNewTableRow(customer);
+						//add the new info to the cache
+						DataCachePool.addArea2Names(customer.getArea(), customer.getName());						
+						CustomerUtils.refreshAreas_FirstName();
+					}
 				} catch (Exception e) {
 					System.out.println("add customer failed");
 				}

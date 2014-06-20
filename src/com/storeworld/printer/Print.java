@@ -17,7 +17,11 @@ import org.eclipse.swt.widgets.MessageBox;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.NumberConverter;
 import com.storeworld.deliver.Deliver;
+import com.storeworld.deliver.DeliverHistory;
+import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.mainui.MainUI;
+import com.storeworld.pub.service.DeliverInfoService;
+import com.storeworld.utils.ItemComposite;
  
 public class Print implements Printable, Runnable{
    private int pageSize;//打印的总页数
@@ -30,8 +34,9 @@ public class Print implements Printable, Runnable{
    private String total = "";
    private String indeed = "";
    private boolean type = false;
+   private String ordernum="";
    
-   public Print(ArrayList<DataInTable> temp, int part, int total_part, String total, String indeed_val, boolean type){
+   public Print(ArrayList<DataInTable> temp, int part, int total_part, String total, String indeed_val, boolean type, String ordernum){
 	   elements.clear();
 	   elements.addAll(temp);
 	   this.part = part;
@@ -40,6 +45,7 @@ public class Print implements Printable, Runnable{
 	   this.indeed = indeed_val;
 	   this.type = type;
 	   this.pageSize = 1;
+	   this.ordernum = ordernum;
    }
       
    //实现java.awt.print.Printable接口的打印方法
@@ -47,9 +53,7 @@ public class Print implements Printable, Runnable{
    @Override
    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
         throws PrinterException {
-	   	  
-	   
-	   
+
       if (pageIndex >= pageSize)
         //退出打印
         return Printable.NO_SUCH_PAGE;
@@ -149,6 +153,27 @@ public class Print implements Printable, Runnable{
 //        System.out.println("paperW:"+paperW+";paperH:"+paperH);         
          
         prnJob.print();//启动打印工作
+        
+        //here we update the database
+        if(!ordernum.equals("")){
+        	DeliverInfoService deliverInfo = new DeliverInfoService();
+        	try {
+				deliverInfo.updateIsPrintByOrderNumber(ordernum);
+			} catch (Exception e) {
+				System.out.println("update is_print failed");
+			}
+        	Display.getDefault().syncExec(new Runnable() {
+    		    public void run() {
+    		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
+    		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
+    		    	if(!dh.getTitleShow().contains("已打单"))
+    		    		ic.setValue(dh.getTitle()+"(已打单)");
+    		    	}
+        	});
+        }
+        
+        
+        
       } catch (PrinterException ex) {
     	//!!
     	//在非SWT线程的线程里想要修改SWT界面,need to do this

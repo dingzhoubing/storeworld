@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.stock.StockList;
 import com.storeworld.utils.Utils;
 
 /**
@@ -24,6 +25,10 @@ public class ProductCellModifier implements ICellModifier {
 		return true;
 	}
 
+	public static ProductList getProductList(){
+		return productlist;
+	}
+	
 	/**
 	 * add a new row in product table
 	 * @param product

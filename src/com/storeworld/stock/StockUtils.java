@@ -58,8 +58,10 @@ public class StockUtils {
 			//return the data as 2014 03 05 16 36 24
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 			time_record = formatter.format(new Date());
-		}else{
+		}else if(time.equals("")){
 			time_record = "";//initial
+		}else{
+			time_record = time;
 		}
 	}
 	
@@ -162,9 +164,12 @@ public class StockUtils {
 			shis.setTitle(title);
 			shis.setTime(time_tmp);
 			shis.setNumber(number_total);
-
+			shis.setIndeed(number_total);//every time we update the history, we need to reset the reserve 1
 			ic_record.setValue(shis.getTitle(), shis.getTimeShow(),
-					shis.getNumber());
+					shis.getValueShow());
+			
+			//update the stock by time, and set the indeed value back to the same as total
+			StockList.updateStocksByTime(time_tmp, "");
 		}
 	}
 	
@@ -184,8 +189,10 @@ public class StockUtils {
 			String title = "";
 			double total = 0.000;
 			String time_tmp = "";
+			String indeed = "";
 			for(int i=0;i<stocks.size()-1;i++){
 				Stock st = stocks.get(i);
+				indeed = st.getIndeed();
 				title+=(st.getBrand()+",");
 				time_tmp = st.getTime();
 				String price = st.getPrice();
@@ -196,6 +203,7 @@ public class StockUtils {
 			}
 			Stock st = stocks.get(stocks.size()-1);
 			String price = st.getPrice();
+			indeed = st.getIndeed();
 			String number = st.getNumber();
 			time_tmp = st.getTime();
 			double p = Double.valueOf(price);
@@ -206,8 +214,8 @@ public class StockUtils {
 	
 //			String number_total = String.valueOf(total);
 			String number_total = df.format(total);
-			
-			StockHistory his = new StockHistory(title,time_tmp,number_total);
+//			String number_indeed = df.format(indeed);
+			StockHistory his = new StockHistory(title,time_tmp,number_total, indeed);
 			historyList.add(his);	
 		}
 		
@@ -248,6 +256,7 @@ public class StockUtils {
 				st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
 				st_tmp.setNumber(cDTO_tmp.getQuantity());
 				st_tmp.setTime(cDTO_tmp.getStock_time());
+				st_tmp.setIndeed(cDTO_tmp.getReserve1());
 				addIntoStocks(st_tmp,stocks);
 			}
 			
@@ -279,8 +288,8 @@ public class StockUtils {
 //		String number="50000";//fake data
 		//it should be the indeed value
 		String number = StockContentPart.getTotal().trim();
-		
-		StockHistory his = new StockHistory(title,time_tmp,number);
+		String indeed = StockContentPart.getIndeed().trim();
+		StockHistory his = new StockHistory(title,time_tmp,number, indeed);
 		
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
 		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
@@ -320,7 +329,7 @@ public class StockUtils {
 		for (int i = 0; i < historyList.size(); i++) {
 			StockHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
-			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			ic.setValue(his.getTitle(), his.getTimeShow(), his.getValueShow());
 			itemList.add(ic);
 			composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT));
@@ -358,41 +367,9 @@ public class StockUtils {
 				st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
 				st_tmp.setNumber(cDTO_tmp.getQuantity());
 				st_tmp.setTime(cDTO_tmp.getStock_time());
+				st_tmp.setIndeed(cDTO_tmp.getReserve1());
 				addIntoStocks(st_tmp, stocks);
-			}
-			
-			
-//			if(list.size()>0){
-//				StockInfoDTO cDTO = (StockInfoDTO) list.get(0);
-//				Stock stock = new Stock();
-//				stock.setBrand(cDTO.getBrand());
-//				stock.setPrice(String.valueOf(cDTO.getUnit_price()));
-//				stock.setNumber(cDTO.getQuantity());
-//				stock.setTime(cDTO.getStock_time());
-//				stocks.add(stock);
-//				last_time = stock.getTime();
-//				for(int i=1;i<list.size();i++){
-//					StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
-//					Stock st_tmp = new Stock();
-//					String tmp_time = cDTO_tmp.getStock_time();
-//					st_tmp.setBrand(cDTO_tmp.getBrand());
-//					st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
-//					st_tmp.setNumber(cDTO_tmp.getQuantity());
-//					st_tmp.setTime(cDTO_tmp.getStock_time());
-//					if(tmp_time.equals(last_time)){						
-//						stocks.add(st_tmp);//if still the same stock, add to array list
-//					}else{//a new stock
-//						addToHistory(stocks);
-//						stocks.clear();
-//						stocks.add(st_tmp);
-//						last_time = tmp_time;
-//					}				
-//				}
-//				//the last stock
-//				if(!stocks.isEmpty()){
-//					addToHistory(stocks);//finish
-//				}
-//			}
+			}			
 			
 			//add into history
 			addToHistory(stocks);

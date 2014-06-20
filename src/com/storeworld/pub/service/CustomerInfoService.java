@@ -1,12 +1,15 @@
 package com.storeworld.pub.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.storeworld.customer.Customer;
+import com.storeworld.customer.CustomerCellModifier;
+import com.storeworld.customer.CustomerUtils;
 import com.storeworld.database.BaseAction;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
-import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.utils.Utils;
@@ -169,6 +172,72 @@ public class CustomerInfoService extends BaseAction{
 		return ret_total;
 	}
 	
+	
+	public int updateCommonInfoIntoCustomer(String area, String name, String tele, String addr){
+		int ret = 0;
+		try{
+		BaseAction tempAction=new BaseAction();
+		String sql="select * from customer_info ci where ci.customer_area=? and ci.customer_name=?";
+		Object[] params_tmp={area, name};
+		List<Object> params=objectArray2ObjectList(params_tmp);
+		System.out.println(params);
+		List list=null;
+		try{
+			list=executeQuery(sql, params);			
+		}catch(Exception e){
+			System.out.println("get customer info failed");
+		}
+		
+		if(list==null||list.size()==0){
+			//no such customer, insert into it
+			String sql_ins="insert into customer_info(customer_area,customer_name,telephone,customer_addr,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?)";
+			Object[] params_temp_ins={area, name, tele, addr, "", "", ""};
+			List<Object> params_ins=objectArray2ObjectList(params_temp_ins);
+			int snum=executeUpdate(sql_ins,params_ins);
+			
+			Customer c = new Customer();
+			c.setID(CustomerUtils.getNewLineID());
+			c.setName(name);
+			c.setArea(area);
+			c.setAddress(addr);
+			c.setPhone(tele);
+			
+			CustomerCellModifier.getCustomerList().customerChangedTwo(c);
+			
+		}else{
+			//if addr or tele changed
+			Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
+			String tele_old="";
+			String addr_old="";
+			String id_update = String.valueOf(mapRes.get("id"));
+			if(mapRes.get("telephone") != null){
+				tele_old = String.valueOf(mapRes.get("telephone"));
+			}
+			if(mapRes.get("customer_addr") != null){
+				addr_old = String.valueOf(mapRes.get("customer_addr"));
+			}
+			if(!(tele.equals(tele_old) && addr.equals(addr_old))){
+				String sql_update="update customer_info ci set ci.customer_area=?,ci.customer_name=?,ci.telephone=?,"
+						+"ci.customer_addr=? where ci.id=?";
+				Object[] params_temp_update={area,name,tele,addr,id_update};
+				List<Object> params_update=objectArray2ObjectList(params_temp_update);
+				int rows=executeUpdate(sql_update,params_update);
+				
+				Customer c = new Customer();
+				c.setID(id_update);
+				c.setName(name);
+				c.setArea(area);
+				c.setAddress(addr);
+				c.setPhone(tele);				
+				CustomerCellModifier.getCustomerList().customerChangedThree(c);
+			}			
+		}
+		}catch(Exception e){
+			System.out.println("add common info into customer table failed");
+		}
+		return ret;
+	}
+	
 	/**
 	 * 根据ID更新一条用户信息，步骤分为：
 	 * 1.校验更新后的数据是否存在与存量数据重复的情况。
@@ -268,6 +337,43 @@ public class CustomerInfoService extends BaseAction{
 		return ro;
 	}
 
+	/**
+	 * query the customer info by id, keep the return object the same as Bing
+	 * @param id
+	 * @return
+	 */
+	public ReturnObject queryCustomerInfoByID(String id){
+		List list=null;
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<CustomerInfoDTO> customerInfoList = new ArrayList<CustomerInfoDTO>();
+		String sql="select * from customer_info ci where id=?";
+		Object[] params_temp={id};
+		List<Object> params=objectArray2ObjectList(params_temp);
+		try {
+			list=executeQuery(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				CustomerInfoDTO customerInfoDto=new CustomerInfoDTO();
+				customerInfoDto.setId(String.valueOf(retMap.get("id")));
+				customerInfoDto.setCustomer_area((String) retMap.get("customer_area"));
+				customerInfoDto.setCustomer_name((String) retMap.get("customer_name"));
+				customerInfoDto.setReserve1((String) retMap.get("reserve1"));
+				customerInfoDto.setReserve2((String) retMap.get("reserve2"));
+				customerInfoDto.setReserve3((String) retMap.get("reserve3"));
+				customerInfoDto.setTelephone((String) retMap.get("telephone"));
+				customerInfoDto.setCustomer_addr((String) retMap.get("customer_addr"));
+				customerInfoList.add(customerInfoDto);
+			}
+			page.setItems((List)customerInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			System.out.println("query customre info by id failed");
+		}
+		return ro;
+		
+	}
+	
 	/**
 	 * 按条件查询客户信息，当根据片区查客户时可用
 	 * @param map

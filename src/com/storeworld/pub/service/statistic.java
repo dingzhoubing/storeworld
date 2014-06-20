@@ -620,7 +620,7 @@ public class statistic extends BaseAction{
 				Map retMap=(Map) list.get(i);
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setQuantity((String) retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 		}
 		page.setItems((List)deliverInfoAllList);
@@ -657,7 +657,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -667,7 +667,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -701,7 +701,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -711,7 +711,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListName.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -738,7 +738,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);
@@ -768,7 +768,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -778,7 +778,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_area"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -810,7 +810,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListBrand.add(deliverInfoDto);
 		}
 		//====================================================================//
@@ -820,7 +820,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("customer_name"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllListArea.add(deliverInfoDto);
 		}
 		//========================================================================//
@@ -846,7 +846,7 @@ public class statistic extends BaseAction{
 				DeliverInfoAllDTO deliverInfoDto=new DeliverInfoAllDTO();
 				deliverInfoDto.setCustomer_area((String)retMap.get("sub_brand"));
 				deliverInfoDto.setQuantity((String)retMap.get("quantity"));
-				deliverInfoDto.setUni_reserve1((Float)retMap.get("stock_total_price"));
+				deliverInfoDto.setUni_reserve1((String)retMap.get("stock_total_price"));
 				deliverInfoAllList.add(deliverInfoDto);
 			}
 			page.setItems((List)deliverInfoAllList);

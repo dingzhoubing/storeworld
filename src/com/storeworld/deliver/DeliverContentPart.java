@@ -305,6 +305,7 @@ public class DeliverContentPart extends ContentPart{
 		text_phone.setEnabled(false);
 		text_address.setEnabled(false);
 		table.setEnabled(false);
+		indeed_val.setEnabled(false);
 	}
 	
 	public static void setCommonInfo(String area, String name, String phone, String addr, String order, String time){
@@ -323,8 +324,8 @@ public class DeliverContentPart extends ContentPart{
 	}
 	
 	
-	public void doSearch(){
-		if (dateTime.isVisible()) {
+	public static void doSearch(){
+		if (DeliverUtils.getDetailTimer()) {//dateTime.isVisible()
 			String year = String.valueOf(dateTime.getYear());
 			int mon = dateTime.getMonth() + 1;
 			String month = String.valueOf(mon);
@@ -536,6 +537,38 @@ public class DeliverContentPart extends ContentPart{
 		});
 	}
 	
+	public static void reNewDeliver(){
+	
+		DeliverUtils.setStatus("NEW");
+		DeliverUtils.leaveEditMode();
+		DeliverUtils.leaveReturnMode();
+		DeliverUtils.setOrderNumber();//set the order number for the deliver table
+	
+		clearContent();
+		enableEditContent();
+//		disableEditContent();
+		DeliverUtils.setTime(null);					
+	
+		table.removeAll();
+		DeliverList.removeAllDelivers();
+		
+		text_serial.setText(DeliverUtils.getOrderNumber());
+		String time = DeliverUtils.getTime();
+		String year = time.substring(0, 4);
+		String month = time.substring(4, 6);
+		String day = time.substring(6, 8);
+		String hour = time.substring(8, 10);
+		String min = time.substring(10, 12);
+		time = year+"-"+month+"-"+day+" "+hour+":"+min;
+		text_time.setText(time);
+		btn_edit.setVisible(false);
+		btn_return.setVisible(false);
+		indeed_val.setEnabled(true);
+	}
+	
+	public static void reNewDeliverHistory(){
+		doSearch();
+	}
 	
 	/**
 	 * initialize the table elements
@@ -572,6 +605,13 @@ public class DeliverContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
+					//if there are items in the table, we need to delete the info from the database
+					if(DeliverUtils.getStatus().equals("NEW") && !text_serial.getText().equals("")){
+						if(DeliverList.getDelivers().size() > 1){
+							DeliverList.deleteDeliversUseLess(getOrderNumber());							
+						}						
+					}
+				
 					DeliverUtils.setStatus("NEW");
 					DeliverUtils.leaveEditMode();
 					DeliverUtils.leaveReturnMode();
@@ -597,6 +637,7 @@ public class DeliverContentPart extends ContentPart{
 					text_time.setText(time);
 					btn_edit.setVisible(false);
 					btn_return.setVisible(false);
+					indeed_val.setEnabled(true);
 //				}else{
 //					
 //				}
@@ -673,6 +714,7 @@ public class DeliverContentPart extends ContentPart{
 					cus.setText("全部客户");
 					dateTime.setVisible(true);
 					dateTime2.setVisible(false);
+					DeliverUtils.setDetailTimer(true);
 				}
 			}
 		});
@@ -702,6 +744,7 @@ public class DeliverContentPart extends ContentPart{
 					cus.setText("全部客户");
 					dateTime.setVisible(true);
 					dateTime2.setVisible(false);
+					DeliverUtils.setDetailTimer(true);
 				}				
 			}
 		});
@@ -712,9 +755,11 @@ public class DeliverContentPart extends ContentPart{
 				if(!cus.getText().equals("全部客户")){
 					dateTime.setVisible(false);
 					dateTime2.setVisible(true);
+					DeliverUtils.setDetailTimer(false);
 				}else{
 					dateTime.setVisible(true);
 					dateTime2.setVisible(false);
+					DeliverUtils.setDetailTimer(true);
 				}
 			}
 		});
@@ -802,6 +847,7 @@ public class DeliverContentPart extends ContentPart{
 				DeliverList.removeCurrentHistory();
 				//will not show delete button anymore
 				btn_delete.setVisible(false);
+				DeliverUtils.setStatus("NEW");
 			}
 		});
 		
@@ -828,6 +874,7 @@ public class DeliverContentPart extends ContentPart{
 					
 					btn_return.setVisible(false);
 					DeliverUtils.enterEditMode();
+					indeed_val.setEnabled(true);
 				}
 			}
 		});
@@ -868,6 +915,7 @@ public class DeliverContentPart extends ContentPart{
 					total_big.setText("");
 					indeed_val.setText("");
 					indeed_big.setText("");
+					indeed_val.setEnabled(true);//can be editable
 					
 					//make a return mode, then, in this mode,
 					//we need to check and make sure:
@@ -1101,13 +1149,33 @@ public class DeliverContentPart extends ContentPart{
 				if(Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()){
 					String txt = Utils.getIndeed();
 					//reasonable value
+					if(DeliverList.getDelivers().size() > 1){
 					if(pattern_indeed_val.matcher(txt).matches()){	
 						String format_str = df.format(Double.valueOf(txt));
 						indeed_val.setText(format_str);
 						indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(format_str));
+						
+						indeed_val.setEnabled(false);
+						//update the database
+						if(!indeed_val.getText().equals(total_val.getText()))
+							DeliverList.updateDeliversByOrderNumber(DeliverUtils.getOrderNumber(), indeed_val.getText());
+						if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
+							//update the history panel
+							DeliverUtils.getItemCompositeRecord().setDownRight(indeed_val.getText());
+							DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
+							dh.setIndeed(indeed_val.getText());
+						}
+						
+						indeed_val.setEnabled(true);
+						
 					}else{
 						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 						mbox.setMessage("数值应为整数或两位小数");
+						mbox.open();
+					}
+					}else{
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("送货列表为空，不存在实付");
 						mbox.open();
 					}
 					//initial the next click
@@ -1152,7 +1220,7 @@ public class DeliverContentPart extends ContentPart{
 							int ret = Integer.valueOf(rc.getReturnNumber());
 							st.put("quantity", (deli-ret));
 							DeliverInfoService deliverinfo = new DeliverInfoService();	
-							
+
 							if((deli-ret) == 0){
 								try {
 									deliverinfo.deleteDeliverInfo(Integer.valueOf(rc
@@ -1162,7 +1230,7 @@ public class DeliverContentPart extends ContentPart{
 								}
 							}else{
 							try {
-								deliverinfo.updateDeliverInfo(rc.getID(), common,st);								
+								deliverinfo.updateDeliverInfo(rc.getID(),st);								
 								} catch (Exception e1) {
 										System.out.println("update deliver failed");
 								}
@@ -1170,14 +1238,25 @@ public class DeliverContentPart extends ContentPart{
 						}
 					}
 							    	
-
+					String indeed_minus = indeed_val.getText();
+					DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
+					String indeed_old = dh.getIndeed();
+					String indeed_u = df.format(Double.valueOf(indeed_old) - Double.valueOf(indeed_minus));
+					try {
+						DeliverInfoService deliverinfo = new DeliverInfoService();	
+						deliverinfo.updateDeliversIndeedByOrderNumber(DeliverUtils.getOrderNumber(), indeed_u);
+					} catch (Exception e1) {
+						System.out.println("remove the deliver failed");
+					}
+					
 			    	
 					//how to get the indeed value
-					PrintHandler ph = new PrintHandler(ds, true, 0.00);
+					PrintHandler ph = new PrintHandler(ds, true, indeed_val.getText(), "");
 					ph.doPrint();
 					
 					DeliverUtils.leaveReturnMode();
-					doSearch();
+//					doSearch();
+					DeliverUtils.getItemCompositeRecord().setDownRight(indeed_u);
 					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 					mbox.setMessage("退货成功");
 					mbox.open();
@@ -1186,6 +1265,16 @@ public class DeliverContentPart extends ContentPart{
 				//do more check here
 				if(DeliverList.getDelivers().size() > 1){
 					
+					for(int i=0; i< DeliverList.getDelivers().size()-1;i++){
+						Deliver d = (Deliver)DeliverList.getDelivers().get(i);
+						if(!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))){
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage(String.format("第 %d 条送货信息不全", i+1));
+							mbox.open();
+							return;//do not go to print or save
+						}						
+					}
+
 					//check area & name, if both are not empty, add to history, or popup an message box
 					if(!gc.getText().equals("") && !gcName.getText().equals("")){
 						
@@ -1198,7 +1287,7 @@ public class DeliverContentPart extends ContentPart{
 						//the last one will not print
 						ds.addAll(DeliverList.getDelivers().subList(0, DeliverList.getDelivers().size()-1));
 						//how to get the indeed value
-						PrintHandler ph = new PrintHandler(ds, true, 0.00);
+						PrintHandler ph = new PrintHandler(ds, false, indeed_val.getText(), DeliverUtils.getOrderNumber());
 						ph.doPrint();
 						
 						//step 1: add the deliver common info into database
@@ -1210,13 +1299,17 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("deliver_addr", text_address.getText());
 						commonMap.put("deliver_time", DeliverUtils.getTime());
 						commonMap.put("telephone", text_phone.getText());
-						//if already exist, update it 
-//						deliverinfo.print_voucher(commonMap);
-//						try {
-//							deliverinfo.updateCommonInfo(commonMap);
-//						} catch (Exception e1) {
-//							e1.printStackTrace();
-//						}
+						if(DeliverUtils.getStatus().equals("NEW")){
+							deliverinfo.printSaveCommonInfo(commonMap);
+						}else{//update
+							if(DeliverUtils.getEditMode()){
+							try {
+								deliverinfo.updateCommonInfo(commonMap);
+							} catch (Exception e1) {
+								System.out.println("update common info failed");
+							}
+							}
+						}
 						
 						//status: NEW, HISTORY, EMPTY
 						DeliverUtils.setStatus("EMPTY");
@@ -1247,8 +1340,6 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
-
-    	
 		//button print
 				btn_save = new Button(composite_right, SWT.NONE);
 				btn_save.setText("仅保存");
@@ -1259,6 +1350,16 @@ public class DeliverContentPart extends ContentPart{
 //						System.out.println("print");
 						//do more check here
 						if(DeliverList.getDelivers().size() > 1){
+							
+							for(int i=0; i< DeliverList.getDelivers().size()-1;i++){
+								Deliver d = (Deliver)DeliverList.getDelivers().get(i);
+								if(!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))){
+									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage(String.format("第 %d 条送货信息不全", i+1));
+									mbox.open();
+									return;//do not go to print or save
+								}						
+							}
 							
 							//check area & name, if both are not empty, add to history, or popup an message box
 							if(!gc.getText().equals("") && !gcName.getText().equals("")){
@@ -1276,14 +1377,18 @@ public class DeliverContentPart extends ContentPart{
 								commonMap.put("deliver_time", DeliverUtils.getTime());
 								commonMap.put("telephone", text_phone.getText());
 								//if already exist, update it 
-								deliverinfo.print_voucher(commonMap);
-//								try {
-//									deliverinfo.updateCommonInfo(commonMap);
-//								} catch (Exception e1) {
-//									// TODO Auto-generated catch block
-//									e1.printStackTrace();
-//								}
-//								
+								if(DeliverUtils.getStatus().equals("NEW")){
+									deliverinfo.printSaveCommonInfo(commonMap);
+								}else{//update
+									if(DeliverUtils.getEditMode()){
+									try {
+										deliverinfo.updateCommonInfo(commonMap);
+									} catch (Exception e1) {
+										System.out.println("update common info failed");
+									}
+									}
+								}
+
 								//status: NEW, HISTORY, EMPTY
 								DeliverUtils.setStatus("EMPTY");
 								
@@ -1505,6 +1610,7 @@ public class DeliverContentPart extends ContentPart{
 		
 		//initial state: disable
 		disableEditContent();
-
+		
+		DeliverUtils.setStatus("NEW");
 	}
 }

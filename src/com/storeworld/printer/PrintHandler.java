@@ -11,14 +11,16 @@ public class PrintHandler {
 	private ArrayList<DataInTable> dataset = new ArrayList<DataInTable>();
 	private boolean type = false;//false means deliver, true means return
 //	private double total_val = 0.00;
-	private double indeed_val = 0.00;
+	private String indeed_val = "";
 	private static DecimalFormat df = new DecimalFormat("0.00");
+	private String ordernum = "";
 	
-	public PrintHandler(ArrayList<DataInTable> ds, boolean type, double indeed){
+	public PrintHandler(ArrayList<DataInTable> ds, boolean type, String indeed, String ordernum){
 		this.dataset.clear();
 		this.dataset.addAll(ds);
 		this.indeed_val = indeed;		
 		this.type = type;		
+		this.ordernum = ordernum;
 	}
 	
 	public void doPrint(){
@@ -36,7 +38,7 @@ public class PrintHandler {
 		}
 		
 		String total_str = df.format(t);
-		String indeed_str= df.format(indeed_val);
+		String indeed_str= indeed_val;
 		
 		int counter = 0;
 		ArrayList<DataInTable> temp = new ArrayList<DataInTable>();
@@ -46,14 +48,14 @@ public class PrintHandler {
 			temp.add(dataset.get(i));
 			//a list contains 7 elements
 			if((counter%7)==0){
-				Thread td = new Thread(new Print(temp, (int)(counter/7), part, total_str, indeed_str, type));
+				Thread td = new Thread(new Print(temp, (int)(counter/7), part, total_str, indeed_str, type, ordernum));
 				td.start();
 				temp.clear();
 			}
 		}
 		//still need one table
 		if(!temp.isEmpty()){
-			Thread td = new Thread(new Print(temp, part, part, total_str, indeed_str, type));
+			Thread td = new Thread(new Print(temp, part, part, total_str, indeed_str, type, ordernum));
 			td.start();			
 		}
 

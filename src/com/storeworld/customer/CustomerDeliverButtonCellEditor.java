@@ -1,5 +1,7 @@
 package com.storeworld.customer;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -10,6 +12,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -18,6 +21,10 @@ import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.mainui.CoolBarPart;
 import com.storeworld.mainui.MainUI;
+import com.storeworld.pojo.dto.CustomerInfoDTO;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.utils.UIDataConnector;
 import com.storeworld.utils.Utils;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
@@ -35,7 +42,7 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
     protected Table table;
     protected CustomerList customerlist;
     protected int rowHeight = 0;
-    
+    private static CustomerInfoService customerinfo = new CustomerInfoService();
     public CustomerDeliverButtonCellEditor() {
         setStyle(0);
     }
@@ -74,10 +81,87 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 					TableItem item = table.getItem(index);
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
+						
+						Customer c = (Customer)(table.getItem(index).getData());
+						
+						if(c.getArea().equals("") || c.getName().equals("")){						
+						ReturnObject ret = customerinfo.queryCustomerInfoByID(c.getID());
+						Pagination page = (Pagination) ret.getReturnDTO();
+						List<Object> list = page.getItems();
+						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
+						String old_area = cDTO.getCustomer_area();
+						String old_name = cDTO.getCustomer_name();
+						String old_tele = cDTO.getTelephone();
+						String old_addr = cDTO.getCustomer_addr();												
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+				    	messageBox.setMessage(String.format("片区:%s， 客户:%s 信息正在被编辑,确定放弃编辑，采用该信息发货？",
+				    			old_area, old_name));
+				    	if (messageBox.open() == SWT.OK){//give up the edit
+				    		
+				    		//record some info
+							System.out.println("jump into the deliver page");
+							//record the customer info
+
+							//current deliver list from customer page
+							UIDataConnector.setFromCustomer(true);
+							UIDataConnector.setCustomerRecord(c);//record the customer
+							
+							//jump
+							Utils.setFunctin(FUNCTION.DELIVER);						
+							MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
+							if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)
+								shell.setNorthPart(new CoolBarPart(shell.getNorthPart(NORTH_TYPE.NORTH_BOTTOM), SWT.NONE, null, null), NORTH_TYPE.NORTH_INDEX);
+							if(Utils.getContentPartComposites(CONTENT_TYPE.CONTENT_DELIVER) == null)
+								shell.setContentPart(new DeliverContentPart(shell.getContentPart(CONTENT_TYPE.CONTENT_BOTTOM), SWT.NONE, null, null), CONTENT_TYPE.CONTENT_DELIVER);
+							shell.show_North_index();
+							Utils.setFunctinLast(FUNCTION.DELIVER);
+							shell.show_Content_deliver();
+							
+							//show the basic message
+							DeliverUtils.setOrderNumber();//set the order number for the deliver table
+							
+							DeliverContentPart.clearContent();
+							DeliverContentPart.getTableViewer().getTable().removeAll();
+							DeliverList.removeAllDelivers();
+							
+							DeliverContentPart.enableEditContent();
+							DeliverContentPart.makeHistoryUnEditable();
+							DeliverUtils.setTime(null);
+							DeliverUtils.setStatus("NEW");
+							
+							DeliverContentPart.setTextOrderNumber(DeliverUtils.getOrderNumber());						
+							String time = DeliverUtils.getTime();
+							String year = time.substring(0, 4);
+							String month = time.substring(4, 6);
+							String day = time.substring(6, 8);
+							String hour = time.substring(8, 10);
+							String min = time.substring(10, 12);
+							time = year+"-"+month+"-"+day+" "+hour+":"+min;
+							DeliverContentPart.setTime(time);
+							DeliverContentPart.setCommon(c.getArea(), c.getName(), c.getPhone(), c.getAddress());
+													
+							button.setVisible(false);
+//							Utils.refreshTable(table);	
+							
+							//give up edit and update back data
+							Customer cus = new Customer();
+				    		cus.setID(c.getID());//new row in fact
+				    		cus.setArea(old_area);
+				    		cus.setName(old_name);
+				    		cus.setPhone(old_tele);
+				    		cus.setAddress(old_addr);
+	    					CustomerCellModifier.getCustomerList().customerChangedThree(cus);
+																 												
+							break;
+				    	}else{
+				    		//do nothing
+				    	}				    	
+						}else{
+						
 						//record some info
 						System.out.println("jump into the deliver page");
 						//record the customer info
-						Customer c = (Customer)(table.getItem(index).getData());
+
 						//current deliver list from customer page
 						UIDataConnector.setFromCustomer(true);
 						UIDataConnector.setCustomerRecord(c);//record the customer
@@ -120,6 +204,7 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 //						Utils.refreshTable(table);											
 								 												
 						break;
+					}//else
 					}
 				}
 			}

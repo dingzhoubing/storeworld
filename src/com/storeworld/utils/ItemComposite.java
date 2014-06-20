@@ -81,14 +81,24 @@ public class ItemComposite extends Composite {
 				History history = getHistory();
 				if(history instanceof StockHistory){
 					//if click to show history, leave edit mode
-					StockUtils.leaveEditMode();
-					StockUtils.setStatus("HISTORY");
+
+					if(StockUtils.getStatus().equals("NEW")){
+						if(StockList.getStocks().size() > 1){
+							StockUtils.addToHistory();
+						}
+					}
 					
+					StockUtils.leaveEditMode();
 					StockList.showHistory((StockHistory)history);
 					StockUtils.recordItemComposite(getSelf());
-					
-					
+					StockUtils.setStatus("HISTORY");
 				}else{//DeliverHistory
+					
+					if(DeliverUtils.getStatus().equals("NEW") && !DeliverContentPart.getOrderNumber().equals("")){
+						if(DeliverList.getDelivers().size() > 1){
+							DeliverList.deleteDeliversUseLess(DeliverContentPart.getOrderNumber());							
+						}						
+					}
 					
 					DeliverUtils.setStatus("HISTORY");
 					//if click to show history, leave edit mode
@@ -164,6 +174,10 @@ public class ItemComposite extends Composite {
 		this.down_left.setText(dl);
 		this.down_right.setText(dr+Constants.SPACE);
 		
+	}
+	
+	public void setDownRight(String dr){
+		this.down_right.setText(dr+Constants.SPACE);
 	}
 	public History getHistory(){
 		return this.his;

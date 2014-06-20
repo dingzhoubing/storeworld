@@ -9,12 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
+import com.storeworld.product.Product;
+import com.storeworld.product.ProductUtils;
 import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.stock.Stock;
@@ -65,7 +72,7 @@ public class DeliverList {
 			System.out.println("get the current id of deliver info failed");
 		}
 		//no record
-		if(newID.equals("-1"))
+		if(newID.equals("-1") || newID.equals(""))
 			newID="1";//empty
 		//by the list of Customer from database
 		DeliverUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
@@ -112,8 +119,8 @@ public class DeliverList {
 			//update the database only if we are not in the return mode
 //			if (!DeliverUtils.getReturnMode()) {
 				try {
-					deliverinfo.deleteDeliverInfo(Integer.valueOf(deliver
-							.getID()));
+					deliverinfo.deleteDeliverInfoAndUpdateGoods(Integer.valueOf(deliver.getID()), deliver);
+					//how to determine if the product is new or real 0?
 				} catch (Exception e) {
 					System.out.println("remove the deliver failed");
 				}
@@ -144,6 +151,45 @@ public class DeliverList {
 		while (iterator.hasNext()){
 			(iterator.next()).update(deliver);
 		}
+	}
+	
+	public void deliverChangedThree(Deliver deliver){
+		Iterator<IDataListViewer> iterator = changeListeners.iterator();
+		while (iterator.hasNext()){
+			(iterator.next()).update(deliver);	
+			
+			for(int i=0;i<deliverList.size();i++){
+				Deliver d = (Deliver)(deliverList.get(i));
+				if(d.getID().equals(deliver.getID())){
+					d.setBrand(deliver.getBrand());
+					d.setSubBrand(deliver.getSubBrand());
+					d.setSize(deliver.getSize());
+					d.setUnit(deliver.getUnit());
+					d.setPrice(deliver.getPrice());
+					d.setNumber(deliver.getNumber());
+					break;
+				}				
+			}
+			
+			DeliverUtils.refreshTableData();
+			
+		}
+	}
+	
+	private boolean checkSameDeliver(Deliver deliver){
+		boolean ret = false;
+		for(int i=0;i<deliverList.size()-1;i++){
+			Deliver stmp = (Deliver)deliverList.get(i);
+			//a different stock
+			if(!stmp.getID().equals(deliver.getID())){
+				if(deliver.getBrand().equals(stmp.getBrand()) && deliver.getSubBrand().equals(stmp.getSubBrand()) 
+						&&deliver.getSize().equals(stmp.getSize())){
+					ret = true;
+					break;
+				}				
+			}			
+		}		
+		return ret;
 	}
 	
 	/**
@@ -177,55 +223,177 @@ public class DeliverList {
 			deliver.setOrderNumber(DeliverUtils.getOrderNumber());
 			(iterator.next()).update(deliver);
 			
-			if(!DeliverValidator.checkID(deliver.getID())){
+			if(!DeliverValidator.checkID(deliver.getID()) && DeliverValidator.rowLegal(deliver) && DeliverValidator.rowComplete(deliver)){
 				//update the database here		
+				int ret = 0;
 //				if (!DeliverUtils.getReturnMode()) {
-					try {
-						deliverinfo.updateDeliverInfo(deliver.getID(), common,
-								st);
-						// if the brand, sub are new, we update the product
-						// cache !!
-						// if area, name are new, update the customer cache(if
-						// user click print button) !!
+					try {						
+						//exist the same deliver
+						if(checkSameDeliver(deliver)){
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+		    		    	messageBox.setMessage(String.format("存在相同的货品在该送货表中，请重新选择！"));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){	    		    		
+		    		    		Deliver s = new Deliver();
+		    					s.setID(deliver.getID());//new row in fact
+		    					s.setBrand(deliver.getBrand());
+		    					s.setSubBrand("");
+		    					s.setSize("");
+		    					s.setUnit(deliver.getUnit());	
+		    					s.setNumber(deliver.getNumber());//initial it's empty, not null
+		    					s.setPrice(deliver.getPrice());
+//		    					s.setTime(time);time and indeed?
+		    					DeliverCellModifier.getDeliverList().deliverChangedThree(s);
+		    					ret = -1;//in this way, we do not update history
+		    		    	}
+						}else{
+						
+						ret = deliverinfo.updateDeliverInfo(deliver.getID(),st);
+						if(ret == -1){
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+		    		    	messageBox.setMessage(String.format("品牌:%s, 子品牌:%s, 规格:%s 的货品不存在仓库中， 点击确定将添加货品至仓库表中并继续发货，点击取消重新选择其他货品", 
+		    		    			deliver.getBrand(),deliver.getSubBrand(),deliver.getSize()));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){
+		    		    		deliverinfo.insertGoodsAndUpdateDeliverTwo(deliver.getID(),st);
+		    		    		DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
+		    		    		ret = 0;//back to normal case
+		    		    	}else{
+		    		    		//update the deliver
+		    		    		Deliver d = new Deliver();
+		    					d.setID(deliver.getID());
+		    					d.setBrand(deliver.getBrand());
+		    					d.setSubBrand("");
+		    					d.setSize("");
+		    					d.setUnit(deliver.getUnit());	
+		    					d.setNumber(deliver.getNumber());//initial it's empty, not null
+		    					d.setPrice(deliver.getPrice());
+//		    					d.setOrderNumber(deliver.getOrderNumber());//?
+		    					DeliverCellModifier.getDeliverList().deliverChangedThree(d);		
+		    		    	}
+						}else if(ret == -2){
+							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+		    		    	messageBox.setMessage(String.format("品牌:%s, 子品牌:%s, 规格:%s 的货品库存不足， 点击确定将添加货品至仓库表中并继续发货，点击取消重新选择其他货品或更新库存", 
+		    		    			deliver.getBrand(), deliver.getSubBrand(), deliver.getSize()));		    		    	
+		    		    	if (messageBox.open() == SWT.OK){
+		    		    		deliverinfo.updateGoodsAndUpdateDeliverTwo(deliver.getID(), st);
+		    		    		DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
+		    		    		ret = 0;//back to normal case		    		    		
+		    		    	}else{
+		    		    		//update the deliver
+		    		    		Deliver d = new Deliver();
+		    					d.setID(deliver.getID());
+		    					d.setBrand(deliver.getBrand());
+		    					d.setSubBrand("");
+		    					d.setSize("");
+		    					d.setUnit(deliver.getUnit());	
+		    					d.setNumber(deliver.getNumber());//initial it's empty, not null
+		    					d.setPrice(deliver.getPrice());
+//		    					d.setOrderNumber(deliver.getOrderNumber());//?
+		    					DeliverCellModifier.getDeliverList().deliverChangedThree(d);		
+		    		    	}							
+						}
+						}
 					} catch (Exception e) {
 						System.out.println("update deliver failed");
 					}
 //				}
 				//if in edit mode, change the history
 				//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
-				if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
+				if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY") && ret == 0){
 					DeliverUtils.updateHistory(deliverList);
 				}
 			}
 			if(DeliverValidator.checkID(deliver.getID()) && DeliverValidator.rowLegal(deliver) && DeliverValidator.rowComplete(deliver)){				
 				try {
-//					deliverinfo.addDeliverInfo(common, st);
-					deliverinfo.addDeliverInfo(st);
-					//add a new brand->sub in cache
-					DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
-					//if also add into the product table, we should update the productlist
-					//every time we enter the product/customer page, we should refresh the table
-					//to show the data from stock, deliver page
-					DeliverCellModifier.addNewTableRow(deliver);
+					
+					if(checkSameDeliver(deliver)){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
+	    		    	messageBox.setMessage(String.format("存在相同的货品在该送货表中，请重新选择！"));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){	    		    		
+	    		    		Deliver s = new Deliver();
+	    					s.setID(deliver.getID());//new row in fact
+	    					s.setBrand(deliver.getBrand());
+	    					s.setSubBrand("");
+	    					s.setSize("");
+	    					s.setUnit(deliver.getUnit());	
+	    					s.setNumber(deliver.getNumber());//initial it's empty, not null
+	    					s.setPrice(deliver.getPrice());
+//	    					s.setTime(time);time and indeed?
+	    					DeliverCellModifier.getDeliverList().deliverChangedThree(s);
+//	    					ret = -1;//in this way, we do not update history
+	    		    	}
+					}else{
+					int ret = deliverinfo.addDeliverInfo(st);
+					if(ret == -1){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+	    		    	messageBox.setMessage(String.format("品牌:%s, 子品牌:%s, 规格:%s 的货品不存在仓库中， 点击确定将添加货品至仓库表中并继续发货，点击取消重新选择其他货品", 
+	    		    			deliver.getBrand(), deliver.getSubBrand(), deliver.getSize()));		    		    	
+	    		    	if (messageBox.open() == SWT.OK){   
+	    		    		deliverinfo.insertGoodsAndUpdateDeliver(deliver.getID(), st);
+	    		    		DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
+	    					DeliverCellModifier.addNewTableRow(deliver);
+	    		    	}else{
+	    		    		Deliver d = new Deliver();
+	    					d.setID(deliver.getID());//in fact, the new row
+	    					d.setBrand("");
+	    					d.setSubBrand("");
+	    					d.setSize("");
+	    					d.setUnit("");	
+	    					d.setNumber("");//initial it's empty, not null
+	    					d.setPrice("");
+	    					d.setOrderNumber("");//?
+	    					deliverChangedThree(d);
+	    		    	}												
+					}else if(ret == -2){
+						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
+	    		    	messageBox.setMessage(String.format("品牌:%s, 子品牌:%s, 规格:%s 的货品库存不足， 点击确定将添加货品至仓库表中并继续发货，点击取消重新选择其他货品或更新库存", 
+	    		    			deliver.getBrand(), deliver.getSubBrand(), deliver.getSize()));	    		    	
+	    		    	if (messageBox.open() == SWT.OK){   
+	    		    		deliverinfo.updateGoodsAndUpdateDeliver(deliver.getID(), st);
+	    		    		DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
+	    					DeliverCellModifier.addNewTableRow(deliver);
+	    		    	}else{
+	    		    		Deliver d = new Deliver();
+	    					d.setID(deliver.getID());//in fact, the new row
+	    					d.setBrand("");
+	    					d.setSubBrand("");
+	    					d.setSize("");
+	    					d.setUnit("");	
+	    					d.setNumber("");//initial it's empty, not null
+	    					d.setPrice("");
+	    					d.setOrderNumber("");//?
+	    					deliverChangedThree(d);
+	    		    	}						
+					}else{//0
+						DataCachePool.addBrand2Sub(deliver.getBrand(), deliver.getSubBrand());
+						DeliverCellModifier.addNewTableRow(deliver);	
+					}
+					}
 				} catch (Exception e) {
 					System.out.println("add deliver failed");
 				}
 			}
+			boolean updateSum = true;
+			double total = 0.000;
+			// boolean has = false;
+			for (int i = 0; i < deliverList.size() - 1; i++) {
+				Deliver stin = (Deliver) (deliverList.get(i));
+				String price = stin.getPrice();
+				String number = stin.getNumber();
+				if(!(DeliverValidator.rowLegal(stin) && DeliverValidator.rowComplete(stin))){
+					updateSum = false;
+					break;
+				}					
+				double p = Double.valueOf(price);
+				int n = Integer.valueOf(number);
+				total += (p * n);
+				// has = true;
+			}
+			if(updateSum){
+				DeliverContentPart.setTotal(df.format(total));
+				DeliverContentPart.setIndeed(df.format(total));
+			}
 		}
-		
-		double total = 0.000;
-//		boolean has = false;
-		for(int i=0;i<deliverList.size()-1;i++){
-			Deliver st = (Deliver)(deliverList.get(i));
-			String price = st.getPrice();
-			String number = st.getNumber();
-			double p = Double.valueOf(price);
-			int n = Integer.valueOf(number);
-			total+=(p * n);	
-//			has = true;
-		}
-		DeliverContentPart.setTotal(df.format(total));
-		DeliverContentPart.setIndeed(df.format(total));	
+
 	}
 
 	/**
@@ -234,10 +402,16 @@ public class DeliverList {
 	public static void removeCurrentHistory(){
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		
-		Map<String, Object> map = new HashMap<String ,Object>();
-		map.put("stock_time", DeliverUtils.getTime());
-		
+//		Map<String, Object> map = new HashMap<String ,Object>();
+//		map.put("stock_time", DeliverUtils.getTime());
+		String order_num = DeliverUtils.getOrderNumber();
 		//haven't change the database
+				
+		try {
+			deliverinfo.deleteDeliverAndCommonByOrderNumber(order_num);
+		} catch (Exception e) {
+			System.out.println("delete deliver failed");
+		}
 		
 		//remove history & item composite
 		ItemComposite itemCurrent = DeliverUtils.getItemCompositeRecord();
@@ -265,6 +439,26 @@ public class DeliverList {
 		DeliverCellModifier.getDeliverList().addDeliver(st);
 		//refresh the table to show color
 		Utils.refreshTable(DeliverCellModifier.getTableViewer().getTable());
+	}
+	
+	public static void updateDeliversByOrderNumber(String ordernum, String indeed){
+		
+		try {
+			deliverinfo.updateDeliversIndeedByOrderNumber(ordernum, indeed);
+		} catch (Exception e) {
+			System.out.println("update the indeed failed");
+		}
+		
+		
+	}
+	
+	public static void deleteDeliversUseLess(String ordernum){
+		
+		try {
+			deliverinfo.deleteDeliversByOrderNumber(ordernum);
+		} catch (Exception e) {
+			System.out.println("update the indeed failed");
+		}
 	}
 	
 	/**
@@ -298,7 +492,9 @@ public class DeliverList {
 			deliverList.clear();//clear first
 			ReturnObject ret = deliverinfo.queryDeliverInfo(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();			
+			List<Object> list = page.getItems();
+			String indeed = "";
+			String ordernum = "";
 			for(int i=0;i<list.size();i++){				
 				DeliverInfoAllDTO cDTO = (DeliverInfoAllDTO) list.get(i);
 				if(i==0){
@@ -310,6 +506,7 @@ public class DeliverList {
 					addr = cDTO.getDeliver_addr();	
 					DeliverContentPart.setCommonInfo(area, name, phone, addr, order, time);
 				}
+				
 				Deliver de_tmp = new Deliver();
 				de_tmp.setID(cDTO.getUni_id());
 				de_tmp.setBrand(cDTO.getBrand());
@@ -318,13 +515,18 @@ public class DeliverList {
 				de_tmp.setUnit(cDTO.getUnit());
 				de_tmp.setPrice(String.valueOf(cDTO.getUnit_price()));
 				de_tmp.setNumber(cDTO.getQuantity());
-				de_tmp.setOrderNumber(cDTO.getOrder_num());
+				ordernum = cDTO.getOrder_num();
+				de_tmp.setOrderNumber(ordernum);
+				indeed = cDTO.getUni_reserve1();
+				if(indeed == null)
+					indeed = "";
 				//...now in test, only show these three property
 				DeliverCellModifier.getDeliverList().addDeliver(de_tmp);
 				p = Double.valueOf(cDTO.getUnit_price());
 				n = Integer.valueOf(cDTO.getQuantity());
 				total+=(p * n);		
 			}
+			DeliverUtils.setOrderNumber(ordernum);
 			//add new line
 			Deliver de = new Deliver(DeliverUtils.getNewLineID());
 			DeliverCellModifier.getDeliverList().addDeliver(de);
@@ -332,7 +534,10 @@ public class DeliverList {
 			Utils.refreshTable(DeliverCellModifier.getTableViewer().getTable());
 			//show total
 			DeliverContentPart.setTotal(df.format(total));
-			DeliverContentPart.setIndeed(df.format(total));	
+			if(indeed.equals(""))
+				DeliverContentPart.setIndeed(df.format(total));
+			else
+				DeliverContentPart.setIndeed(indeed);
 			
 			
 		} catch (Exception e) {

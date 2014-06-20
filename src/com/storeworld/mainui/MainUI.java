@@ -28,6 +28,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.storeworld.deliver.DeliverContentPart;
+import com.storeworld.deliver.DeliverList;
+import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.login.DataBaseService;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
@@ -494,6 +497,17 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 	}
 	@Override
 	public void dispose() {
+		
+		try{
+		if(DeliverUtils.getStatus().equals("NEW") && !DeliverContentPart.getOrderNumber().equals("")){
+			if(DeliverList.getDelivers().size() > 1){
+				DeliverList.deleteDeliversUseLess(DeliverContentPart.getOrderNumber());							
+			}						
+		}
+		}catch(Exception e){
+			System.out.println("delete the useless items of deliver table failed before log out");
+		}
+		
 		try {
 			//kill the process
 			if(DataBaseService.getProc() != null){

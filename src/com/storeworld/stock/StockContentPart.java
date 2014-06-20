@@ -99,6 +99,9 @@ public class StockContentPart extends ContentPart{
 	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
 	private static Button btnNewButton = null;
 	private static Button button_swkb = null;
+	
+	private static DateTime dateTime = null;
+	
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
 		composite = new Composite(this, SWT.NONE);	
@@ -217,7 +220,8 @@ public class StockContentPart extends ContentPart{
 		}
 		
 		dateTime_stock.setEnabled(false);
-		table.setEnabled(false);		
+		table.setEnabled(false);	
+		indeed_val.setEnabled(false);
 	}
 	
 	
@@ -309,6 +313,7 @@ public class StockContentPart extends ContentPart{
 					if(colCurrent == brandColumn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						combo.setVisibleItemCount(5);
 						StockUtils.setCurrentLine(rowCurrent);
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
 						StockUtils.setCurrentSub_Brand(c.getSubBrand());
@@ -318,7 +323,8 @@ public class StockContentPart extends ContentPart{
 						combo.setItems(list.toArray(new String[list.size()]));
 					}else if(colCurrent == sub_brandColumn){//sub_brand column, then fill the combox
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());
+						combo.setVisibleItemCount(5);
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
 						String current_brand = c.getBrand();
 						if( current_brand == null ||current_brand.equals("") || !Utils.checkBrand(current_brand)){
@@ -334,6 +340,7 @@ public class StockContentPart extends ContentPart{
 					}else if(colCurrent == sizeColumn){
 						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+						combo.setVisibleItemCount(5);
 						Stock c = (Stock)(table.getItem(rowCurrent).getData());
 						String current_brand = c.getBrand();
 						String current_sub = c.getSubBrand();
@@ -413,8 +420,62 @@ public class StockContentPart extends ContentPart{
 //		});
 		
 	}
+		
+	public static void addNewStock(){
+		
+		if((StockList.getStocks().size() > 1)){
+			
+			//only records when the time is not empty
+			if(!StockUtils.getEditMode() && !StockUtils.getStatus().equals("HISTORY")){
+				if(!StockUtils.getTime().equals("")){
+					StockUtils.addToHistory();
+				}
+			}
+			//clear table
+			//and add a new line
+			table.removeAll();
+			StockList.removeAllStocks();
+			setTotal("0.00");
+			setIndeed("0.00");
+		}
+		StockUtils.setStatus("NEW");
+		//after we add to history, initial the time
+		initialTimer();
+		StockUtils.setTime("");//initial
+		makeHistoryUnEditable();
+		makeEnable();
+		indeed_val.setEnabled(true);
+		//if entered to add a new stock, leave the edit mode
+		StockUtils.leaveEditMode();
+	}
 	
+	public static void reNewStock(){//for product changed
+		table.removeAll();
+		StockList.removeAllStocks();
+		setTotal("0.00");
+		setIndeed("0.00");
+		StockUtils.setStatus("NEW");
+		//after we add to history, initial the time
+		initialTimer();
+		StockUtils.setTime("");//initial
+		makeHistoryUnEditable();
+		makeEnable();
+		indeed_val.setEnabled(true);
+		//if entered to add a new stock, leave the edit mode
+		StockUtils.leaveEditMode();
+		
+	}
 	
+	public static void reNewStockHistory(){
+		String year = String.valueOf(dateTime.getYear());
+		int mon = dateTime.getMonth()+1;
+		String month = String.valueOf(mon);
+		if(mon<10)
+			month = "0"+month;
+		//date to search
+		String dateSearch = year+month;
+		StockUtils.showSearchHistory(dateSearch);
+	}
 	/**
 	 * initialize the table elements
 	 */
@@ -451,13 +512,13 @@ public class StockContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
-				StockUtils.setStatus("NEW");
+				
 //				StockUtils.setTime();//record the time
 				//TODO: check if has history
 				if((StockList.getStocks().size() > 1)){
 					
 					//only records when the time is not empty
-					if(!StockUtils.getEditMode()){
+					if(!StockUtils.getEditMode() && !StockUtils.getStatus().equals("HISTORY")){
 						if(!StockUtils.getTime().equals("")){
 							StockUtils.addToHistory();
 						}
@@ -469,12 +530,13 @@ public class StockContentPart extends ContentPart{
 					setTotal("0.00");
 					setIndeed("0.00");
 				}
+				StockUtils.setStatus("NEW");
 				//after we add to history, initial the time
 				initialTimer();
 				StockUtils.setTime("");//initial
 				makeHistoryUnEditable();
 				makeEnable();
-				
+				indeed_val.setEnabled(true);
 				//if entered to add a new stock, leave the edit mode
 				StockUtils.leaveEditMode();
 //				StockUtils.setStatus("");//no status??
@@ -530,7 +592,7 @@ public class StockContentPart extends ContentPart{
         StockUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color, 186, 50);//width ??
         composite_2.layout();
         //date picker
-        final DateTime dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
+        dateTime = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
         dateTime.setBounds(12, 520, 98, 30);
 		Button btnSearch = new Button(composite_left, SWT.NONE);
 		//search the history
@@ -593,6 +655,8 @@ public class StockContentPart extends ContentPart{
 				total_val.setText("0.00");//+Constants.SPACE
 				indeed_val.setText("0.00");//+Constants.SPACE
 				btn_delete.setVisible(false);
+				
+				StockUtils.setStatus("NEW");
 			}
 		});
 				
@@ -642,12 +706,30 @@ public class StockContentPart extends ContentPart{
 				if(Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()){
 					String txt = Utils.getIndeed();
 					//reasonable value
+					if(StockList.getStocks().size() > 0){
 					if(pattern_indeed_val.matcher(txt).matches()){	
 						String format_str = df.format(Double.valueOf(txt));
-						indeed_val.setText(format_str);						
+						indeed_val.setText(format_str);			
+						indeed_val.setEnabled(false);
+						//update the database
+						if(!indeed_val.getText().equals(total_val.getText()))
+							StockList.updateStocksByTime(StockUtils.getTime(), indeed_val.getText());
+						if(StockUtils.getEditMode() && StockUtils.getStatus().equals("HISTORY")){
+							//update the history panel
+							StockUtils.getItemCompositeRecord().setDownRight(indeed_val.getText());
+							StockHistory sh = (StockHistory)StockUtils.getItemCompositeRecord().getHistory();
+							sh.setIndeed(indeed_val.getText());
+						}
+						
+						indeed_val.setEnabled(true);
 					}else{
 						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 						mbox.setMessage("数值应为整数或两位小数");
+						mbox.open();
+					}
+					}else{
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("进货列表为空，不存在实付");
 						mbox.open();
 					}
 					//initial the next click
@@ -676,6 +758,7 @@ public class StockContentPart extends ContentPart{
 					makeEnable();
 					btn_edit.setVisible(false);
 					btn_delete.setVisible(true);
+					indeed_val.setEnabled(true);
 					StockUtils.enterEditMode();
 				}
 			}
@@ -876,6 +959,6 @@ public class StockContentPart extends ContentPart{
 		
 		Utils.refreshTable(table);
 		composite_right.setLayout(new FillLayout());
-		
+		StockUtils.setStatus("NEW");//at initial, the status is new, so we can directly add a new one
 	}
 }

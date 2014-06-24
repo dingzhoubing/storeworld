@@ -36,6 +36,10 @@ import com.storeworld.analyze.ratioutils.RatioBlock;
 import com.storeworld.analyze.ratioutils.RatioResultList;
 import com.storeworld.analyze.trendutils.TrendDataSet;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.pojo.dto.AnalysticDTO;
+import com.storeworld.pojo.dto.Pagination;
+import com.storeworld.pojo.dto.ResultSetDTO;
+import com.storeworld.pub.service.Statistic;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
 
@@ -46,6 +50,7 @@ import com.storeworld.utils.Utils;
  */
 public class AnalyzeContentPart extends ContentPart{
 	
+	private static Statistic statistic = new Statistic();
 	/**
 	 * the base composite 
 	 */
@@ -238,10 +243,28 @@ public class AnalyzeContentPart extends ContentPart{
 		args.put("type", type.toString());
 		//call engine to get the data
 		//??
+		ResultSetDTO ro=null;
+		try {
+			ro=statistic.startAnalyzing(args);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(ro == null)
+			return;
+		
+		Pagination page1 = (Pagination) ro.get("table1");
+		Pagination page2 = (Pagination) ro.get("table2");
+		Pagination page3 = (Pagination) ro.get("table3");
+		List<Object> res1 = (List<Object>)page1.getItems();
+		List<Object> res2 = (List<Object>)page2.getItems();
+		List<Object> res3 = (List<Object>)page3.getItems();
+		
 		
 		//this if/else can be optimized, since it looks better in this way, leave it		
 		//case 1: brand ratio, area ratio, trend
 		if(brand.equals(AnalyzerConstants.ALL_BRAND) && area.equals(AnalyzerConstants.ALL_AREA)){
+						
 			//brand ratio
 			RatioBlock rb = new RatioBlock();
 			rb.setBrand_sub(true);//all brands
@@ -249,7 +272,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -262,7 +285,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//area
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -278,7 +301,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -292,7 +315,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//area
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -307,7 +330,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -323,7 +346,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -336,7 +359,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//area
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -352,7 +375,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -366,7 +389,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//area
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -382,7 +405,7 @@ public class AnalyzeContentPart extends ContentPart{
 			rb.setBrand_area(true);//brand
 			RatioResultList rrl = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl.initilByQuery();//the input arg is the query result from Engine			
+			rrl.initilByQuery(res1, 1);//the input arg is the query result from Engine			
 			RatioComposite bc = new RatioComposite(composite_content, 0, rb, rrl);    
     		alys.add(bc);
     		composite_content.setLayout(layout_content);
@@ -397,7 +420,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//brand
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -413,7 +436,7 @@ public class AnalyzeContentPart extends ContentPart{
     		rb2.setBrand_area(false);//brand
 			RatioResultList rrl2 = new RatioResultList();
 			//we should notice that, all the table can not be modified!
-			rrl2.initilByQuery();//the input arg is the query result from Engine			
+			rrl2.initilByQuery(res2, 2);//the input arg is the query result from Engine			
 			RatioComposite bc2 = new RatioComposite(composite_content, 0, rb2, rrl2);    
     		alys.add(bc2);
     		composite_content.setLayout(layout_content);
@@ -426,8 +449,9 @@ public class AnalyzeContentPart extends ContentPart{
 		if(!kind.equals(KIND.NONE)){
 			//trend, always has the trend graph  	
 			TrendDataSet ts = new TrendDataSet();
-			ts.setKind(kind);		
-			TrendComposite tc = new TrendComposite(composite_content, 0, ts); 
+			ts.setKind(kind);	
+			ts.setType(type);
+			TrendComposite tc = new TrendComposite(composite_content, 0, ts, res3); 
 			alys.add(tc);
 			composite_content.setLayout(layout_content);
 			composite_scroll.setMinSize(composite_content.computeSize(SWT.DEFAULT, SWT.DEFAULT));

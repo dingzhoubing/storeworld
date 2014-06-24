@@ -35,6 +35,9 @@ public class ResultSetDTO extends ObjectExternalizable {
 		this.map = map;
 	}
 
+	public void setMap(String key, Object val){
+		map.put(key, val);
+	}
 	/**
 	 * @param key
 	 */

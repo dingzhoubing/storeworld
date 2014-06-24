@@ -65,15 +65,16 @@ public class StockTextCellEditor extends TextCellEditor {
 		boolean valid = false;
 		if(GeneralCCombo.getToolTip()!=null)
 			GeneralCCombo.getToolTip().setVisible(false);
-//		if(this.col == SIZE_COLUMN){
-//			valid = StockValidator.validateSize(val);
-//			if(!valid){
-//			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
+		if(this.col == SIZE_COLUMN){
+			valid = StockValidator.validateSize(val);
+			if(!valid){
+			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 //            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
-//        	tip.setMessage(SIZE_MESSAGE);
-//        	tip.setVisible(true);
-//			}
-//		}else 
+			tip.setLocation(loc.x+ADJUST_X+getShiftWidth(col), loc.y+text.getLocation().y+ADJUST_Y);//
+        	tip.setMessage(SIZE_MESSAGE);
+        	tip.setVisible(true);
+			}
+		}else 
 		if(this.col == UNIT_COLUMN){
 			valid = StockValidator.validateUnit(val);
 			if(!valid){

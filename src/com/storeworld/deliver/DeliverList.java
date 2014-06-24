@@ -182,8 +182,7 @@ public class DeliverList {
 			Deliver stmp = (Deliver)deliverList.get(i);
 			//a different stock
 			if(!stmp.getID().equals(deliver.getID())){
-				if(deliver.getBrand().equals(stmp.getBrand()) && deliver.getSubBrand().equals(stmp.getSubBrand()) 
-						&&deliver.getSize().equals(stmp.getSize())){
+				if(deliver.getBrand().equals(stmp.getBrand()) && deliver.getSubBrand().equals(stmp.getSubBrand())){//&&deliver.getSize().equals(stmp.getSize())
 					ret = true;
 					break;
 				}				
@@ -192,6 +191,10 @@ public class DeliverList {
 		return ret;
 	}
 	
+	
+	
+	//reserve1 : indeed
+	//reserve2: deliver_time
 	/**
 	 * update the deliver data from table & database
 	 * @param deliver
@@ -222,6 +225,8 @@ public class DeliverList {
 			deliver.setTime(DeliverUtils.getTime());
 			deliver.setOrderNumber(DeliverUtils.getOrderNumber());
 			(iterator.next()).update(deliver);
+			
+//			st.put("reserve2", DeliverUtils.getTime());//set the order time for each deliver, need?
 			
 			if(!DeliverValidator.checkID(deliver.getID()) && DeliverValidator.rowLegal(deliver) && DeliverValidator.rowComplete(deliver)){
 				//update the database here		

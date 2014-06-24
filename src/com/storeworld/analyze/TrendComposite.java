@@ -3,6 +3,7 @@ package com.storeworld.analyze;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
@@ -25,13 +26,12 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
 import com.storeworld.analyze.AnalyzerUtils.KIND;
+import com.storeworld.analyze.AnalyzerUtils.TYPE;
 import com.storeworld.analyze.trendutils.TrendDataSet;
+import com.storeworld.pojo.dto.AnalysticDTO;
 
 /**
  * show the trend graph of the result
@@ -41,11 +41,14 @@ import com.storeworld.analyze.trendutils.TrendDataSet;
 public class TrendComposite extends Composite implements AnalyzerBase{
 	
 	private TrendDataSet args;
+	private List<Object> ds;
 	
-	public TrendComposite(Composite parent, int style, TrendDataSet args) {
+	public TrendComposite(Composite parent, int style, TrendDataSet args, List<Object> ds) {
 		super(parent, style);
 		this.args = args;
-
+		ds.clear();
+		ds.addAll(ds);
+				
 		showComposite();
 	}
 	/**
@@ -61,15 +64,34 @@ public class TrendComposite extends Composite implements AnalyzerBase{
 //	private DefaultCategoryDataset createDataset(){
 //		 
 //	}
-	private File ComputeImage(){
+	private File ComputeImage(List<Object> ds){
 		//for test
         JFreeChart mChart = null;
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		dataset.setValue(200, "shipment", "13/4");
-		dataset.setValue(300, "shipment", "14/4");
-		dataset.setValue(250, "shipment", "15/4");
-		dataset.setValue(600, "shipment", "16/4");
-		dataset.setValue(300, "shipment", "17/4");
+		
+		//parse the dataset
+		for(int i=0;i<ds.size();i++){
+			AnalysticDTO item = (AnalysticDTO)ds.get(i);
+			double f1 = Double.valueOf(item.getField1());
+			String f2 = item.getField2();
+			String f3 = item.getField3();
+			String year = f3.substring(0, 4);
+			String mon = f3.substring(4, 6);
+			String x = "";
+			if(args.getType().equals(TYPE.MONTH)){								
+				String d = f3.substring(6, 8);
+				x=year+"/"+mon+"/"+d;
+			}else{
+				x=year+"/"+mon;
+			}
+			dataset.setValue(f1, f2, x);
+		}
+		
+//		dataset.setValue(200, "shipment", "13/4");
+//		dataset.setValue(300, "shipment", "14/4");
+//		dataset.setValue(250, "shipment", "15/4");
+//		dataset.setValue(600, "shipment", "16/4");
+//		dataset.setValue(300, "shipment", "17/4");
 		
 		mChart = ChartFactory.createLineChart("", "", "", dataset, PlotOrientation.VERTICAL, false, true, false);
 		
@@ -115,13 +137,13 @@ public class TrendComposite extends Composite implements AnalyzerBase{
 		else
 			lbl_title.setText("ÀûÈóÇ÷ÊÆ");
 		
-		Image image = computeTrend();			
+//		Image image = computeTrend();			
 		Composite composite_image  = new Composite(this, SWT.BORDER);
 		composite_image.setBackground(new Color(this.getDisplay(), 255, 250, 250));
 		composite_image.setBounds(0, (int)(height/20), 740, 400);		
 		
 		ImageLoader imageLoader = new ImageLoader();
-		File imagefile = ComputeImage();
+		File imagefile = ComputeImage(ds);
 		
 		ImageData[] data;
 		try {

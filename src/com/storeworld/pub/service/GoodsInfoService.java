@@ -129,8 +129,8 @@ public class GoodsInfoService extends BaseAction{
 		int ret = 0;
 		
 		BaseAction tempAction=new BaseAction();
-		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
-		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=?";// and gi.standard=?
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand")};//,map.get("standard")
 		List<Object> params=objectArray2ObjectList(params_tmp);
 		//System.out.println(params);
 		List list=null;
@@ -148,7 +148,8 @@ public class GoodsInfoService extends BaseAction{
 		//if the new good exist:
 		//if the new good not the same as old good, update new good & old good
 		//else update the old good 		
-		String newUnit = String.valueOf(map.get("unit"));		
+		String newUnit = String.valueOf(map.get("unit"));	
+		String newSize = String.valueOf(map.get("standard"));
 		if(checkProductSame(mapold, map)){			
 			Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
 			String Repo = String.valueOf(mapRes.get("repertory"));
@@ -171,7 +172,7 @@ public class GoodsInfoService extends BaseAction{
 				p.setID(id);
 				p.setBrand(String.valueOf(map.get("brand")));
 				p.setSubBrand(String.valueOf(map.get("sub_brand")));
-				p.setSize(String.valueOf(map.get("standard")));
+				p.setSize(newSize);//String.valueOf(map.get("standard"))
 				p.setUnit(newUnit);	
 				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
 				ProductCellModifier.getProductList().productChangedThree(p);
@@ -220,7 +221,7 @@ public class GoodsInfoService extends BaseAction{
 				p.setID(id);
 				p.setBrand(String.valueOf(map.get("brand")));
 				p.setSubBrand(String.valueOf(map.get("sub_brand")));
-				p.setSize(String.valueOf(map.get("standard")));
+				p.setSize(newSize);//String.valueOf(map.get("standard"))
 				p.setUnit(newUnit);	
 				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
 				ProductCellModifier.getProductList().productChangedThree(p);
@@ -247,7 +248,7 @@ public class GoodsInfoService extends BaseAction{
 				p.setID(id);
 				p.setBrand(String.valueOf(map.get("brand")));
 				p.setSubBrand(String.valueOf(map.get("sub_brand")));
-				p.setSize(String.valueOf(map.get("standard")));
+				p.setSize(newSize);//String.valueOf(map.get("standard"))
 				p.setUnit(newUnit);	
 				p.setRepository(String.valueOf(new_repo));//initial it's empty, not null
 				ProductCellModifier.getProductList().productChangedThree(p);
@@ -371,6 +372,7 @@ public class GoodsInfoService extends BaseAction{
 		//new product is exist, find out the new product and update it
 		//update the unit and repository
 		String newUnit = String.valueOf(map.get("unit"));
+		String newSize = String.valueOf(map.get("standard"));
 		
 		Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
 		String oldRepo = String.valueOf(mapRes.get("repertory"));
@@ -389,7 +391,7 @@ public class GoodsInfoService extends BaseAction{
 		p.setID(id);
 		p.setBrand(String.valueOf(map.get("brand")));
 		p.setSubBrand(String.valueOf(map.get("sub_brand")));
-		p.setSize(String.valueOf(map.get("standard")));
+		p.setSize(newSize);//String.valueOf(map.get("standard"))
 		p.setUnit(newUnit);	
 		p.setRepository(str_new_repo);//initial it's empty, not null
 		ProductCellModifier.getProductList().productChangedThree(p);
@@ -427,6 +429,8 @@ public class GoodsInfoService extends BaseAction{
 		}
 		//update the unit and repository
 		String newUnit = String.valueOf(map.get("unit"));
+		String newSize = String.valueOf(map.get("standard"));
+		
 		String addRepo = String.valueOf(map.get("quantity"));
 		
 		Map<String,Object> mapRes = (Map<String,Object>)list.get(0); 
@@ -446,7 +450,7 @@ public class GoodsInfoService extends BaseAction{
 		p.setID(id);
 		p.setBrand(String.valueOf(map.get("brand")));
 		p.setSubBrand(String.valueOf(map.get("sub_brand")));
-		p.setSize(String.valueOf(map.get("standard")));
+		p.setSize(newSize);//String.valueOf(map.get("standard"))
 		p.setUnit(newUnit);	
 		p.setRepository(str_new_repo);//initial it's empty, not null
 		ProductCellModifier.getProductList().productChangedThree(p);

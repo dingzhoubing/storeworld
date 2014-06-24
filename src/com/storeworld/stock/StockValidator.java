@@ -164,7 +164,7 @@ public class StockValidator {
 	public static boolean rowLegal(Stock p){
 		if(p.getBrand() !=null && p.getSubBrand()!=null){
 			
-			if(!p.getBrand().equals("") && !p.getSubBrand().equals("") && !p.getSize().equals("")){
+			if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){// && !p.getSize().equals("")
 
 				if(!p.getUnit().equals("")){
 					//already has one unit
@@ -174,7 +174,7 @@ public class StockValidator {
 				Map<String, Object> prod = new HashMap<String, Object>();
 				prod.put("brand", p.getBrand());
 				prod.put("sub_brand", p.getSubBrand());
-				prod.put("standard", p.getSize());
+//				prod.put("standard", p.getSize());
 				ReturnObject ret;
 				try {
 					ret = goodsinfo.queryGoodsInfo(prod);
@@ -182,12 +182,14 @@ public class StockValidator {
 					List<Object> list = page.getItems();
 					if(list.size() > 0){
 						GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(0);
+						p.setSize(cDTO.getStandard());
 						p.setUnit(cDTO.getUnit());
 					}else{
+						p.setSize("");
 						p.setUnit("");
 					}							
 				} catch (Exception e) {
-					System.out.println("query the unit with brand&sub&size failed");
+					System.out.println("query the size & unit with brand & sub failed");//&size
 				}				
 				StockCellModifier.getStockList().stockChangedForUnit(p);
 				}

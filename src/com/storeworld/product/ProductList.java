@@ -175,8 +175,7 @@ public class ProductList {
 			Product stmp = (Product)productList.get(i);
 			//a different stock
 			if(!stmp.getID().equals(product.getID())){
-				if(product.getBrand().equals(stmp.getBrand()) && product.getSubBrand().equals(stmp.getSubBrand()) 
-						&&product.getSize().equals(stmp.getSize())){
+				if(product.getBrand().equals(stmp.getBrand()) && product.getSubBrand().equals(stmp.getSubBrand())){//&&product.getSize().equals(stmp.getSize())
 					ret = true;
 					break;
 				}				

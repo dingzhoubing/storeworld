@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import com.storeworld.analyze.AnalyzerUtils.TYPE;
 import com.storeworld.database.BaseAction;
 import com.storeworld.database.DataBaseCommonInfo;
 import com.storeworld.deliver.DeliverHistory;
@@ -75,6 +76,9 @@ public class StockInfoService extends BaseAction{
 		
 		return type;
 	}
+	
+	
+	
 	
 	
 	public int updateAllStockInfoForProductChanged(Map<String,Object> mapnew, Map<String,Object> mapold){
@@ -430,6 +434,54 @@ public class StockInfoService extends BaseAction{
 		return ro;
 	}
 	
+	
+	
+	public ReturnObject queryStockInfoByBrandAndSub(String brand, String sub) throws Exception{
+		List list=null;
+		Pagination page = new Pagination();
+		ReturnObject ro=new ReturnObject();
+		List<StockInfoDTO> stockInfoList = new ArrayList<StockInfoDTO>();
+		
+		String sql="select * from stock_info si where si.brand=? and si.sub_brand=?";		
+		List<Object> params = new ArrayList<Object>();
+		params.add(brand);
+		params.add(sub);
+		
+		try {
+			list=executeQuery(sql, params);
+			for(int i=0;i<list.size();i++){
+				Map retMap=(Map) list.get(i);
+				StockInfoDTO stockInfoDto=new StockInfoDTO();
+				stockInfoDto.setId(String.valueOf(retMap.get("id")) );
+				stockInfoDto.setBrand((String) retMap.get("brand"));
+				stockInfoDto.setQuantity(String.valueOf(retMap.get("quantity")));
+				stockInfoDto.setReserve1((String) retMap.get("reserve1"));
+				stockInfoDto.setReserve2((String) retMap.get("reserve2"));
+				stockInfoDto.setReserve3((String) retMap.get("reserve3"));
+				stockInfoDto.setStandard((String) retMap.get("standard"));
+				stockInfoDto.setSub_brand((String) retMap.get("sub_brand"));
+				stockInfoDto.setUnit((String) retMap.get("unit"));
+				stockInfoDto.setUnit_price((Float) retMap.get("unit_price"));
+				stockInfoDto.setStock_from((String) retMap.get("stock_from"));
+				stockInfoDto.setStock_time((String) retMap.get("stock_time"));
+				stockInfoList.add(stockInfoDto);
+			}
+			page.setItems((List)stockInfoList);
+			ro.setReturnDTO(page);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("查询货品信息失败！");
+		}
+		return ro;
+	}
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * description:查询满足条件的某几条信息(条件最多为：品牌，子品牌，规格，进货厂家，进货日期)
 	 * @param map：装的是查询条件
@@ -530,17 +582,17 @@ public class StockInfoService extends BaseAction{
 	 */
 	public ReturnObject queryStockInfoByDefaultStocktime(Map<String,Object> map) throws Exception{
 		List list=null;
-		statistic tempService=new statistic();
+		Statistic tempService=new Statistic();
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
 		List<StockInfoDTO> stockInfoList = new ArrayList<StockInfoDTO>();
 		
 		String stock_time_temp=(String) map.get("stock_time");
-		String stock_time=stock_time_temp.substring(0, 8);
-		String start_time=tempService.calculateStartTimeByEndTime(stock_time,1);
-		start_time=start_time+"000000";
-		stock_time=stock_time_temp;
-		
+		String stock_time=stock_time_temp.substring(0, 6);
+//		String start_time=tempService.calculateStartTimeByEndTime(stock_time,TYPE.MONTH.toString());
+		String start_time=stock_time+"00000000";
+//		stock_time=stock_time_temp;
+		stock_time = stock_time+"31235959";
 
 		
 		String sql="select * from stock_info si where 1=1";
@@ -596,7 +648,7 @@ public class StockInfoService extends BaseAction{
 	 */
 	public ReturnObject queryStockInfoByInputStocktime(Map<String,Object> map) throws Exception{
 		List list=null;
-		statistic tempService=new statistic();
+		Statistic tempService=new Statistic();
 		Pagination page = new Pagination();
 		ReturnObject ro=new ReturnObject();
 		List<StockInfoDTO> stockInfoList = new ArrayList<StockInfoDTO>();

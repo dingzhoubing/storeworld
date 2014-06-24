@@ -131,7 +131,7 @@ public class ProductValidator {
 	public static boolean rowLegal(Product p){
 		if(p.getBrand() !=null && p.getSubBrand()!=null){//no use, never null
 			
-			if(!p.getBrand().equals("") && !p.getSubBrand().equals("")&& !p.getSize().equals(""))
+			if(!p.getBrand().equals("") && !p.getSubBrand().equals(""))//&& !p.getSize().equals("")
 				return true;
 			else
 				return false;

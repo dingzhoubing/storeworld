@@ -1,6 +1,7 @@
 package com.storeworld.analyze.trendutils;
 
 import com.storeworld.analyze.AnalyzerUtils.KIND;
+import com.storeworld.analyze.AnalyzerUtils.TYPE;
 
 public class TrendDataSet {
 
@@ -10,6 +11,7 @@ public class TrendDataSet {
 	 * false: profit
 	 */
 	private KIND kind;
+	private TYPE type;
 	
 	public TrendDataSet(){
 		
@@ -22,4 +24,10 @@ public class TrendDataSet {
 		return this.kind;
 	}
 	
+	public void setType(TYPE type){
+		this.type = type;
+	}
+	public TYPE getType(){
+		return this.type;
+	}
 }

@@ -464,27 +464,28 @@ public class DeliverContentPart extends ContentPart{
 							comboboxCellEditor2.setObjects(list);
 							combo.setItems(list.toArray(new String[list.size()]));
 						}
-					}else if(colCurrent == sizeColumn){
-						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
-						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
-						String current_brand = c.getBrand();
-						String current_sub = c.getSubBrand();
-						//all this will make the size column with empty
-						if(current_brand == null || current_brand.equals("") || current_sub==null || current_sub.equals("")
-								|| !Utils.checkBrand(current_brand) || !Utils.checkSubBrand(current_sub)){
-							combo.removeAll();
-							c.setSize("");
-							deliverlist.deliverChanged(c);	
-						}else{
-							//query the database to get the available size
-							List<String> list = Utils.getSizes(current_brand, current_sub);
-							//set data into objects
-							comboboxCellEditor3.setObjects(list);
-							combo.setItems(list.toArray(new String[list.size()]));
-						}
-													
 					}
+//					else if(colCurrent == sizeColumn){
+//						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
+//						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
+//						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
+//						String current_brand = c.getBrand();
+//						String current_sub = c.getSubBrand();
+//						//all this will make the size column with empty
+//						if(current_brand == null || current_brand.equals("") || current_sub==null || current_sub.equals("")
+//								|| !Utils.checkBrand(current_brand) || !Utils.checkSubBrand(current_sub)){
+//							combo.removeAll();
+//							c.setSize("");
+//							deliverlist.deliverChanged(c);	
+//						}else{
+//							//query the database to get the available size
+//							List<String> list = Utils.getSizes(current_brand, current_sub);
+//							//set data into objects
+//							comboboxCellEditor3.setObjects(list);
+//							combo.setItems(list.toArray(new String[list.size()]));
+//						}
+//													
+//					}
 					else if(colCurrent == deleteButtonColumn){
 						if(rowCurrent == table.getItemCount()-1){
 							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
@@ -1580,9 +1581,10 @@ public class DeliverContentPart extends ContentPart{
 //		comboboxCellEditor2.setActivationStyle(SWT.Expand);
 		cellEditor[2] = comboboxCellEditor2;
 		
-		ComboUtils.setWidth_Col(columnWidth, 3, Constants.DELIVER_TYPE_SUB_BRAND);
-		comboboxCellEditor3 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSizes());
-		cellEditor[3] = comboboxCellEditor3;
+//		ComboUtils.setWidth_Col(columnWidth, 3, Constants.DELIVER_TYPE_SUB_BRAND);
+//		comboboxCellEditor3 = new GeneralComboCellEditor<String>(tableViewer.getTable(), Utils.getSizes());
+//		cellEditor[3] = comboboxCellEditor3;
+		cellEditor[3] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 3);
 		
 		cellEditor[4] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 4);
 		cellEditor[5] = new DeliverTextCellEditor(tableViewer.getTable(),columnWidth, 5);

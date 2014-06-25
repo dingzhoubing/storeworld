@@ -62,7 +62,8 @@ public class RatioResultList {
 			String f1 = item.getField1();
 			String f2 = item.getField2();
 			double f3 = Double.valueOf(item.getField3());
-			String ratio = (f3*100)+"%";
+			double f3v = (double)(Math.round(((double)f3*100)*100))/100;
+			String ratio = (f3v)+"%";
 			
 			RatioAnalyzer sba = new RatioAnalyzer(f1, f2, ratio);
 			resultList.add(sba);

@@ -59,6 +59,7 @@ public class StockMarker {
 		}else{
 			ArrayList<StockItem> items = new ArrayList<StockItem>();
 			items.add(si);
+			stocks.put(key, items);
 		}		
 	}
 	
@@ -90,6 +91,8 @@ public class StockMarker {
 		}else{
 			return 0.0;//if no such product, no such profit
 		}		
+		
+		profit = (double)(Math.round((profit)*100))/100;
 		return profit;
 	}
 	

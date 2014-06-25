@@ -1,5 +1,6 @@
 package com.storeworld.analyze;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -23,11 +27,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
 import com.storeworld.analyze.AnalyzerUtils.KIND;
@@ -35,10 +41,14 @@ import com.storeworld.analyze.AnalyzerUtils.TYPE;
 import com.storeworld.analyze.ratioutils.RatioBlock;
 import com.storeworld.analyze.ratioutils.RatioResultList;
 import com.storeworld.analyze.trendutils.TrendDataSet;
+import com.storeworld.customer.CustomerUtils;
+import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.AnalysticDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ResultSetDTO;
+import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.pub.service.Statistic;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
@@ -66,7 +76,7 @@ public class AnalyzeContentPart extends ContentPart{
 	private static final String RECENT_YEAR = "最近一个年";
 	private static final String RECENT_ALL = "所有记录";
 	
-	
+	private static ResultSetDTO ro= new ResultSetDTO();
 
 	
 	private static ExpandBar expandBar = null;
@@ -233,7 +243,7 @@ public class AnalyzeContentPart extends ContentPart{
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		time = formatter.format(new Date());
-		Map<String, Object> args = new HashMap<String ,Object>();
+		final Map<String, Object> args = new HashMap<String ,Object>();
 		args.put("brand", brand);
 		args.put("sub_brand", sub);
 		args.put("area", area);
@@ -241,25 +251,66 @@ public class AnalyzeContentPart extends ContentPart{
 		args.put("time", time);
 		args.put("kind", kind.toString());
 		args.put("type", type.toString());
-		//call engine to get the data
-		//??
-		ResultSetDTO ro=null;
-		try {
-			ro=statistic.startAnalyzing(args);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//call engine to get the data	
+		
+		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		IRunnableWithProgress runnable = new IRunnableWithProgress() {  
+		    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {  
+		    	
+		    Display.getDefault().asyncExec(new Runnable() {  
+		                public void run() {  
+		        monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  
+		        
+		        monitor.worked(25);  
+	            monitor.subTask("收集数据");
+				try {
+					ro.getMap().clear();
+					ro=statistic.startAnalyzing(args, monitor);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
+				monitor.worked(100);  
+	            monitor.subTask("分析完成");
+	            
+		        monitor.done();
+		                }
+		    	  });
+		    }  
+		};  
+		  
+		try {  
+		    progressDialog.run(true,/*是否开辟另外一个线程*/  
+		    false,/*是否可执行取消操作的线程*/  
+		    runnable/*线程所执行的具体代码*/  
+		    );  
+		} catch (InvocationTargetException e) {  
+		    e.printStackTrace();  
+		} catch (InterruptedException e) {  
+		    e.printStackTrace();  
 		}
-		if(ro == null)
+		
+		if(ro.getMap().isEmpty())
 			return;
 		
 		Pagination page1 = (Pagination) ro.get("table1");
 		Pagination page2 = (Pagination) ro.get("table2");
 		Pagination page3 = (Pagination) ro.get("table3");
-		List<Object> res1 = (List<Object>)page1.getItems();
-		List<Object> res2 = (List<Object>)page2.getItems();
-		List<Object> res3 = (List<Object>)page3.getItems();
+		List<Object> res1 = new ArrayList<Object>();
+		List<Object> res2 = new ArrayList<Object>();
+		List<Object> res3 = new ArrayList<Object>();
+		if(page1 != null)
+			res1 = (List<Object>)page1.getItems();
+		if(page2 != null)
+			res2 = (List<Object>)page2.getItems();
+		if(page2 != null)
+			res3 = (List<Object>)page3.getItems();
 		
+		if(res1.size()==0 && res2.size()==0 && res3.size()==0){
+			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+	    	messageBox.setMessage("没有满足查询条件的数据可供分析，请查询其他条件");
+	    	messageBox.open();
+	    	return;
+		}
 		
 		//this if/else can be optimized, since it looks better in this way, leave it		
 		//case 1: brand ratio, area ratio, trend
@@ -545,6 +596,7 @@ public class AnalyzeContentPart extends ContentPart{
 		 			public void handleEvent(Event event) {
 		 				if(combo_brand_shipment.getText().equals("")){
 		 					combo_brand_shipment.setText(AnalyzerConstants.ALL_BRAND);
+		 					combo_sub_shipment.setText(AnalyzerConstants.ALL_SUB);
 		 					combo_sub_shipment.setVisible(false);
 		 				}		 				
 		 			}
@@ -619,6 +671,7 @@ public class AnalyzeContentPart extends ContentPart{
 		 			public void handleEvent(Event event) {
 		 				if(combo_area_shipment.getText().equals("")){
 		 					combo_area_shipment.setText(AnalyzerConstants.ALL_AREA);
+		 					combo_cus_shipment.setText(AnalyzerConstants.ALL_CUSTOMER);
 		 					combo_cus_shipment.setVisible(false);
 		 				}		 				
 		 			}
@@ -709,6 +762,7 @@ public class AnalyzeContentPart extends ContentPart{
 			 			public void handleEvent(Event event) {
 			 				if(combo_brand_profit.getText().equals("")){
 			 					combo_brand_profit.setText(AnalyzerConstants.ALL_BRAND);
+			 					combo_sub_profit.setText(AnalyzerConstants.ALL_SUB);
 			 					combo_sub_profit.setVisible(false);
 			 				}		 				
 			 			}
@@ -780,6 +834,7 @@ public class AnalyzeContentPart extends ContentPart{
 		 			public void handleEvent(Event event) {
 		 				if(combo_area_profit.getText().equals("")){
 		 					combo_area_profit.setText(AnalyzerConstants.ALL_AREA);
+		 					combo_cus_profit.setText(AnalyzerConstants.ALL_CUSTOMER);
 		 					combo_cus_profit.setVisible(false);
 		 				}		 				
 		 			}

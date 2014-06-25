@@ -80,7 +80,9 @@ public class RatioComposite extends Composite implements AnalyzerBase{
 		
 		ArrayList<RatioAnalyzer> results = this.resultlist.getResults();
 		for(RatioAnalyzer ra : results){
-			pieDataset.setValue(ra.getCol1(), Double.valueOf(ra.getCol3()));
+			String fv = ra.getCol3();
+			fv = fv.substring(0, fv.length()-1);
+			pieDataset.setValue(ra.getCol1(), Double.valueOf(fv));
 		}
 		File file = null;
 		JFreeChart chart = ChartFactory.createPieChart

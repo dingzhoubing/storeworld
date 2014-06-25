@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import com.storeworld.analyze.AnalyzerConstants;
 import com.storeworld.analyze.AnalyzerUtils.KIND;
 import com.storeworld.analyze.AnalyzerUtils.TYPE;
@@ -14,13 +16,12 @@ import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ResultSetDTO;
 import com.storeworld.pojo.dto.ReturnObject;
-import com.storeworld.pojo.dto.StockFactor;
 import com.storeworld.pojo.dto.StockInfoDTO;
-import com.storeworld.utils.Utils;
 public class Statistic extends BaseAction{
 	
 	private static DeliverInfoService deliverinfo = new DeliverInfoService();
 	private static StockInfoService stockinfo = new StockInfoService();
+	private static IProgressMonitor monitor = null;
 	
 	private static int BRAND_SUB = 5;
 	private static int AREA_CUS = 10;
@@ -87,11 +88,11 @@ public class Statistic extends BaseAction{
 		String day=end_time.substring(6, 8);
 		String tail = end_time.substring(8);
 		String retStr=null;
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			retStr = oneMonthAgo(year, month, day);
-		}else if(timeType.equals(TYPE.SEASON)){
+		}else if(timeType.equals(TYPE.SEASON.toString())){
 			retStr = oneSeasonAgo(year, month, day);
-		}else if(timeType.equals(TYPE.YEAR)){
+		}else if(timeType.equals(TYPE.YEAR.toString())){
 			retStr = oneYearAgo(year, month, day);
 		}else{//TYPE.ALL
 			retStr = oneAllAgo(year, month, day);
@@ -102,7 +103,7 @@ public class Statistic extends BaseAction{
 	//sort the keyset of the result list from larger -> smaller
 	private void sortKeySetForShipment(ArrayList<String> keylist, HashMap<String, Integer> map){
 		for(int i=0;i<keylist.size();i++){
-			for(int j=i+1; j<keylist.size()-i; j++){
+			for(int j=i+1; j<keylist.size(); j++){
 				String keya = keylist.get(i);
 				String keyb = keylist.get(j);
 				int a = map.get(keylist.get(i));
@@ -117,7 +118,7 @@ public class Statistic extends BaseAction{
 	
 	private void sortKeySetForProfit(ArrayList<String> keylist, HashMap<String, Double> map){
 		for(int i=0;i<keylist.size();i++){
-			for(int j=i+1; j<keylist.size()-i; j++){
+			for(int j=i+1; j<keylist.size(); j++){
 				String keya = keylist.get(i);
 				String keyb = keylist.get(j);
 				double a = map.get(keylist.get(i));
@@ -130,13 +131,13 @@ public class Statistic extends BaseAction{
 		}		
 	}
 	
-	//sort the time 
+	//sort the time from last -> now
 	private void sortKeySetForTrend(ArrayList<String> keylist){
 		for(int i=0;i<keylist.size();i++){
-			for(int j=i+1; j<keylist.size()-i; j++){
+			for(int j=i+1; j<keylist.size(); j++){
 				String keya = keylist.get(i);
 				String keyb = keylist.get(j);
-				if((keya.compareTo(keyb)) < 0){
+				if((keya.compareTo(keyb)) > 0){
 					keylist.set(i, keyb);
 					keylist.set(j, keya);
 				}				
@@ -147,12 +148,12 @@ public class Statistic extends BaseAction{
 	//sort the stock search result
 	private void sortStockResultByTime(List<Object> stocks){
 		for(int i=0;i<stocks.size();i++){
-			for(int j=i+1; j<stocks.size()-i; j++){
+			for(int j=i+1; j<stocks.size(); j++){
 				StockInfoDTO sa = (StockInfoDTO)stocks.get(i);
 				StockInfoDTO sb = (StockInfoDTO)stocks.get(j);
 				String ta = sa.getStock_time();
 				String tb = sb.getStock_time();
-				if((ta.compareTo(tb)) < 0){
+				if((ta.compareTo(tb)) > 0){
 					stocks.set(i, tb);
 					stocks.set(j, ta);
 				}				
@@ -216,7 +217,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -270,8 +271,8 @@ public class Statistic extends BaseAction{
 					trends.put(time, number);
 				}
 				
-			}//end for
-			
+			}//end for			
+	        
 			//sort the brand, area
 			ArrayList<String> brands = new ArrayList<String>();
 			ArrayList<String> areas = new ArrayList<String>();
@@ -282,7 +283,7 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForShipment(brands, brand2num);
 			sortKeySetForShipment(areas, area2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
@@ -290,11 +291,12 @@ public class Statistic extends BaseAction{
 			
 			//brands ratio
 			double left = 1.00;			
+			if(brands.size() > 0){
 			for(int i=0;i<brands.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				int tmpnum = brand2num.get(brands.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;
 				left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
@@ -309,13 +311,15 @@ public class Statistic extends BaseAction{
 			brands_ratio.add(resDTO);
 			page1.setItems((List)brands_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
+			if(areas.size() > 0){
 			double left_area = 1.00;			
 			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				int tmpnum_area = area2num.get(areas.get(i));
-				double ratio_area = (double)(Math.round((tmpnum_area/sumAll)*10000))/10000;
+				double ratio_area = (double)(Math.round(((double)tmpnum_area/sumAll)*10000))/10000;
 				left_area-=ratio_area;
 				resDTO_area.setField2(tmpnum_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
@@ -330,7 +334,7 @@ public class Statistic extends BaseAction{
 			areas_ratio.add(resDTO_area);
 			page2.setItems((List)areas_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -379,7 +383,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -405,6 +409,7 @@ public class Statistic extends BaseAction{
 				String time = cDTO.getDeliver_time().substring(0, timeStartMarker+2);
 				int number = Integer.valueOf(cDTO.getQuantity());
 				double price = Double.valueOf(cDTO.getUnit_price());
+				price = (double)(Math.round(price*100))/100;
 				double profit = smarker.getProfitByKey(key, number, price);
 				allProfit+=profit;
 				if(brand2profit.containsKey(brand)){
@@ -428,6 +433,8 @@ public class Statistic extends BaseAction{
 					trendprofit.put(time, profit);
 				}				
 			}
+			//preserve precise 2
+			allProfit = (double)(Math.round(allProfit*100))/100;
 			
 			//sort the brand, area
 			ArrayList<String> brands = new ArrayList<String>();
@@ -439,20 +446,22 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForProfit(brands, brand2profit);
 			sortKeySetForProfit(areas, area2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
 			combineKeySetForProfit(areas, area2profit, AREA_CUS);
 			
 			//brands ratio
-			double left = 1.00;			
+			double left = 1.00;		
+			if(brands.size() > 0){
 			for(int i=0;i<brands.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				double tmpprofit = brand2profit.get(brands.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				brands_ratio.add(resDTO);
@@ -466,14 +475,17 @@ public class Statistic extends BaseAction{
 			brands_ratio.add(resDTO);
 			page1.setItems((List)brands_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_area = 1.00;			
-			for(int i=0;i<brands.size()-1;i++){
+			double left_area = 1.00;	
+			if(areas.size() > 0){
+			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				double tmpprofit_area = area2profit.get(areas.get(i));
 				double ratio_area = (double)(Math.round((tmpprofit_area/allProfit)*10000))/10000;
-				left_area-=ratio_area;
+				if(ratio_area > 0.00)
+					left_area-=ratio_area;
 				resDTO_area.setField2(tmpprofit_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
 				areas_ratio.add(resDTO_area);
@@ -487,7 +499,7 @@ public class Statistic extends BaseAction{
 			areas_ratio.add(resDTO_area);
 			page2.setItems((List)areas_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -512,7 +524,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -578,20 +590,22 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForShipment(brands, brand2num);
 			sortKeySetForShipment(customers, cus2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
 			
 			//brands ratio
-			double left = 1.00;			
+			double left = 1.00;		
+			if(brands.size() > 0){
 			for(int i=0;i<brands.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				int tmpnum = brand2num.get(brands.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
-				left-=ratio;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;				
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
 				brands_ratio.add(resDTO);
@@ -605,14 +619,17 @@ public class Statistic extends BaseAction{
 			brands_ratio.add(resDTO);
 			page1.setItems((List)brands_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_cus = 1.00;			
+			double left_cus = 1.00;		
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				int tmpnum_cus = cus2num.get(customers.get(i));
-				double ratio_cus = (double)(Math.round((tmpnum_cus/sumAll)*10000))/10000;
-				left_cus-=ratio_cus;
+				double ratio_cus = (double)(Math.round(((double)tmpnum_cus/sumAll)*10000))/10000;
+				if(ratio_cus > 0.00)
+					left_cus-=ratio_cus;
 				resDTO_cus.setField2(tmpnum_cus + "");//number
 				resDTO_cus.setField3(ratio_cus + "");
 				cus_ratio.add(resDTO_cus);
@@ -626,7 +643,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -675,7 +692,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -735,20 +752,22 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForProfit(brands, brand2profit);
 			sortKeySetForProfit(customers, cus2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
 			combineKeySetForProfit(customers, cus2profit, AREA_CUS);
 			
 			//brands ratio
-			double left = 1.00;			
+			double left = 1.00;		
+			if(brands.size() > 0){
 			for(int i=0;i<brands.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				double tmpprofit = brand2profit.get(brands.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				brands_ratio.add(resDTO);
@@ -762,14 +781,17 @@ public class Statistic extends BaseAction{
 			brands_ratio.add(resDTO);
 			page1.setItems((List)brands_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_cus = 1.00;			
+			double left_cus = 1.00;		
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				double tmpprofit_cus = cus2profit.get(customers.get(i));
 				double ratio_cus = (double)(Math.round((tmpprofit_cus/allProfit)*10000))/10000;
-				left_cus-=ratio_cus;
+				if(ratio_cus > 0.00)
+					left_cus-=ratio_cus;
 				resDTO_cus.setField2(tmpprofit_cus + "");//number
 				resDTO_cus.setField3(ratio_cus + "");
 				cus_ratio.add(resDTO_cus);
@@ -783,7 +805,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -806,7 +828,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -861,7 +883,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trends.keySet());
 			
 			sortKeySetForShipment(brands, brand2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
@@ -872,7 +894,7 @@ public class Statistic extends BaseAction{
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				int tmpnum = brand2num.get(brands.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;
 				left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
@@ -936,7 +958,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -986,19 +1008,21 @@ public class Statistic extends BaseAction{
 			dates.addAll(trendprofit.keySet());
 			
 			sortKeySetForProfit(brands, brand2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
 			
 			//brands ratio
 			double left = 1.00;			
+			if(brands.size() > 0){
 			for(int i=0;i<brands.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(brands.get(i));//brand
 				double tmpprofit = brand2profit.get(brands.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				brands_ratio.add(resDTO);
@@ -1012,6 +1036,7 @@ public class Statistic extends BaseAction{
 			brands_ratio.add(resDTO);
 			page1.setItems((List)brands_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
 			
 			//trends
@@ -1036,7 +1061,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -1102,19 +1127,20 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForShipment(subs, sub2num);
 			sortKeySetForShipment(areas, area2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
 			combineKeySetForShipment(areas, area2num, AREA_CUS);
 			
 			//brands ratio
-			double left = 1.00;			
+			double left = 1.00;	
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				int tmpnum = sub2num.get(subs.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;
 				left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
@@ -1129,13 +1155,15 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_area = 1.00;			
+			double left_area = 1.00;		
+			if(areas.size() > 0){
 			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				int tmpnum_area = area2num.get(areas.get(i));
-				double ratio_area = (double)(Math.round((tmpnum_area/sumAll)*10000))/10000;
+				double ratio_area = (double)(Math.round(((double)tmpnum_area/sumAll)*10000))/10000;
 				left_area-=ratio_area;
 				resDTO_area.setField2(tmpnum_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
@@ -1150,7 +1178,7 @@ public class Statistic extends BaseAction{
 			areas_ratio.add(resDTO_area);
 			page2.setItems((List)areas_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -1199,7 +1227,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -1259,7 +1287,7 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForProfit(subs, sub2profit);
 			sortKeySetForProfit(areas, area2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
@@ -1267,12 +1295,14 @@ public class Statistic extends BaseAction{
 			
 			//brands ratio
 			double left = 1.00;			
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				double tmpprofit = sub2profit.get(subs.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				subs_ratio.add(resDTO);
@@ -1286,14 +1316,17 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_area = 1.00;			
+			double left_area = 1.00;	
+			if(areas.size() > 0){
 			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				double tmpprofit_area = area2profit.get(areas.get(i));
 				double ratio_area = (double)(Math.round((tmpprofit_area/allProfit)*10000))/10000;
-				left_area-=ratio_area;
+				if(ratio_area > 0.00)
+					left_area-=ratio_area;
 				resDTO_area.setField2(tmpprofit_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
 				areas_ratio.add(resDTO_area);
@@ -1307,7 +1340,7 @@ public class Statistic extends BaseAction{
 			areas_ratio.add(resDTO_area);
 			page2.setItems((List)areas_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -1332,7 +1365,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -1398,19 +1431,20 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForShipment(subs, sub2num);
 			sortKeySetForShipment(customers, cus2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
 			
 			//brands ratio
-			double left = 1.00;			
+			double left = 1.00;	
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				int tmpnum = sub2num.get(subs.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;
 				left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
@@ -1425,13 +1459,15 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_cus = 1.00;			
+			double left_cus = 1.00;		
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				int tmpnum_area = cus2num.get(customers.get(i));
-				double ratio_area = (double)(Math.round((tmpnum_area/sumAll)*10000))/10000;
+				double ratio_area = (double)(Math.round(((double)tmpnum_area/sumAll)*10000))/10000;
 				left_cus-=ratio_area;
 				resDTO_cus.setField2(tmpnum_area + "");//number
 				resDTO_cus.setField3(ratio_area + "");
@@ -1446,7 +1482,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -1495,7 +1531,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -1555,7 +1591,7 @@ public class Statistic extends BaseAction{
 			
 			sortKeySetForProfit(subs, sub2profit);
 			sortKeySetForProfit(customers, cus2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
@@ -1563,12 +1599,14 @@ public class Statistic extends BaseAction{
 			
 			//brands ratio
 			double left = 1.00;			
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				double tmpprofit = sub2profit.get(subs.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				subs_ratio.add(resDTO);
@@ -1582,14 +1620,17 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
-			double left_cus = 1.00;			
+			double left_cus = 1.00;
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				double tmpprofit_cus = cus2profit.get(customers.get(i));
 				double ratio_cus = (double)(Math.round((tmpprofit_cus/allProfit)*10000))/10000;
-				left_cus-=ratio_cus;
+				if(ratio_cus > 0.00)
+					left_cus-=ratio_cus;
 				resDTO_cus.setField2(tmpprofit_cus + "");//number
 				resDTO_cus.setField3(ratio_cus + "");
 				cus_ratio.add(resDTO_cus);
@@ -1603,7 +1644,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -1628,7 +1669,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -1681,18 +1722,19 @@ public class Statistic extends BaseAction{
 			dates.addAll(trends.keySet());
 			
 			sortKeySetForShipment(subs, sub2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
 			
 			//brands ratio
 			double left = 1.00;			
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				int tmpnum = sub2num.get(subs.get(i));
-				double ratio = (double)(Math.round((tmpnum/sumAll)*10000))/10000;
+				double ratio = (double)(Math.round(((double)tmpnum/sumAll)*10000))/10000;
 				left-=ratio;
 				resDTO.setField2(tmpnum + "");//number
 				resDTO.setField3(ratio + "");
@@ -1707,6 +1749,7 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
 			
 			//trends
@@ -1756,7 +1799,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -1806,19 +1849,21 @@ public class Statistic extends BaseAction{
 			dates.addAll(trendprofit.keySet());
 			
 			sortKeySetForProfit(subs, sub2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
 			
 			//brands ratio
 			double left = 1.00;			
+			if(subs.size() > 0){
 			for(int i=0;i<subs.size()-1;i++){
 				AnalysticDTO resDTO = new AnalysticDTO();
 				resDTO.setField1(subs.get(i));//brand
 				double tmpprofit = sub2profit.get(subs.get(i));
 				double ratio = (double)(Math.round((tmpprofit/allProfit)*10000))/10000;
-				left-=ratio;
+				if(ratio > 0.00)
+					left-=ratio;
 				resDTO.setField2(tmpprofit + "");//number
 				resDTO.setField3(ratio + "");
 				subs_ratio.add(resDTO);
@@ -1832,6 +1877,7 @@ public class Statistic extends BaseAction{
 			subs_ratio.add(resDTO);
 			page1.setItems((List)subs_ratio);
 			result.setMap("table1", page1);
+			}
 			//areas ratio
 			
 			//trends
@@ -1858,7 +1904,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -1912,7 +1958,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trends.keySet());
 			
 			sortKeySetForShipment(areas, area2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(areas, area2num, AREA_CUS);
@@ -1920,12 +1966,13 @@ public class Statistic extends BaseAction{
 			//brands ratio
 			
 			//cus ratio
-			double left_area = 1.00;			
+			double left_area = 1.00;		
+			if(areas.size() > 0){
 			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				int tmpnum_area = area2num.get(areas.get(i));
-				double ratio_area = (double)(Math.round((tmpnum_area/sumAll)*10000))/10000;
+				double ratio_area = (double)(Math.round(((double)tmpnum_area/sumAll)*10000))/10000;
 				left_area-=ratio_area;
 				resDTO_area.setField2(tmpnum_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
@@ -1940,7 +1987,7 @@ public class Statistic extends BaseAction{
 			area_ratio.add(resDTO_area);
 			page2.setItems((List)area_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -1988,7 +2035,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -2039,7 +2086,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trendprofit.keySet());
 			
 			sortKeySetForProfit(areas, area2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(areas, area2profit, AREA_CUS);
@@ -2048,12 +2095,14 @@ public class Statistic extends BaseAction{
 			
 			//areas ratio
 			double left_cus = 1.00;			
+			if(areas.size() > 0){
 			for(int i=0;i<areas.size()-1;i++){
 				AnalysticDTO resDTO_area = new AnalysticDTO();
 				resDTO_area.setField1(areas.get(i));//brand
 				double tmpprofit_area = area2profit.get(areas.get(i));
 				double ratio_area = (double)(Math.round((tmpprofit_area/allProfit)*10000))/10000;
-				left_cus-=ratio_area;
+				if(ratio_area > 0.00)
+					left_cus-=ratio_area;
 				resDTO_area.setField2(tmpprofit_area + "");//number
 				resDTO_area.setField3(ratio_area + "");
 				area_ratio.add(resDTO_area);
@@ -2067,7 +2116,7 @@ public class Statistic extends BaseAction{
 			area_ratio.add(resDTO_area);
 			page2.setItems((List)area_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -2092,7 +2141,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -2146,7 +2195,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trends.keySet());
 			
 			sortKeySetForShipment(customers, cus2num);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
@@ -2155,11 +2204,12 @@ public class Statistic extends BaseAction{
 			
 			//cus ratio
 			double left_cus = 1.00;			
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				int tmpnum_cus = cus2num.get(customers.get(i));
-				double ratio_cus = (double)(Math.round((tmpnum_cus/sumAll)*10000))/10000;
+				double ratio_cus = (double)(Math.round(((double)tmpnum_cus/sumAll)*10000))/10000;
 				left_cus-=ratio_cus;
 				resDTO_cus.setField2(tmpnum_cus + "");//number
 				resDTO_cus.setField3(ratio_cus + "");
@@ -2174,7 +2224,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -2222,7 +2272,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -2273,7 +2323,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trendprofit.keySet());
 			
 			sortKeySetForProfit(customers, cus2profit);
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			combineKeySetForProfit(customers, cus2profit, AREA_CUS);
@@ -2281,13 +2331,15 @@ public class Statistic extends BaseAction{
 			//brands ratio
 			
 			//areas ratio
-			double left_cus = 1.00;			
+			double left_cus = 1.00;		
+			if(customers.size() > 0){
 			for(int i=0;i<customers.size()-1;i++){
 				AnalysticDTO resDTO_cus = new AnalysticDTO();
 				resDTO_cus.setField1(customers.get(i));//brand
 				double tmpprofit_cus = cus2profit.get(customers.get(i));
 				double ratio_cus = (double)(Math.round((tmpprofit_cus/allProfit)*10000))/10000;
-				left_cus-=ratio_cus;
+				if(ratio_cus > 0.00)
+					left_cus-=ratio_cus;
 				resDTO_cus.setField2(tmpprofit_cus + "");//number
 				resDTO_cus.setField3(ratio_cus + "");
 				cus_ratio.add(resDTO_cus);
@@ -2301,7 +2353,7 @@ public class Statistic extends BaseAction{
 			cus_ratio.add(resDTO_cus);
 			page2.setItems((List)cus_ratio);
 			result.setMap("table2", page2);
-			
+			}
 			//trends
 			for(int i=0;i<dates.size();i++){
 				AnalysticDTO item = new AnalysticDTO();
@@ -2326,7 +2378,7 @@ public class Statistic extends BaseAction{
 		int timeStartMarker = 4;//by default;
 		
 		//should we abstract this to a method?
-		if(timeType.equals(TYPE.MONTH)){
+		if(timeType.equals(TYPE.MONTH.toString())){
 			timeStartMarker = 6;
 		}else{
 			timeStartMarker = 4;
@@ -2371,7 +2423,7 @@ public class Statistic extends BaseAction{
 			dates.addAll(trends.keySet());
 			
 
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			
@@ -2425,7 +2477,7 @@ public class Statistic extends BaseAction{
 				//sort the stocklist
 				sortStockResultByTime(liststock);
 				//put the data into stockmarker as an engine
-				for(int i=liststock.size()-1; i>-0; i--){
+				for(int i=liststock.size()-1; i>=0; i--){
 					StockInfoDTO stmp = (StockInfoDTO)liststock.get(i);
 					int stocknumber = Integer.valueOf(stmp.getQuantity());
 					double stockprice = Double.valueOf(stmp.getUnit_price());
@@ -2466,7 +2518,7 @@ public class Statistic extends BaseAction{
 			//sort the brand, area
 			ArrayList<String> dates = new ArrayList<String>();			
 			dates.addAll(trendprofit.keySet());			
-//			sortKeySetForTrend(dates);
+			sortKeySetForTrend(dates);
 			
 			//combine the hashmap
 			
@@ -2492,10 +2544,10 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	public ResultSetDTO startAnalyzing(Map<String,Object> params) throws Exception{
+	public ResultSetDTO startAnalyzing(Map<String,Object> params, IProgressMonitor mt) throws Exception{
 		
 		ResultSetDTO ro=new ResultSetDTO();
-				
+		monitor = mt;		
 		String brand=String.valueOf(params.get("brand"));
 		String sub_brand=String.valueOf(params.get("sub_brand"));
 		String customer_area=String.valueOf(params.get("area"));
@@ -2505,6 +2557,9 @@ public class Statistic extends BaseAction{
 		String timeType = String.valueOf(params.get("type"));
 		String start_time = calculateStartTimeByEndTime(end_time, timeType);
 		
+        monitor.worked(35);  
+        monitor.subTask("开始分析数据");
+        
 		if(brand.equals(AnalyzerConstants.ALL_BRAND) && customer_area.equals(AnalyzerConstants.ALL_AREA)){			
 			ro = analyzeCase_One(start_time, end_time, profitOrShipment, timeType);
 		}

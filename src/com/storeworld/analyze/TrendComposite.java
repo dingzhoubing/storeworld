@@ -3,6 +3,7 @@ package com.storeworld.analyze;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -41,13 +42,13 @@ import com.storeworld.pojo.dto.AnalysticDTO;
 public class TrendComposite extends Composite implements AnalyzerBase{
 	
 	private TrendDataSet args;
-	private List<Object> ds;
+	private List<Object> ds = new ArrayList<Object>();
 	
-	public TrendComposite(Composite parent, int style, TrendDataSet args, List<Object> ds) {
+	public TrendComposite(Composite parent, int style, TrendDataSet args, List<Object> d) {
 		super(parent, style);
 		this.args = args;
 		ds.clear();
-		ds.addAll(ds);
+		ds.addAll(d);
 				
 		showComposite();
 	}

@@ -17,11 +17,12 @@ public class StockTextCellEditor extends TextCellEditor {
 	protected ToolTip tip;
 	private static final int ADJUST_X = 30;
 	private static final int ADJUST_Y = 20;
-	// the column width, to determine the tooltip location
+	// the column width, to determine the tooltip location, no use now
 	private int width;
 	//the column of the table, to get the validator type and determine the tooltip location
 	private int col;
 	
+	//the marker of each column
 	private static final int SIZE_COLUMN = 3;
 	private static final int UNIT_COLUMN = 4;
 	private static final int PRICE_COLUMN = 5;
@@ -46,7 +47,11 @@ public class StockTextCellEditor extends TextCellEditor {
         });
     }
 	
-
+	/**
+	 * get the shift value by shift array list
+	 * @param col
+	 * @return
+	 */
 	private int getShiftWidth(int col){
 		ArrayList<Integer> tpShift = StockContentPart.getTpShift();
 		int ret = 0;
@@ -57,10 +62,9 @@ public class StockTextCellEditor extends TextCellEditor {
 	
 	@Override
 	protected void editOccured(ModifyEvent e) {		
-		// TODO Auto-generated method stub
+
 		super.editOccured(e);
-		//in CustomerCellModifier, we have computed the result, can be optimized
-		//bu we assume this is not time consuming, so let it go
+		//we assume that this is not time consuming
 		String val = (String)text.getText();
 		boolean valid = false;
 		if(GeneralCCombo.getToolTip()!=null)
@@ -69,7 +73,6 @@ public class StockTextCellEditor extends TextCellEditor {
 			valid = StockValidator.validateSize(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
 			tip.setLocation(loc.x+ADJUST_X+getShiftWidth(col), loc.y+text.getLocation().y+ADJUST_Y);//
         	tip.setMessage(SIZE_MESSAGE);
         	tip.setVisible(true);
@@ -79,7 +82,6 @@ public class StockTextCellEditor extends TextCellEditor {
 			valid = StockValidator.validateUnit(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
 			tip.setLocation(loc.x+ADJUST_X+getShiftWidth(col), loc.y+text.getLocation().y+ADJUST_Y);//
         	tip.setMessage(UNIT_MESSAGE);
         	tip.setVisible(true);
@@ -88,7 +90,6 @@ public class StockTextCellEditor extends TextCellEditor {
 			valid = StockValidator.validatePrice(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
 			tip.setLocation(loc.x+ADJUST_X+getShiftWidth(col), loc.y+text.getLocation().y+ADJUST_Y);//
         	tip.setMessage(PRICE_MESSAGE);
         	tip.setVisible(true);
@@ -98,7 +99,6 @@ public class StockTextCellEditor extends TextCellEditor {
 			valid = StockValidator.validateNumber(val);
 			if(!valid){
 			Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//            tip.setLocation(loc.x+ADJUST_X+width*(col-1), loc.y+text.getLocation().y+ADJUST_Y);//
 			tip.setLocation(loc.x+ADJUST_X+getShiftWidth(col), loc.y+text.getLocation().y+ADJUST_Y);//
         	tip.setMessage(NUMBER_MESSAGE);
         	tip.setVisible(true);

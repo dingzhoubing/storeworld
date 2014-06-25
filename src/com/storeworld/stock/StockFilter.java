@@ -3,6 +3,11 @@ package com.storeworld.stock;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+/**
+ * filter of stock data table
+ * @author dingyuanxiong
+ *
+ */
 public class StockFilter extends ViewerFilter {
 	private static String filterword = "";
 	private static boolean isFirst = true;
@@ -24,7 +29,7 @@ public class StockFilter extends ViewerFilter {
 			isFirst = false;
 		}
 		//this blank row has to be clear and show again??
-		if(st.getBrand().equals("") || st.getSubBrand().equals("") || st.getSize().equals(""))
+		if(st.getBrand().equals("") || st.getSubBrand().equals(""))// || st.getSize().equals("")
 			return false;
 		if(st.getBrand().contains(filterword))
 			return false;

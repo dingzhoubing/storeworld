@@ -236,7 +236,7 @@ public class GeneralComboCellEditor<T extends Object> extends CellEditor {
 //    		this cannot happened
     		comboBox = new GeneralCCombo(parent, getStyle(), 0,0,"");
     	}
-        comboBox.setVisibleItemCount(10);
+        comboBox.setVisibleItemCount(10);//is 10 ok?
         comboBox.setFont(parent.getFont());
         comboBox.addKeyListener(new KeyAdapter() {
 

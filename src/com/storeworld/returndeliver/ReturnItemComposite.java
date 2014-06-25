@@ -21,9 +21,11 @@ import com.storeworld.extenddialog.IndeedKeyBoard;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
-
-
-
+/**
+ * the return item of return composite
+ * @author dingyuanxiong
+ *
+ */
 public class ReturnItemComposite extends Composite{
 
 	private ReturnItemComposite self ; 
@@ -45,8 +47,10 @@ public class ReturnItemComposite extends Composite{
 	private Text text_price;
 	private Text text_delivernumber;
 	private Text text_returnnumber;
+	
 	private static DecimalFormat df = new DecimalFormat("0.00");
 	private static Pattern pattern_return_val = Pattern.compile("\\d+");
+	
 	/**
 	 * getter/setter of deliver info
 	 * @param id
@@ -184,6 +188,8 @@ public class ReturnItemComposite extends Composite{
 	}
 
 	private void addListeners(){
+		
+		//listener about select|de-select the return check box
 		check.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 
@@ -201,41 +207,45 @@ public class ReturnItemComposite extends Composite{
 			
 			@Override
 			public void focusGained(FocusEvent e) {
-				check.forceFocus();				
-				IndeedKeyBoard inkb = new IndeedKeyBoard(text_returnnumber, self.getParent().getShell(), 0, 180, 250);
+				check.forceFocus();
+				// open the indeed key board, for user to get the return number
+				IndeedKeyBoard inkb = new IndeedKeyBoard(text_returnnumber,self.getParent().getShell(), 0, 180, 250);
 				inkb.open();
-				if(Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()){
+
+				if (Utils.getIndeedClickButton() && Utils.getIndeedNeedChange()) {
 					String txt = Utils.getIndeed();
-					//reasonable value
-					if(pattern_return_val.matcher(txt).matches()){
+					// reasonable value
+					if (pattern_return_val.matcher(txt).matches()) {
 						int deli = Integer.valueOf(text_delivernumber.getText());
 						int ret = Integer.valueOf(txt);
-						if(ret <= deli){
+						if (ret <= deli) {//if return number is smaller than the deliver number, we can return
 							text_returnnumber.setText(txt);
 							setReturnNumber(txt);
-							//compute to get the data show in UI
+							// compute to get the data show in UI
 							double total = 0.0;
 							ArrayList<ReturnItemComposite> items = ReturnComposite.getReturnItems();
-							for(int i=0;i<items.size();i++){
+							for (int i = 0; i < items.size(); i++) {
 								ReturnItemComposite rc = items.get(i);
-								if(rc.getCheck()){
+								if (rc.getCheck()) {
 									double price = Double.valueOf(rc.getPrice());
-									total+=(price * Integer.valueOf(rc.getReturnNumber()));									
+									total += (price * Integer.valueOf(rc.getReturnNumber()));
 								}
 							}
 							DeliverContentPart.setTotal(df.format(total));
 							DeliverContentPart.setIndeed(df.format(total));
-						}else{
-							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						} else {//if we cannot return more than we delivered
+							MessageBox mbox = new MessageBox(MainUI
+									.getMainUI_Instance(Display.getDefault()));
 							mbox.setMessage("退货数应不大于送货量");
 							mbox.open();
 						}
-					}else{
-						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					} else {//if what input is not an integer, we show message box
+						MessageBox mbox = new MessageBox(MainUI
+								.getMainUI_Instance(Display.getDefault()));
 						mbox.setMessage("数值应为整数");
 						mbox.open();
 					}
-					//initial the next click
+					// initial the next click
 					Utils.setIndeedClickButton(false);
 				}
 			}
@@ -246,6 +256,7 @@ public class ReturnItemComposite extends Composite{
 	public ReturnItemComposite getSelf(){
 		return this.self;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		ReturnItemComposite rc = (ReturnItemComposite)obj;

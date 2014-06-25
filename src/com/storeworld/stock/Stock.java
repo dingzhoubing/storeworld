@@ -3,30 +3,34 @@ package com.storeworld.stock;
 import com.storeworld.common.DataInTable;
 
 /**
- * the stock(����) definition
+ * the stock definition
  * @author dingyuanxiong
  *
  */
 public class Stock extends DataInTable{
 	private String id="";//the identifier of the record
-	private String brand="";//the brand of the stock
-	private String sub_brand="";//the sub_brand of the stock
-	private String size="";//the size of the stock
-	private String unit="";//the unit of the stock
-	private String price="";
-	private String number="";
-	private String time = "";
+	private String brand="";//the brand of the stock item
+	private String sub_brand="";//the sub_brand of the stock item
+	private String size="";//the size of the stock item
+	private String unit="";//the unit of the stock item
+	private String price="";//stock price of the stock item
+	private String number="";//stock number of the stock item
+	private String time = "";//stock time of the stock item
 	
-	private String indeed = "";
+	private String indeed = "";//the indeed value of this time of stock
+	
 	public Stock(){
 		
 	}
+	
 	public Stock(String id){
 		this.id = id;
 	}
+	
 	public Stock(String brand,String sub_brand,String size,String unit, String price, String number){
 		this(null, brand,sub_brand,size,unit,price, number);
 	}
+	
 	public Stock(String ID, String brand,String sub_brand,String size,String unit, String price, String number){
 		if(ID != null)		
 			this.id = ID;
@@ -37,6 +41,7 @@ public class Stock extends DataInTable{
 		this.price = price;
 		this.number = number;
 	}
+	
 	public Stock(String ID, String brand,String sub_brand,String size,String unit, String price, String number, String time){
 		if(ID != null)		
 			this.id = ID;

@@ -1,5 +1,6 @@
 package com.storeworld.customer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -25,7 +29,9 @@ import com.storeworld.product.ProductCellModifier;
 import com.storeworld.product.ProductUtils;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.DeliverInfoService;
+import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.stock.StockCellModifier;
+import com.storeworld.stock.StockContentPart;
 import com.storeworld.utils.DataCachePool;
 import com.storeworld.utils.Utils;
 
@@ -66,7 +72,6 @@ public class CustomerList{
 			for(int i=0;i<list.size();i++){
 				CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(i);
 				Customer cus = new Customer();
-//				newID = cDTO.getId();
 				cus.setID(cDTO.getId());
 				cus.setName(cDTO.getCustomer_name());
 				cus.setArea(cDTO.getCustomer_area());
@@ -194,13 +199,13 @@ public class CustomerList{
 	 * update the info of a customer
 	 * @param customer
 	 */
-	public void customerChanged(Customer customer) {
+	public void customerChanged(final Customer customer) {
 		// no matter valid or not, we should update the table
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()) {
 			(iterator.next()).update(customer);
 			//not the new row, we update, or we do not update, just update he table
-			Map<String, Object> cus = new HashMap<String ,Object>();
+			final Map<String, Object> cus = new HashMap<String ,Object>();
 			cus.put("id", customer.getID());
 			cus.put("customer_area", customer.getArea());
 			cus.put("customer_name", customer.getName());
@@ -233,7 +238,7 @@ public class CustomerList{
 						String old_name="";
 						String old_tele = "";
 						String old_addr = "";
-						Map<String, Object> cus_rec = new HashMap<String, Object>();
+						final Map<String, Object> cus_rec = new HashMap<String, Object>();
 						//it should contains only one element, or something wrong
 						if(!list.isEmpty()){
 							CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
@@ -253,26 +258,62 @@ public class CustomerList{
 								&& customer.getPhone().equals(old_tele) && customer.getAddress().equals(old_addr)){
 							//do nothing?
 						}else{
+							final String old_area_final = old_area;
+							final String old_name_final = old_name;
+							
 							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
 		    		    	messageBox.setMessage(String.format("片区:%s，客户:%s 的信息将被修改，送货表中将会发生相应更新，确认要操作吗？", old_area, old_name));		    		    	
 		    		    	if (messageBox.open() == SWT.OK){	
 		    		    		
-		    		    		
-		    		    		cusinfo.updateCustomerInfo(customer.getID(), cus);
-		    					//old area, old name, new area, new name
-		    					DataCachePool.updateCustomerInfoOfCache(old_area, old_name, customer.getArea(), customer.getName());	
-		    					CustomerUtils.refreshAreas_FirstName();
-		    							    					
-		    					//update all deliver info and current deliver table
-								DeliverInfoService deliverinfo = new DeliverInfoService();
-								deliverinfo.updateAllDeliverInfoForCustomerChanged(cus, cus_rec);
-//								sp.setStatus("更新送货表", 75);
-								
-								DeliverContentPart.reNewDeliver();
-								DeliverContentPart.reNewDeliverHistory();
-//								sp.setStatus("更新进货界面", 100);
-								
-		    		    		
+		    		    		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		    		    		IRunnableWithProgress runnable = new IRunnableWithProgress() {  
+		    		    		    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {  
+		    		    		    	
+		    		    		    Display.getDefault().asyncExec(new Runnable() {  
+		    		    		                public void run() {  
+		    		    		        monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  
+		    		    		        
+		    		    		        
+		    		    		        try {
+											cusinfo.updateCustomerInfo(customer.getID(), cus);
+										} catch (Exception e) {
+											
+										}
+				    					//old area, old name, new area, new name
+				    					DataCachePool.updateCustomerInfoOfCache(old_area_final, old_name_final, customer.getArea(), customer.getName());	
+				    					CustomerUtils.refreshAreas_FirstName();
+				    							 
+				    					monitor.worked(20);  
+	    		    		            monitor.subTask("更新客戶表");
+	    		    		            
+				    					//update all deliver info and current deliver table
+										DeliverInfoService deliverinfo = new DeliverInfoService();
+										deliverinfo.updateAllDeliverInfoForCustomerChanged(cus, cus_rec);
+										monitor.worked(60);  
+	    		    		            monitor.subTask("更新送货表");
+										
+										DeliverContentPart.reNewDeliver();
+										DeliverContentPart.reNewDeliverHistory();
+										monitor.worked(100);  
+	    		    		            monitor.subTask("更新送货界面");
+	    		    		            
+		    		    		        monitor.done();
+		    		    		                }
+		    		    		    	  });
+		    		    		    }  
+		    		    		};  
+		    		    		  
+		    		    		try {  
+		    		    		    progressDialog.run(true,/*是否开辟另外一个线程*/  
+		    		    		    false,/*是否可执行取消操作的线程*/  
+		    		    		    runnable/*线程所执行的具体代码*/  
+		    		    		    );  
+		    		    		} catch (InvocationTargetException e) {  
+		    		    		    e.printStackTrace();  
+		    		    		} catch (InterruptedException e) {  
+		    		    		    e.printStackTrace();  
+		    		    		}  
+
 		    		    	}else{
 		    		    		Customer c = new Customer();
 		    					c.setID(customer.getID());//new row in fact

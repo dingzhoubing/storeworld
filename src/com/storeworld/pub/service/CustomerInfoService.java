@@ -1,7 +1,6 @@
 package com.storeworld.pub.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,19 +13,20 @@ import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.utils.Utils;
 
+/**
+ * try to use generic type
+ *
+ */
 public class CustomerInfoService extends BaseAction{
 	
 	/**
 	 * 新增一条客户信息，处理过程分为两步：
-	 * 1.判断是否已存在相同客户：片区，客户名，电话来判断。
+	 * 1.判断是否已存在相同客户：片区，客户名来判断。?? still need, since when we use this function, we already do the existence test
 	 * 2.插入新记录。
-	 * @param map
-	 * @return
-	 * @throws Exception
 	 */
 	public boolean addCustomerInfo(Map<String,Object> map) throws Exception{
 		try{
-			//1.获得输入的用户信息值，放入param中，ADD your code below:
+			//no need?
 			boolean isExist=isExistCustomerInfo(map);
 			if(isExist){
 				throw new Exception("已经存在相同的客户，片区，姓名，电话，分别为："+map.get("customer_area")+","+map.get("customer_name")+","+map.get("telephone"));
@@ -34,31 +34,27 @@ public class CustomerInfoService extends BaseAction{
 			String sql="insert into customer_info(customer_area,customer_name,telephone,customer_addr,reserve1,reserve2,reserve3) values(?,?,?,?,?,?,?)";
 			Object[] params_temp={map.get("customer_area"),map.get("customer_name"),map.get("telephone"),map.get("customer_addr"),map.get("reserve1"),map.get("reserve2"),map.get("reserve3")};//来自map
 			List<Object> params=objectArray2ObjectList(params_temp);
-			//2.调用接口执行插入
 			int snum=executeUpdate(sql,params);
-			if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+			if(snum<1){//why this happens
 				throw new Exception("新增用户信息失败，请检查数据!");
 				}
 			}catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 				throw new Exception("新增用户信息失败!"+e.getMessage());
 			}
 		 return true;
 		
 	}
+	
+	
 	/**
 	 * 判断一条记录是否已经存在：片区，客户名，电话。
-	 * @param map
-	 * @return
-	 * @throws Exception
 	 */
 	private boolean isExistCustomerInfo(Map<String,Object> map) throws Exception{
 		BaseAction tempAction=new BaseAction();
-		String sql="select * from customer_info ci where ci.customer_area=? and ci.customer_name=? and ci.telephone=?";
-		Object[] params_tmp={map.get("customer_area"),map.get("customer_name"),map.get("telephone")};
+		String sql="select * from customer_info ci where ci.customer_area=? and ci.customer_name=?";// and ci.telephone=?
+		Object[] params_tmp={map.get("customer_area"),map.get("customer_name")};//,map.get("telephone")
 		List<Object> params=objectArray2ObjectList(params_tmp);
-		System.out.println(params);
+//		System.out.println(params);
 		List list=null;
 		try{
 			list=executeQuery(sql, params);
@@ -69,7 +65,6 @@ public class CustomerInfoService extends BaseAction{
 		{
 			return false;
 		}
-
 		return true;
 	}
 	
@@ -103,29 +98,8 @@ public class CustomerInfoService extends BaseAction{
 		}
 		return true;
 	}
-	/**
-	 * 批量新增客户信息
-	 * @param listMap 装的是多条客户信息
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean batchAddCustomerInfo (List<Map<String,Object>> listMap) throws Exception{
-		boolean ret_total=true;//执行批量插入的返回值
-		int num=listMap.size();
-		try{
-			for(int j=0;j<num;j++){
-				boolean ret_one=addCustomerInfo(listMap.get(j));//执行一次插入的结果
-				if(ret_one==false){
-					ret_total=false;
-					return ret_total;
-				}
-			}
-		}catch(Exception e){
-			throw new Exception("执行批量新增货品信息异常！");
-		}
-		return ret_total;
-	}
 	
+
 	/**
 	 * 删除一条客户信息，用ID标识。
 	 * @param id
@@ -240,12 +214,8 @@ public class CustomerInfoService extends BaseAction{
 	
 	/**
 	 * 根据ID更新一条用户信息，步骤分为：
-	 * 1.校验更新后的数据是否存在与存量数据重复的情况。
-	 * 2.根据ID更新所有字段（即便某些字段可能没有变化）。
-	 * @param id
-	 * @param map
-	 * @return
-	 * @throws Exception
+	 * 1.校验更新后的数据是否存在与存量数据重复的情况, we have already checked this in UI side
+	 * 2.根据ID更新所有字段（即便某些字段可能没有变化）, already checked this in UI side
 	 */
 	public boolean updateCustomerInfo(String id,Map<String,Object> map) throws Exception{
 		String sql="update customer_info ci set ci.customer_area=?,ci.customer_name=?,ci.telephone=?,"
@@ -254,12 +224,12 @@ public class CustomerInfoService extends BaseAction{
 				map.get("customer_addr"),id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
-			if(isKeyFactorModified(map)){
-				boolean isExist=isExistCustomerInfo(map);
-				if(isExist){
-					throw new Exception("已经存在相同的客户，片区，姓名，电话，分别为："+map.get("customer_area")+","+map.get("customer_name")+","+map.get("telephone"));
-				}
-			}
+//			if(isKeyFactorModified(map)){
+//				boolean isExist=isExistCustomerInfo(map);
+//				if(isExist){
+//					throw new Exception("已经存在相同的客户，片区，姓名，电话，分别为："+map.get("customer_area")+","+map.get("customer_name")+","+map.get("telephone"));
+//				}
+//			}
 			int rows=executeUpdate(sql,params);
 			if(rows!=1){
 				throw new Exception("更新单条信息失败");
@@ -272,45 +242,16 @@ public class CustomerInfoService extends BaseAction{
 		return true;
 	}
 	
-	/**
-	 * 批量更新客户信息
-	 * @param listId
-	 * @param listMap
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean batchUpdateCustomerInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
 
-		boolean ret_total=true;//执行批量更新的返回值
-		int num=listMap.size();
-		try{
-			for(int j=0;j<num;j++){
-				boolean ret_one=updateCustomerInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
-				if(ret_one!=true){
-					ret_total=false;
-					return ret_total;
-				}
-			}
-		}catch(Exception e){
-			throw new Exception("执行批量新增货品信息异常！");
-		}
-		return ret_total;
-
-	}
-	
 	/**
 	 * 查询所有客户信息，不加查询条件。
-	 * @return
-	 * @throws Exception
 	 */
 	public ReturnObject queryCustomerInfoAll() throws Exception{
-		//ReturnObject ro=null;
+		ReturnObject ro=new ReturnObject();
 		List list=null;
 		String sql="select * from customer_info ci";
-		//Object[] params={};
 		List<Object> params=null;
 		Pagination page = new Pagination();
-		ReturnObject ro=new ReturnObject();
 		List<CustomerInfoDTO> customerInfoList = new ArrayList<CustomerInfoDTO>();
 		try {
 			list=executeQuery(sql, params);
@@ -330,8 +271,6 @@ public class CustomerInfoService extends BaseAction{
 			page.setItems((List)customerInfoList);
 			ro.setReturnDTO(page);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new Exception("查询客户信息失败！");
 		}
 		return ro;
@@ -374,11 +313,10 @@ public class CustomerInfoService extends BaseAction{
 		
 	}
 	
+	
 	/**
 	 * 按条件查询客户信息，当根据片区查客户时可用
-	 * @param map
-	 * @return
-	 * @throws Exception
+	 * contains the function of "queryCustomerInfoByID"
 	 */
 	public ReturnObject queryCustomerInfo(Map<String,Object> map) throws Exception{
 		//ReturnObject ro=null;
@@ -459,9 +397,65 @@ public class CustomerInfoService extends BaseAction{
 		return ro;
 	}
 	
+	/**
+	 * get the next row id of customer table
+	 * @return
+	 * @throws Exception
+	 */
 	public int getNextCustomerID() throws Exception{
 		return getNextID("customer_info");
 	}
 	
+//====================================================================================================================	
+	/**
+	 * 批量新增客户信息
+	 * @param listMap 装的是多条客户信息
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean batchAddCustomerInfo (List<Map<String,Object>> listMap) throws Exception{
+//		boolean ret_total=true;//执行批量插入的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=addCustomerInfo(listMap.get(j));//执行一次插入的结果
+//				if(ret_one==false){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//	}
 	
+	
+	/**
+	 * 批量更新客户信息
+	 * @param listId
+	 * @param listMap
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean batchUpdateCustomerInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
+//
+//		boolean ret_total=true;//执行批量更新的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=updateCustomerInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
+//				if(ret_one!=true){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//
+//	}
+	
+//==========================================================================================================================	
 }

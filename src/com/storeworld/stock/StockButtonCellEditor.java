@@ -21,10 +21,10 @@ import com.storeworld.utils.Utils;
  */
 public class StockButtonCellEditor extends CellEditor {
 
-    protected Button button;
-    protected Table table;
-    protected StockList stocklist;
-    protected int rowHeight = 0;
+    protected Button button = null; //the remove button
+    protected Table table = null; //the parent table
+    protected StockList stocklist = null; //the data set in the parent table
+    protected int rowHeight = 0; //the row height of the row, no use now
 
     public StockButtonCellEditor() {
         setStyle(0);
@@ -35,7 +35,7 @@ public class StockButtonCellEditor extends CellEditor {
         this(parent, 0);
         this.table = (Table)parent;
         this.stocklist = productlist;
-        this.rowHeight = rowHeight;
+        this.rowHeight = rowHeight;//not been used now
     }
 
     public StockButtonCellEditor(Composite parent, int style) {
@@ -45,8 +45,7 @@ public class StockButtonCellEditor extends CellEditor {
 	@Override
 	protected Control createControl(Composite parent) {
 		button = new Button(parent, 0);
-        
-        
+                
         button.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
             	button.setVisible(false);
@@ -64,8 +63,10 @@ public class StockButtonCellEditor extends CellEditor {
 					int rowY = item.getBounds().y;						
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Stock c = (Stock)(table.getItem(index).getData());		
-						stocklist.removeStock(c);
+						//remove the stock item
+						stocklist.removeStock(c);						
 						button.setVisible(false);
+						//refresh the stock table
 						Utils.refreshTable(table);												
 								 
 						break;

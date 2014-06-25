@@ -6,25 +6,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.widgets.Text;
-
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.GoodsInfoService;
 
 public class StockValidator {
-//	private static String current_id = "";
-//	
-//	public static void setNewID(String id){
-//		current_id = id;
-//	}
-//	public static String getNewID(){
-//		return current_id;
-//	}
-	
+
+	//data pattern of each column in stock table
 	private static Pattern pattern_brand = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]+$");
 	//start with number, end with(out) Chinese character or 26 English character
 	private static Pattern pattern_size = Pattern.compile("^\\d+[\\u4E00-\\u9FA5\\uF900-\\uFA2DA-Za-z]*$");
@@ -149,7 +138,6 @@ public class StockValidator {
 	 * @return
 	 */
 	public static boolean checkID(String id){
-//		if(id.equals(getNewID()))//dynamic to the newest ID
 		if(id.equals(StockUtils.getNewLineID()))
 			return true;
 		else
@@ -170,7 +158,6 @@ public class StockValidator {
 					//already has one unit
 				}else{
 				//set the unit
-				//here, only set once!!!
 				Map<String, Object> prod = new HashMap<String, Object>();
 				prod.put("brand", p.getBrand());
 				prod.put("sub_brand", p.getSubBrand());

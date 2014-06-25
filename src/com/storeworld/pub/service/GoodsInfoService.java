@@ -57,18 +57,13 @@ public class GoodsInfoService extends BaseAction{
 	}
 
 	/**
-	 * 增加一条货品信息，处理的步骤包括：
-	 * 1.根据界面输入的货品信息（已放入map中），查货品信息表，判断是否已经存在相同的记录
-	 * 2.如果存在，抛出异常，如不存在，执行插入。
-	 * @param map
-	 * @return
-	 * @throws Exception
+	 * add product info, if exist, update the product table in db
 	 */
 	public int addGoodsInfoAndUpdate(Map<String,Object> map) throws Exception{
 		//return type, 0 means normal, -1 means exist such goods
 		int type = 0;
 	 try{
-		//1.获得输入的用户信息值，放入param中，ADD your code below:
+		 //if exist such product, update the number
 		boolean isExist=isExistGoodsInfoAndUpdate(map);
 		if(isExist){
 			type = -1;//this good already exist, do not insert
@@ -91,12 +86,13 @@ public class GoodsInfoService extends BaseAction{
 	 return type;
 	}
 	
-	public int minusGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+	
+	public int minusGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew, String returnOrDeliver) throws Exception{
 		//return type, 0 means normal, -1 means exist such goods
 		int type = 0;
 		try{
-			//1.获得输入的用户信息值，放入param中，ADD your code below:
-			type=isExistGoodsInfoAndMinus(mapold, map, gapold, gapnew);
+			//if exist such product, minus the number of product
+			type=isExistGoodsInfoAndMinus(mapold, map, gapold, gapnew, returnOrDeliver);
 			if(type == -1){				
 				return type;
 			}else if(type == -2){
@@ -113,19 +109,19 @@ public class GoodsInfoService extends BaseAction{
 	private boolean checkProductSame(Map<String,Object> mapold, Map<String,Object> map){
 		String brand_old = String.valueOf(mapold.get("brand"));
 		String subbrand_old = String.valueOf(mapold.get("sub_brand"));
-		String size_old = String.valueOf(mapold.get("standard"));
+//		String size_old = String.valueOf(mapold.get("standard"));
 		
 		String brand_new = String.valueOf(map.get("brand"));
 		String subbrand_new = String.valueOf(map.get("sub_brand"));
-		String size_new = String.valueOf(map.get("standard"));
+//		String size_new = String.valueOf(map.get("standard"));
 		
-		if(brand_old.equals(brand_new) && subbrand_old.equals(subbrand_new) && size_old.equals(size_new))
+		if(brand_old.equals(brand_new) && subbrand_old.equals(subbrand_new))// && size_old.equals(size_new)
 			return true;
 		else
 			return false;		
 	}
 	
-	private int isExistGoodsInfoAndMinus(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
+	private int isExistGoodsInfoAndMinus(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew, String returnOrDeliver) throws Exception{
 		int ret = 0;
 		
 		BaseAction tempAction=new BaseAction();
@@ -157,7 +153,7 @@ public class GoodsInfoService extends BaseAction{
 			int repo_number = Integer.valueOf(Repo);
 			int new_deliver_num = Integer.valueOf(String.valueOf(map.get("quantity")));
 			int old_deliver_num = Integer.valueOf(String.valueOf(mapold.get("quantity")));
-			if(new_deliver_num > repo_number){
+			if(new_deliver_num > repo_number && !returnOrDeliver.equals("return")){//not in return mode, if in return mode, anyway, we do update
 				ret = -2;// for this deliver, repository is not enough
 				return ret;
 			}else{
@@ -181,8 +177,8 @@ public class GoodsInfoService extends BaseAction{
 			//old map is not the same product as new map
 			//update old product & new product
 			//step 1: update old map product			
-			String sql_oldmap_product="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
-			Object[] params_tmp_oldmap_product={mapold.get("brand"),mapold.get("sub_brand"),mapold.get("standard")};
+			String sql_oldmap_product="select * from goods_info gi where gi.brand=? and gi.sub_brand=?";// and gi.standard=?
+			Object[] params_tmp_oldmap_product={mapold.get("brand"),mapold.get("sub_brand")};//,mapold.get("standard")
 			List<Object> params_oldmap_product=objectArray2ObjectList(params_tmp_oldmap_product);
 			//System.out.println(params);
 			List list_oldmap_product=tempAction.executeQuery(sql_oldmap_product, params_oldmap_product);
@@ -260,6 +256,15 @@ public class GoodsInfoService extends BaseAction{
 		return ret;
 	}
 	
+	/**
+	 * when update stock info table
+	 * @param mapold
+	 * @param map
+	 * @param gapold
+	 * @param gapnew
+	 * @return
+	 * @throws Exception
+	 */
 	public int addGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
 		//return type, 0 means normal, -1 means exist such goods
 		int type = 0;
@@ -300,8 +305,8 @@ public class GoodsInfoService extends BaseAction{
 	
 	private boolean isExistGoodsInfoAndUpdate(Map<String,Object> mapold, Map<String,Object> map, int gapold, int gapnew) throws Exception{
 		BaseAction tempAction=new BaseAction();
-		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
-		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=?";// and gi.standard=?
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand")};//,map.get("standard")
 		List<Object> params=objectArray2ObjectList(params_tmp);
 		//System.out.println(params);
 		List list=null;
@@ -406,15 +411,12 @@ public class GoodsInfoService extends BaseAction{
 	
 	
 	/**
-	 * description:判断是否存在相同的记录, 是则更新货品表
-	 * @param map
-	 * @return
-	 * @throws Exception
+	 * 判断是否存在相同的记录, 是则更新货品表
 	 */
 	private boolean isExistGoodsInfoAndUpdate(Map<String,Object> map) throws Exception{
 		BaseAction tempAction=new BaseAction();
-		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
-		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+		String sql="select * from goods_info gi where gi.brand=? and gi.sub_brand=?";// and gi.standard=?
+		Object[] params_tmp={map.get("brand"),map.get("sub_brand")};//,map.get("standard")
 		List<Object> params=objectArray2ObjectList(params_tmp);
 		//System.out.println(params);
 		List list=null;
@@ -497,6 +499,7 @@ public class GoodsInfoService extends BaseAction{
 		
 		return true;
 	}
+	
 	/**
 	 * description:判断货品信息的一条记录的关键字段是否被修改
 	 * @param map
@@ -534,29 +537,6 @@ public class GoodsInfoService extends BaseAction{
 		return true;
 	}
 
-	/**
-	 * 批量增加货品信息，在进货的时候，或者人工录入货品信息时，当录完最后一条记录时，再一起提交，
-	 * 或者当有“进货”或者“保存”按钮时，也是一起提交，批量写数据库。
-	 * @param listMap 获取table中输入的货品信息记录
-	 * @return
-	 * @throws Exception 
-	 */
-//	public boolean batchAddGoodsInfo (List<Map<String,Object>> listMap) throws Exception{
-//		boolean ret_total=true;//执行批量插入的返回值
-//		int num=listMap.size();
-//		try{
-//			for(int j=0;j<num;j++){
-//				boolean ret_one=addGoodsInfo(listMap.get(j));//执行一次插入的结果
-//				if(ret_one==false){
-//					ret_total=false;
-//					return ret_total;
-//				}
-//			}
-//		}catch(Exception e){
-//			throw new Exception("执行批量新增货品信息异常！");
-//		}
-//		return ret_total;
-//	}
 
 	/**
 	 * Description:删除某一条货品信息
@@ -620,12 +600,13 @@ public class GoodsInfoService extends BaseAction{
 				map.get("unit"),map.get("repertory"),id};
 		List<Object> params=objectArray2ObjectList(params_temp);
 		try {
-			if(isKeyFactorModified(map)){
-				boolean isExist=isExistGoodsInfo(map);
-				if(isExist){
-					throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard")+",不允许这样更新！");
-				}
-			}
+			//still need?
+//			if(isKeyFactorModified(map)){
+//				boolean isExist=isExistGoodsInfo(map);
+//				if(isExist){
+//					throw new Exception("已经存在相同的货品，品牌，子品牌，规格分别为："+map.get("brand")+","+map.get("sub_brand")+","+map.get("standard")+",不允许这样更新！");
+//				}
+//			}
 			int rows=executeUpdate(sql,params);
 			if(rows!=1){
 				throw new Exception("更新单条信息失败");
@@ -636,32 +617,6 @@ public class GoodsInfoService extends BaseAction{
 			throw new Exception("更新货品信息失败"+":"+e.getMessage());
 		}
 		return true;
-	}
-
-	/**
-	 * 批量更新货品信息
-	 * @param listId
-	 * @param listMap
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean batchUpdateGoodsInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
-
-		boolean ret_total=true;//执行批量更新的返回值
-		int num=listMap.size();
-		try{
-			for(int j=0;j<num;j++){
-				boolean ret_one=updateGoodsInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
-				if(ret_one!=true){
-					ret_total=false;
-					return ret_total;
-				}
-			}
-		}catch(Exception e){
-			throw new Exception("执行批量新增货品信息异常！");
-		}
-		return ret_total;
-
 	}
 
 	
@@ -824,5 +779,57 @@ public class GoodsInfoService extends BaseAction{
 	public int getNextGoodsID() throws Exception{
 		return getNextID("goods_info");
 	}
+
 	
+//=========================================================================================================
+	/**
+	 * 批量更新货品信息
+	 * @param listId
+	 * @param listMap
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean batchUpdateGoodsInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
+//
+//		boolean ret_total=true;//执行批量更新的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=updateGoodsInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
+//				if(ret_one!=true){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//
+//	}
+
+	/**
+	 * 批量增加货品信息，在进货的时候，或者人工录入货品信息时，当录完最后一条记录时，再一起提交，
+	 * 或者当有“进货”或者“保存”按钮时，也是一起提交，批量写数据库。
+	 * @param listMap 获取table中输入的货品信息记录
+	 * @return
+	 * @throws Exception 
+	 */
+//	public boolean batchAddGoodsInfo (List<Map<String,Object>> listMap) throws Exception{
+//		boolean ret_total=true;//执行批量插入的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=addGoodsInfo(listMap.get(j));//执行一次插入的结果
+//				if(ret_one==false){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//	}
+
 }

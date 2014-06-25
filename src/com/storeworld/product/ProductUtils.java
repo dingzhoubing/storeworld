@@ -81,20 +81,7 @@ public class ProductUtils {
     		Utils.refreshTable(tv.getTable());
     	}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	public static void setSearchButtonClicked(boolean clicked){
 		searchButtonClicked = clicked;
 	}
@@ -132,14 +119,10 @@ public class ProductUtils {
 	}
 	
 	
-public static void refreshBrands(){
-		
-		brands_current.clear();
-		
-		brands_current.addAll(DataCachePool.getBrand2Sub().keySet());
-		
-		showBrandCheckBoxes(composite_ar_record,width_record,composite_scrollarea_record,tv_record,base_record);
-		
+	public static void refreshBrands(){		
+		brands_current.clear();		
+		brands_current.addAll(DataCachePool.getBrand2Sub().keySet());		
+		showBrandCheckBoxes(composite_ar_record,width_record,composite_scrollarea_record,tv_record,base_record);		
 	}
 	
 	public static void showAllProducts() {
@@ -160,7 +143,6 @@ public static void refreshBrands(){
 		for(Button btn : brandButtons){
 			btn.setSelection(false);
 		}
-
 		tv_record.addFilter(pf);
 		Utils.refreshTable(tv_record.getTable());
 		//after show the searched result, make the seatch button clear 

@@ -58,6 +58,31 @@ public class BaseAction {
 		}
 		if(connection == null){
 			//do something
+			System.out.println("connection still null?, we try more times");
+			count =0;
+			while (count < 5) {
+				try {
+					connection = (Connection) DriverManager.getConnection(
+							Constants.URL, Constants.USERNAME, Constants.PASSWORD);
+					if(connection != null)
+						break;
+					// connection.setAutoCommit(false); //
+					// 设置连接不自动提交，即用该连接进行的操作都不更新到数据库
+				} catch (SQLException e) {
+//					e.printStackTrace();
+					count++;
+					//try to start the service again, and record the proc
+					//avoid if user kill the service
+					Thread thread = new Thread(new DataBaseService());
+					thread.start();				
+					
+					Thread.sleep(200);
+				}
+			}
+			
+			if(connection == null){
+				System.out.println("after try another 5 times, connection still null?");
+			}
 		}
     	return connection;
 	}

@@ -26,8 +26,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.storeworld.customer.CustomerFilter;
-import com.storeworld.customer.CustomerUtils;
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.utils.Utils;
@@ -48,20 +46,22 @@ public class ProductContentPart extends ContentPart{
 	//define the cell Editor of each column
 	private static CellEditor[] cellEditor = new CellEditor[7];
 	private static TableEditor editor = null;
-	private static TableEditor editorEdit = null;//software number keyboard
-	private static TableEditor editorDel = null;//software number keyboard
+	private static TableEditor editorEdit = null;
+	private static TableEditor editorDel = null;
 	
 	private Composite current = null;
 	private Composite composite = null;
 	//record the last hover on row number
 	private static int visibleButton_last = -1;
 	
+	//record the column number of specified property
 	private int sizeColumn = 3;
 	private int repColumn = 5;
 	private int deleteButtonColumn = 6;
 	
 	private int composite_shift = 0;
 	private int composite_updown = 38;
+	
 	private static Button button_swkb = null;
 	
 	public static TableEditor getEditorDel(){
@@ -91,6 +91,7 @@ public class ProductContentPart extends ContentPart{
 		SoftKeyBoard skb = new SoftKeyBoard(text, table.getParent().getShell(), 0, composite_shift, composite_updown);
 		skb.open();
 	}
+	
 	/**
 	 * add all kinds of listener of the table
 	 * @param event
@@ -316,11 +317,10 @@ public class ProductContentPart extends ContentPart{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-//		table.setBounds(0, 0, w, h);
 		table.setBounds(0, 0, 760, h);
 		tv = tableViewer;
 		//set the columns of the table
-//		int columnWidth = (int)(9*w/50);
+
 		int columnWidth = 132;
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
@@ -332,7 +332,6 @@ public class ProductContentPart extends ContentPart{
 		newColumnTableColumn_1.setMoveable(false);
 		newColumnTableColumn_1.setResizable(false);
 		newColumnTableColumn_1.setText("Æ·ÅÆ ");
-//		newColumnTableColumn.setImage(new Image(display,"title.png"));
 		//add listener
 		newColumnTableColumn_1.addSelectionListener(new SelectionAdapter(){
 			boolean asc = true;
@@ -400,22 +399,18 @@ public class ProductContentPart extends ContentPart{
 		});
 		
 		final TableColumn newColumnTableColumn_6 = new TableColumn(table, SWT.NONE);
-		newColumnTableColumn_6.setWidth(85);//columnWidth*5/9)
-//		buttonWidth = (int)(columnWidth*5/9/2);
+		newColumnTableColumn_6.setWidth(85);
 		newColumnTableColumn_6.setText("");
 		newColumnTableColumn_6.setMoveable(false);
 		newColumnTableColumn_6.setResizable(false);		
 		
-		
 		//set the editor of the table columns
 		tableViewer.setContentProvider(new ProductContentProvider(tableViewer, productlist));
 		tableViewer.setLabelProvider(new ProductTableLabelProvider());
-		tableViewer.setUseHashlookup(true);//spead up
-		
+		tableViewer.setUseHashlookup(true);//spead up		
 		
 		Product prod_new = new Product(ProductUtils.getNewLineID());//dynamic from the database
 		productlist.addProduct(prod_new);
-		
 		
 		tableViewer.setInput(productlist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","repository","operation"});		
@@ -444,8 +439,6 @@ public class ProductContentPart extends ContentPart{
 		ICellModifier modifier = new ProductCellModifier(tableViewer, productlist);
 		tableViewer.setCellModifier(modifier);
 		
-		//add Filter, no use now
-//		tableViewer.addFilter(new ProductFilter());
 		ProductUtils.showBrandCheckBoxes(composite_br, (int)(4*w/5/10), composite_scrollbrand, tableViewer, base);
 		
 		Utils.refreshTable(table);

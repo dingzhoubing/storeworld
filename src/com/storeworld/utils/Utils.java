@@ -424,6 +424,10 @@ public class Utils {
 		return new Image(null,image, SWT.IMAGE_GRAY);
 	}
 	
+	/**
+	 * refresh the table data, to make the table data with different color items
+	 * @param table
+	 */
 	public static void refreshTable(Table table){
 		Color color1 = new Color(table.getDisplay(), 255, 245, 238);
 		Color color2 = new Color(table.getDisplay(), 255, 250, 250);

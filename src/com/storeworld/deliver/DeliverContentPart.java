@@ -394,10 +394,9 @@ public class DeliverContentPart extends ContentPart{
 				}	
 				
 				if(found){
-					
+					//if using the software keyboard
 					if(Utils.getUseSoftKeyBoard()){
 						if(colCurrent == priceColumn || colCurrent == numberColumn){
-							//cannot reuse the editor, make cause unstable
 							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 							Text text = (Text)(editorEdit.getEditor());	
 							callKeyBoard(text);
@@ -407,10 +406,9 @@ public class DeliverContentPart extends ContentPart{
 								if(Utils.getClickButton() && Utils.getInputNeedChange()){
 									c.setPrice(Utils.getInput());
 									text.setText(c.getPrice());//validate the text
-									if(DeliverValidator.validatePrice(c.getPrice()))//table, table.getItem(rowCurrent), colCurrent, 
+									if(DeliverValidator.validatePrice(c.getPrice())) 
 									{
 										deliverlist.deliverChanged(c);	
-//										text.setText(c.getPrice());
 									}else{
 										c.setPrice(pricelast);
 									}
@@ -425,7 +423,6 @@ public class DeliverContentPart extends ContentPart{
 									if(DeliverValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
 									{
 										deliverlist.deliverChanged(c);	
-//										text.setText(c.getNumber());
 									}else{
 										c.setNumber(numberlast);
 									}
@@ -538,8 +535,10 @@ public class DeliverContentPart extends ContentPart{
 		});
 	}
 	
-	public static void reNewDeliver(){
-	
+	/**
+	 * when update the product table we reset the deliver table
+	 */
+	public static void reNewDeliver(){	
 		DeliverUtils.setStatus("NEW");
 		DeliverUtils.leaveEditMode();
 		DeliverUtils.leaveReturnMode();
@@ -547,7 +546,6 @@ public class DeliverContentPart extends ContentPart{
 	
 		clearContent();
 		enableEditContent();
-//		disableEditContent();
 		DeliverUtils.setTime(null);					
 	
 		table.removeAll();
@@ -567,6 +565,9 @@ public class DeliverContentPart extends ContentPart{
 		indeed_val.setEnabled(true);
 	}
 	
+	/**
+	 * re-search the the history
+	 */
 	public static void reNewDeliverHistory(){
 		doSearch();
 	}
@@ -581,25 +582,19 @@ public class DeliverContentPart extends ContentPart{
 		
 		//left side navigate
 		final Composite composite_left = new Composite(composite, SWT.NONE);
-//		final Color base = new Color(composite.getDisplay(), 255,240,245);
-		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
+		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);
 		composite_left.setBackground(base);
-//		composite_left.setBounds(0, 0, (int)(w/5), h);
 		composite_left.setBounds(0, 0, 200, h);
 		 
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
 		composite_right.setBounds(200, 0, 760, h);
-//		composite_shift = (int)(w/5);
 		composite_shift = 200;
 		
 		//define a table
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL);//shell, SWT.CHECK
-		//add a new deliver table
 		btnNewButton = new Button(composite_left, SWT.NONE);
-//		btnNewButton.setBounds((int)(2*w/5/10), (int)(w/5/10/2), (int)(2*3*w/5/10), (int)(2*w/5/10));
 		btnNewButton.setBounds(12, 12, 176, 36);
 		btnNewButton.setText("创建送货单");
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
@@ -616,12 +611,10 @@ public class DeliverContentPart extends ContentPart{
 					DeliverUtils.setStatus("NEW");
 					DeliverUtils.leaveEditMode();
 					DeliverUtils.leaveReturnMode();
-//				if(!gc.getText().equals("") && !gcName.equals("")){
 					DeliverUtils.setOrderNumber();//set the order number for the deliver table
 				
 					clearContent();
 					enableEditContent();
-//					disableEditContent();
 					DeliverUtils.setTime(null);					
 				
 					table.removeAll();
@@ -639,24 +632,17 @@ public class DeliverContentPart extends ContentPart{
 					btn_edit.setVisible(false);
 					btn_return.setVisible(false);
 					indeed_val.setEnabled(true);
-//				}else{
-//					
-//				}
 			}
 		});
 		
 		Label label = new Label(composite_left, SWT.NONE);
 		label.setText(" 当月历史记录(在下方设置条件进行搜索)");
 		label.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
-//		label.setBackground(new Color(composite_left.getDisplay(), 240, 255, 255));
 		label.setBackground(new Color(composite_left.getDisplay(), 0xe1, 0xe3, 0xe6));
-//		label.setBounds(0, (int)(2*w/5/10/2)+(int)(2*w/5/10), (int)(w/5), (int)(w/5/10));
 		label.setBounds(0, 62, 200, 18);
-		
-		
+				
+		//parent of scroll composite
 		Composite composite_2 = new Composite(composite_left, SWT.NONE);
-//        composite_2.setBounds(0, (int)(2*w/5/10)+(int)(2*w/5/10), (int)(w/5), (int)(4*(h-2*w/25)/5));
-//        composite_2.setBackground(new Color(composite_left.getDisplay(), 255,240,245));
 		composite_2.setBounds(0, 80, 200, 410);
         composite_2.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
         composite_2.setLayout(new FillLayout());
@@ -669,9 +655,9 @@ public class DeliverContentPart extends ContentPart{
 				composite_scroll.forceFocus();
 				}
 		}); 
+		
 		final Composite composite_fn = new Composite(composite_scroll, SWT.NONE);
 		composite_scroll.setContent(composite_fn);
-//		composite_fn.setBackground(new Color(composite.getDisplay(), 255,240,245));
 		composite_fn.setBackground(new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa));
 		GridLayout layout = new GridLayout(1, false);  
         layout.numColumns = 1;  
@@ -680,16 +666,13 @@ public class DeliverContentPart extends ContentPart{
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         composite_fn.setLayout(layout);
-//        final ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();
         composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        //show the deliver history
-//        Color comp_color = new Color(composite_fn.getDisplay(), 204, 255, 204);
         Color comp_color = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);
-//        DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color,(int)(9*w/5/9), (int)(4*(h-2*w/25)/5/9));
+        //show history
         DeliverUtils.showHistoryPanel(composite_scroll, composite_fn, comp_color, 186, 50);
         composite_2.layout();
         
-        
+        //search option for area
         area = new CCombo(composite_left, SWT.BORDER|SWT.READ_ONLY);
         area.setBounds(12, 492, 86, 25);
         area.setVisibleItemCount(5);
@@ -700,6 +683,7 @@ public class DeliverContentPart extends ContentPart{
         cus.setVisibleItemCount(5);
         cus.setText("全部客户");
         
+        //listener for area combo box
         area.addListener(SWT.MouseDown, new Listener() {
 			@Override
         	public void handleEvent(Event event)  {
@@ -720,8 +704,7 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
         
-
-        
+        //listener for customer combo box
         cus.addListener(SWT.MouseDown, new Listener() {
 			@Override
         	public void handleEvent(Event event) {
@@ -766,10 +749,11 @@ public class DeliverContentPart extends ContentPart{
 		});
         
         
-        //date picker
+        //date picker default
         dateTime = new DateTime(composite_left, SWT.BORDER | SWT.MEDIUM);
         dateTime.setBounds(12, 520, 98, 30);
         
+        //date picker when search the detail of one customer
         dateTime2 = new DateTime(composite_left, SWT.BORDER | SWT.SHORT);
         dateTime2.setBounds(12, 520, 98, 30);
         dateTime2.setVisible(false);
@@ -780,20 +764,20 @@ public class DeliverContentPart extends ContentPart{
 		btnSearch.setText("查找");   
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
-        	public void widgetSelected(SelectionEvent e) {
-				
+        	public void widgetSelected(SelectionEvent e) {				
 				doSearch();
 			}
 		});
 		
 		//================================================================
 		//quick search for customer, to make a deliver
-		final Button btn_quick = new Button(composite_right, SWT.NONE);
+		final Button btn_quick = new Button(composite_right, SWT.NONE);		
+		btn_quick.setBounds(172, 114, 72, 22);
+		btn_quick.setText("快速查找");
+		btn_quick.setVisible(false);
 		btn_quick.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				System.out.println("jump into customer page, can filter the customer by already exist options(todo)");
-				//jump into the customer page
 				Utils.setFunctin(FUNCTION.CUSTOMER);
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				if(Utils.getNorthPartComposites(NORTH_TYPE.NORTH_INDEX) == null)				
@@ -805,9 +789,7 @@ public class DeliverContentPart extends ContentPart{
 				shell.show_Content_customer();
 			}
 		});
-		btn_quick.setBounds(172, 114, 72, 22);
-		btn_quick.setText("快速查找");
-		btn_quick.setVisible(false);
+
 		//show & hide the quick search button
 		composite_right.addListener(SWT.MouseEnter, new Listener(){
 			@Override
@@ -852,6 +834,7 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
+		//when user click the "edit" button
 		btn_edit = new Button(composite_right, SWT.NONE);
 		btn_edit.setBounds(12, 12, 76, 30);
 		btn_edit.setText("修改");
@@ -880,6 +863,7 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
+		//the "return" mode
 		btn_return = new Button(composite_right, SWT.NONE);
 		btn_return.setBounds(90, 12, 76, 30);
 		btn_return.setVisible(false);
@@ -893,8 +877,7 @@ public class DeliverContentPart extends ContentPart{
 					enableEditContent();
 					btn_return.setVisible(false);
 					btn_edit.setVisible(false);
-//					DeliverUtils.enterEditMode();
-					
+
 					//cannot save the return now, in the future, there may exist return module
 					btn_save.setVisible(false);
 					
@@ -916,15 +899,11 @@ public class DeliverContentPart extends ContentPart{
 					total_big.setText("");
 					indeed_val.setText("");
 					indeed_big.setText("");
-					indeed_val.setEnabled(true);//can be editable
-					
+					indeed_val.setEnabled(true);//can be editable					
 					//make a return mode, then, in this mode,
 					//we need to check and make sure:
 					//1. all goods are subsets of this deliver
 					//2. based on 1, on new goods, and goods number are no bigger than this deliver
-					
-					
-					
 				}
 			}
 		});
@@ -936,17 +915,14 @@ public class DeliverContentPart extends ContentPart{
 		lbl_area.setForeground(new Color(composite.getDisplay(), 0x80, 0x80, 0x80));
 		lbl_area.setAlignment(SWT.CENTER);
 		lbl_area.setText("片区:");
-//		lbl_area.setBounds(0, (int)(2*h/9), (int)(4*w/5/25), (int)(h/9/2));
 		lbl_area.setBounds(12, 82, 32, 22);
-		//area combo
 		
 		gc = new GeneralCCombo(composite_right, SWT.BORDER, 0, -1, Constants.DELIVER_TYPE);
-//		gc.setBounds((int)(4*w/5/25), (int)(2*h/9), (int)(24*w/5/25), (int)(h/9/2));
 		gc.setBounds(60, 82, 112, 22);
 		gc.setFont(SWTResourceManager.getFont("微软雅黑", 10, SWT.NORMAL));
 		gc.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
 		gc.setVisibleItemCount(5);
-//		gc.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
+
 		//mouse down listener
 		gc.addListener(SWT.MouseDown, new Listener() {
 			@Override
@@ -968,7 +944,6 @@ public class DeliverContentPart extends ContentPart{
 		gcName.setBounds(60, 114, 112, 22);
 		gcName.setFont(SWTResourceManager.getFont("微软雅黑", 10, SWT.NORMAL));
 		gcName.setVisibleItemCount(5);
-//		gcName.setBackground(new Color(composite.getDisplay(), 204, 255, 204));
 		gcName.addListener(SWT.MouseEnter, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
@@ -979,7 +954,6 @@ public class DeliverContentPart extends ContentPart{
 			@Override
         	public void handleEvent(Event event) {
 				String area = gc.getText();
-//				System.out.println("area: "+area);
 				String[] names = DataCachePool.getCustomerNames(area);
 				if(names.length != 0){//no such areas
 					gcName.setItems(names);
@@ -990,7 +964,6 @@ public class DeliverContentPart extends ContentPart{
 		gcName.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
-//				System.out.println("selected");
 				String area = gc.getText();
 				String name = gcName.getText();
 				try {
@@ -1013,9 +986,7 @@ public class DeliverContentPart extends ContentPart{
 				
 			}
 		});
-//		gc.setItems(items);		
-		//add listener for customer names
-		
+
 		//customer phone
 		Label lbl_phone = new Label(composite_right, SWT.CENTER|SWT.NONE);
 		lbl_phone.setFont(SWTResourceManager.getFont("微软雅黑", 10, SWT.NORMAL));
@@ -1223,17 +1194,16 @@ public class DeliverContentPart extends ContentPart{
 							DeliverInfoService deliverinfo = new DeliverInfoService();	
 
 							if((deli-ret) == 0){
-								try {
-									deliverinfo.deleteDeliverInfo(Integer.valueOf(rc
-											.getID()));
+								try {									
+									deliverinfo.deleteDeliverInfoAndUpdateGoods(Integer.valueOf(rc.getID()), d);//deleteDeliverInfo
 								} catch (Exception e1) {
 									System.out.println("remove the deliver failed");
 								}
 							}else{
 							try {
-								deliverinfo.updateDeliverInfo(rc.getID(),st);								
+								deliverinfo.updateDeliverInfo(rc.getID(),st, "return");		
 								} catch (Exception e1) {
-										System.out.println("update deliver failed");
+									System.out.println("update deliver failed");
 								}
 							}
 						}
@@ -1263,9 +1233,9 @@ public class DeliverContentPart extends ContentPart{
 					mbox.open();
 					
 				}else{
-				//do more check here
+				//not return mode
 				if(DeliverList.getDelivers().size() > 1){
-					
+					//check if all the deliver items are complete
 					for(int i=0; i< DeliverList.getDelivers().size()-1;i++){
 						Deliver d = (Deliver)DeliverList.getDelivers().get(i);
 						if(!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))){
@@ -1310,9 +1280,8 @@ public class DeliverContentPart extends ContentPart{
 								System.out.println("update common info failed");
 							}
 							}
-						}
-						
-						//status: NEW, HISTORY, EMPTY
+						}						
+						//status: NEW, HISTORY, EMPTY, empty mode is necessary?
 						DeliverUtils.setStatus("EMPTY");
 						
 						//step 2: initial the deliver page
@@ -1340,86 +1309,81 @@ public class DeliverContentPart extends ContentPart{
 				}
 			}
 		});
-		
-		//button print
-				btn_save = new Button(composite_right, SWT.NONE);
-				btn_save.setText("仅保存");
-				btn_save.setBounds(382, 500, 85, 40);
-				btn_save.addSelectionListener(new SelectionAdapter() {
-					@Override
-		        	public void widgetSelected(SelectionEvent e) {
-//						System.out.println("print");
-						//do more check here
-						if(DeliverList.getDelivers().size() > 1){
-							
-							for(int i=0; i< DeliverList.getDelivers().size()-1;i++){
-								Deliver d = (Deliver)DeliverList.getDelivers().get(i);
-								if(!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))){
-									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-									mbox.setMessage(String.format("第 %d 条送货信息不全", i+1));
-									mbox.open();
-									return;//do not go to print or save
-								}						
-							}
-							
-							//check area & name, if both are not empty, add to history, or popup an message box
-							if(!gc.getText().equals("") && !gcName.getText().equals("")){
-								
-								if(DeliverUtils.getStatus().equals("NEW")){
-									DeliverUtils.addToHistory();
-								}
-								//step 1: add the deliver common info into database
-								DeliverInfoService deliverinfo = new DeliverInfoService();
-								Map<String,Object> commonMap = new HashMap<String,Object>();
-								commonMap.put("order_num", DeliverUtils.getOrderNumber());
-								commonMap.put("customer_area", gc.getText());
-								commonMap.put("customer_name", gcName.getText());						
-								commonMap.put("deliver_addr", text_address.getText());
-								commonMap.put("deliver_time", DeliverUtils.getTime());
-								commonMap.put("telephone", text_phone.getText());
-								//if already exist, update it 
-								if(DeliverUtils.getStatus().equals("NEW")){
-									deliverinfo.printSaveCommonInfo(commonMap);
-								}else{//update
-									if(DeliverUtils.getEditMode()){
-									try {
-										deliverinfo.updateCommonInfo(commonMap);
-									} catch (Exception e1) {
-										System.out.println("update common info failed");
-									}
-									}
-								}
 
-								//status: NEW, HISTORY, EMPTY
-								DeliverUtils.setStatus("EMPTY");
-								
-								//step 2: initial the deliver page
-								//clear table
-								//and add a new line					
-								table.clearAll();
-								table.removeAll();					
-								DeliverList.removeAllDelivers();
-								clearContent();
-								disableEditContent();	
-								DeliverUtils.setTime("");
-								
-								total_val.setText("");
-								total_big.setText("");
-								btn_edit.setVisible(false);
-								btn_return.setVisible(false);
-								
-							}else{
-								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-								mbox.setMessage("收货人片区和姓名需填写完整");
-								mbox.open();						
+		//button only save, not print
+		btn_save = new Button(composite_right, SWT.NONE);
+		btn_save.setText("仅保存");
+		btn_save.setBounds(382, 500, 85, 40);
+		btn_save.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				if (DeliverList.getDelivers().size() > 1) {
+					for (int i = 0; i < DeliverList.getDelivers().size() - 1; i++) {
+						Deliver d = (Deliver) DeliverList.getDelivers().get(i);
+						if (!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage(String.format("第 %d 条送货信息不全", i + 1));
+							mbox.open();
+							return;// do not go to print or save
+						}
+					}
+
+					// check area & name, if both are not empty, add to history,
+					// or popup an message box
+					if (!gc.getText().equals("")&& !gcName.getText().equals("")) {
+
+						if (DeliverUtils.getStatus().equals("NEW")) {
+							DeliverUtils.addToHistory();
+						}
+						// step 1: add the deliver common info into database
+						DeliverInfoService deliverinfo = new DeliverInfoService();
+						Map<String, Object> commonMap = new HashMap<String, Object>();
+						commonMap.put("order_num",DeliverUtils.getOrderNumber());
+						commonMap.put("customer_area", gc.getText());
+						commonMap.put("customer_name", gcName.getText());
+						commonMap.put("deliver_addr", text_address.getText());
+						commonMap.put("deliver_time", DeliverUtils.getTime());
+						commonMap.put("telephone", text_phone.getText());
+						// if already exist, update it
+						if (DeliverUtils.getStatus().equals("NEW")) {
+							deliverinfo.printSaveCommonInfo(commonMap);
+						} else {// update
+							if (DeliverUtils.getEditMode()) {
+								try {
+									deliverinfo.updateCommonInfo(commonMap);
+								} catch (Exception e1) {
+									System.out.println("update common info failed");
+								}
 							}
 						}
-						
+
+						// status: NEW, HISTORY, EMPTY
+						DeliverUtils.setStatus("EMPTY");
+						// step 2: initial the deliver page
+						// clear table
+						// and add a new line
+						table.clearAll();
+						table.removeAll();
+						DeliverList.removeAllDelivers();
+						clearContent();
+						disableEditContent();
+						DeliverUtils.setTime("");
+						total_val.setText("");
+						total_big.setText("");
+						btn_edit.setVisible(false);
+						btn_return.setVisible(false);
+
+					} else {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("收货人片区和姓名需填写完整");
+						mbox.open();
 					}
-				});
-		
-		
-		
+				}
+
+			}
+		});
+	
 		//whether to use the software keyboard
 		button_swkb = new Button(composite_right, SWT.CHECK);
 		button_swkb.setBounds(660, 545, 100, 20);
@@ -1440,6 +1404,7 @@ public class DeliverContentPart extends ContentPart{
 		composite_return = new ReturnComposite(composite_right, SWT.BORDER);		
 		composite_return.setBounds(12, 150, 736, 230);
 		composite_return.setVisible(false);
+		
 		//===============================================================================
 		//define a table				
 		table = tableViewer.getTable();
@@ -1447,8 +1412,7 @@ public class DeliverContentPart extends ContentPart{
 		table.setHeaderVisible(true);		
 		table.setBounds(12, 150, 736, 230);
 		tv = tableViewer;
-		//set the columns of the table
-//		int columnWidth = (int)(4*9*w/60/5);		
+	
 		final TableColumn newColumnTableColumn_ID = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_ID.setWidth(0);
 		newColumnTableColumn_ID.setMoveable(false);
@@ -1549,9 +1513,7 @@ public class DeliverContentPart extends ContentPart{
 		tpShift.add(62);
 		
 		final TableColumn newColumnTableColumn_7 = new TableColumn(table, SWT.NONE);
-//		newColumnTableColumn_7.setWidth((int)(columnWidth*6/9)-3);//columnWidth*5/9)
-		newColumnTableColumn_7.setWidth(58);//columnWidth*5/9)
-//		buttonWidth = (int)(columnWidth*5/9/2);
+		newColumnTableColumn_7.setWidth(58);
 		newColumnTableColumn_7.setText("");
 		newColumnTableColumn_7.setMoveable(false);
 		newColumnTableColumn_7.setResizable(false);		
@@ -1562,7 +1524,6 @@ public class DeliverContentPart extends ContentPart{
 		tableViewer.setLabelProvider(new DeliverTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		Deliver deliver_new = new Deliver(DeliverUtils.getNewLineID());//dynamic from the database
-//		DeliverValidator.setNewID(DeliverUtils.getNewLineID());
 		deliverlist.addDeliver(deliver_new);
 		
 		tableViewer.setInput(deliverlist);		

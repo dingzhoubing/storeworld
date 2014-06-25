@@ -21,7 +21,8 @@ public class StockTableLabelProvider extends LabelProvider  implements ITableLab
 	private static final int UNIT_COLUMN = 4;
 	private static final int PRICE_COLUMN = 5;
 	private static final int NUMBER_COLUMN = 6;
-	private static DecimalFormat df = new DecimalFormat("#.00");
+	private static DecimalFormat df = new DecimalFormat("0.00");
+	
 	
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof Stock){
@@ -37,7 +38,6 @@ public class StockTableLabelProvider extends LabelProvider  implements ITableLab
 				}else if (columnIndex == UNIT_COLUMN){
 					return c.getUnit();
 				}else if (columnIndex == PRICE_COLUMN){
-//					return String.valueOf(c.getPrice());
 					if(c.getPrice().equals(""))
 						return "";
 					else
@@ -48,6 +48,10 @@ public class StockTableLabelProvider extends LabelProvider  implements ITableLab
 			}
 			return null;
 		}
+		
+		/**
+		 * if want to make a image for each column, change here		
+		 */
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}

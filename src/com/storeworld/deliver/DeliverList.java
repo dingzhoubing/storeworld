@@ -56,18 +56,9 @@ public class DeliverList {
 	public void initial(){		
 		
 		//order number 
-		//it's wrong to get the id in this way!!!
 		String newID = "";
 		try {
 			newID = String.valueOf(deliverinfo.getNextDeliverID());
-//			ReturnObject ret = deliverinfo.queryDeliverInfoAll();
-//			Pagination page = (Pagination) ret.getReturnDTO();
-//			List<Object> list = page.getItems();
-//			for(int i=0;i<list.size();i++){
-//				DeliverInfoAllDTO cDTO = (DeliverInfoAllDTO) list.get(i);
-//				newID = cDTO.getUni_id();//if this the id?
-//
-//			}
 		} catch (Exception e) {
 			System.out.println("get the current id of deliver info failed");
 		}
@@ -75,8 +66,7 @@ public class DeliverList {
 		if(newID.equals("-1") || newID.equals(""))
 			newID="1";//empty
 		//by the list of Customer from database
-		DeliverUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
-		
+		DeliverUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));		
 		//if the brand2sub not cached, query the database
 		DataCachePool.cacheProductInfo();		
 				
@@ -101,7 +91,6 @@ public class DeliverList {
 			(iterator.next()).add(deliver);
 		
 		//if in edit mode, change the history
-		//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
 		if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 			DeliverUtils.updateHistory(deliverList);
 		}
@@ -116,23 +105,18 @@ public class DeliverList {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).remove(deliver);
-			//update the database only if we are not in the return mode
-//			if (!DeliverUtils.getReturnMode()) {
-				try {
-					deliverinfo.deleteDeliverInfoAndUpdateGoods(Integer.valueOf(deliver.getID()), deliver);
-					//how to determine if the product is new or real 0?
-				} catch (Exception e) {
-					System.out.println("remove the deliver failed");
-				}
-//			}
+			try {
+				deliverinfo.deleteDeliverInfoAndUpdateGoods(Integer.valueOf(deliver.getID()), deliver);
+				// how to determine if the product is new or real 0?
+			} catch (Exception e) {
+				System.out.println("remove the deliver failed");
+			}
 			//if in edit mode, change the history
-			//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
 			if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 				DeliverUtils.updateHistory(deliverList);
 			}
 		}
 		double total = 0.00;
-//		boolean has = false;
 		for(int i=0;i<deliverList.size()-1;i++){
 			Deliver st = (Deliver)(deliverList.get(i));
 			String price = st.getPrice();
@@ -140,7 +124,6 @@ public class DeliverList {
 			double p = Double.valueOf(price);
 			int n = Integer.valueOf(number);
 			total+=(p * n);	
-//			has = true;
 		}
 		DeliverContentPart.setTotal(df.format(total));	
 		DeliverContentPart.setIndeed(df.format(total));	
@@ -191,8 +174,6 @@ public class DeliverList {
 		return ret;
 	}
 	
-	
-	
 	//reserve1 : indeed
 	//reserve2: deliver_time
 	/**
@@ -226,12 +207,9 @@ public class DeliverList {
 			deliver.setOrderNumber(DeliverUtils.getOrderNumber());
 			(iterator.next()).update(deliver);
 			
-//			st.put("reserve2", DeliverUtils.getTime());//set the order time for each deliver, need?
-			
 			if(!DeliverValidator.checkID(deliver.getID()) && DeliverValidator.rowLegal(deliver) && DeliverValidator.rowComplete(deliver)){
 				//update the database here		
 				int ret = 0;
-//				if (!DeliverUtils.getReturnMode()) {
 					try {						
 						//exist the same deliver
 						if(checkSameDeliver(deliver)){
@@ -252,7 +230,7 @@ public class DeliverList {
 		    		    	}
 						}else{
 						
-						ret = deliverinfo.updateDeliverInfo(deliver.getID(),st);
+						ret = deliverinfo.updateDeliverInfo(deliver.getID(),st, "");
 						if(ret == -1){
 							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
 		    		    	messageBox.setMessage(String.format("品牌:%s, 子品牌:%s, 规格:%s 的货品不存在仓库中， 点击确定将添加货品至仓库表中并继续发货，点击取消重新选择其他货品", 
@@ -302,7 +280,6 @@ public class DeliverList {
 					}
 //				}
 				//if in edit mode, change the history
-				//!DeliverUtils.getStatus().equals("EMPTY") && !UIDataConnector.getFromCustomer()
 				if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY") && ret == 0){
 					DeliverUtils.updateHistory(deliverList);
 				}
@@ -379,7 +356,6 @@ public class DeliverList {
 			}
 			boolean updateSum = true;
 			double total = 0.000;
-			// boolean has = false;
 			for (int i = 0; i < deliverList.size() - 1; i++) {
 				Deliver stin = (Deliver) (deliverList.get(i));
 				String price = stin.getPrice();
@@ -391,7 +367,6 @@ public class DeliverList {
 				double p = Double.valueOf(price);
 				int n = Integer.valueOf(number);
 				total += (p * n);
-				// has = true;
 			}
 			if(updateSum){
 				DeliverContentPart.setTotal(df.format(total));
@@ -405,13 +380,8 @@ public class DeliverList {
 	 * remove current history from database & navigator
 	 */
 	public static void removeCurrentHistory(){
-		DeliverInfoService deliverinfo = new DeliverInfoService();
-		
-//		Map<String, Object> map = new HashMap<String ,Object>();
-//		map.put("stock_time", DeliverUtils.getTime());
-		String order_num = DeliverUtils.getOrderNumber();
-		//haven't change the database
-				
+		DeliverInfoService deliverinfo = new DeliverInfoService();		
+		String order_num = DeliverUtils.getOrderNumber();				
 		try {
 			deliverinfo.deleteDeliverAndCommonByOrderNumber(order_num);
 		} catch (Exception e) {
@@ -436,8 +406,6 @@ public class DeliverList {
 	 * if the user click add a new deliver table, we initialize the table
 	 */
 	public static void removeAllDelivers(){
-		//the new item
-//		Deliver st = new Deliver(DeliverValidator.getNewID());
 		Deliver st = new Deliver(DeliverUtils.getNewLineID());
 		deliverList.clear();
 		//add a new line, do not wat the addDeliver method to become a static
@@ -457,8 +425,11 @@ public class DeliverList {
 		
 	}
 	
-	public static void deleteDeliversUseLess(String ordernum){
-		
+	/**
+	 * remove the deliver items from database
+	 * @param ordernum
+	 */
+	public static void deleteDeliversUseLess(String ordernum){		
 		try {
 			deliverinfo.deleteDeliversByOrderNumber(ordernum);
 		} catch (Exception e) {

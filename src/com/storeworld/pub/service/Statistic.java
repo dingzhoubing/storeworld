@@ -201,7 +201,15 @@ public class Statistic extends BaseAction{
 		}
 	}
 	
-	
+	/**
+	 * all brand, all areas
+	 * @param start_time
+	 * @param end_time
+	 * @param profit_shipment
+	 * @param timeType
+	 * @return
+	 * @throws Exception
+	 */
 	private ResultSetDTO analyzeCase_One(String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();

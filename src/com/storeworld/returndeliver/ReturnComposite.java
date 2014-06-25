@@ -1,8 +1,6 @@
 package com.storeworld.returndeliver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridLayout;
@@ -14,18 +12,17 @@ import org.eclipse.swt.widgets.Listener;
 import com.storeworld.common.DataInTable;
 import com.storeworld.deliver.Deliver;
 
-
+/**
+ * the composite for return mode
+ * @author dingyuanxiong
+ *
+ */
 public class ReturnComposite extends Composite {
 
 	private static ScrolledComposite context = null;
 	private static Composite composite_fn = null;
+	//record the return items
 	static ArrayList<ReturnItemComposite> returnitems = new ArrayList<ReturnItemComposite>();
-	
-//	private static HashMap<String, Deliver> id2Deliver = new HashMap<String, Deliver>();
-	
-//	public static HashMap<String, Deliver> getId2DeliverMap(){
-//		return id2Deliver;
-//	}
 	
 	public static ArrayList<ReturnItemComposite> getReturnItems(){
 		return returnitems;
@@ -79,9 +76,7 @@ public class ReturnComposite extends Composite {
 		label_7.setText("ÍË»õÊýÁ¿");
 		label_7.setBounds(631, 0, 65, 17);
 		
-		
-		
-		context = new ScrolledComposite(this, SWT.V_SCROLL);//
+		context = new ScrolledComposite(this, SWT.V_SCROLL);
 		context.setBounds(0, 23, 733, 207);
 		context.setExpandHorizontal(true);  
 		context.setExpandVertical(true);  
@@ -94,9 +89,12 @@ public class ReturnComposite extends Composite {
 		initialContext();		
 	}
 	
+	/**
+	 * if user choose to enter the return mode, we show the delivers in the return composite
+	 * @param delivers
+	 */
 	public void showDelivers(ArrayList<DataInTable> delivers){
 		//first, we clear the old values in list and UI side
-
 		for(int i=0;i<returnitems.size(); i++){
 			returnitems.get(i).dispose();
 		}
@@ -106,8 +104,6 @@ public class ReturnComposite extends Composite {
 		//do not use the last empty row
 		for (int i = 0; i < delivers.size()-1; i++) {
 			Deliver ret = (Deliver)delivers.get(i);
-//			id2Deliver.put(ret.getID(), ret);
-			
 			ReturnItemComposite rc = new ReturnItemComposite(composite_fn, ret);			
 			returnitems.add(rc);
 			context.setMinSize(composite_fn.computeSize(SWT.DEFAULT,

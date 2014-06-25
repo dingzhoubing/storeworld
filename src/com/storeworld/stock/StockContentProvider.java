@@ -19,6 +19,10 @@ public class StockContentProvider implements IStructuredContentProvider, IDataLi
 			this.tableviewer = tableviewer;
 			this.stocklist = stocklist;
 		}
+		
+		/**
+		 *	get the elements of the data table 
+		 */
 		public Object[] getElements(Object inputElement) {
 			return StockList.getStocks().toArray();
 		}

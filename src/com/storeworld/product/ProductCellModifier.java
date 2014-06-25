@@ -4,7 +4,6 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.storeworld.stock.StockList;
 import com.storeworld.utils.Utils;
 
 /**
@@ -33,15 +32,12 @@ public class ProductCellModifier implements ICellModifier {
 	 * add a new row in product table
 	 * @param product
 	 */
-	public static void addNewTableRow(Product product){
-//		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
-			int new_id = Integer.valueOf(product.getID()) + 1;
-//			ProductValidator.setNewID(String.valueOf(new_id));
-			ProductUtils.setNewLineID(String.valueOf(new_id));
-			Product prod_new = new Product(String.valueOf(new_id));
-			productlist.addProduct(prod_new);
-			Utils.refreshTable(tv.getTable());
-//		}
+	public static void addNewTableRow(Product product) {
+		int new_id = Integer.valueOf(product.getID()) + 1;
+		ProductUtils.setNewLineID(String.valueOf(new_id));
+		Product prod_new = new Product(String.valueOf(new_id));
+		productlist.addProduct(prod_new);
+		Utils.refreshTable(tv.getTable());
 	}
 	
 	//when initial the table data
@@ -75,11 +71,9 @@ public class ProductCellModifier implements ICellModifier {
 			else
 				return String.valueOf("");
 		}else if(property.equals("operation")){
-//			return String.valueOf("1");
 			return null;// show the operation button
 		}
 		return null;
-//		throw new RuntimeException("error column name : " + property);
 	}
 
 	//when modify the table
@@ -163,7 +157,6 @@ public class ProductCellModifier implements ICellModifier {
 			p.setRepository(newValue);
 		} else {
 			return;//just return, do nothing
-//			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
 
 		boolean valid = false;

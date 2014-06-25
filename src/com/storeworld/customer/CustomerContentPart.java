@@ -33,7 +33,6 @@ import com.storeworld.utils.Utils;
 /**
  * the main of the customer page
  * @author dingyuanxiong
- * need to do: dispose control, color control
  *
  */
 public class CustomerContentPart extends ContentPart{
@@ -68,7 +67,6 @@ public class CustomerContentPart extends ContentPart{
 	private static Listener listener = null;
 	
 
-	
 	/**
 	 * constructor
 	 * @param parent
@@ -99,6 +97,7 @@ public class CustomerContentPart extends ContentPart{
 	public static void removeMouseDownListener(){
 		table.removeListener(SWT.MouseDown, listener);
 	}
+	
 	/**
 	 * call the software keyboard
 	 */
@@ -116,9 +115,7 @@ public class CustomerContentPart extends ContentPart{
 	 * @param event
 	 */
 	public void addListenerForTable(){
-		
-//		click to show the soft keyboard
-//		table.addListener(SWT.MouseDown, listener);
+
 		table.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
@@ -269,14 +266,15 @@ public class CustomerContentPart extends ContentPart{
 		final int w = current.getBounds().width;
 		int h = current.getBounds().height;
 		composite.setBounds(0, 0, w, h);
+		
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-//		composite_right.setBounds((int)(w/5), 0, (int)(4*w/5), h);
 		composite_right.setBounds(200, 0, 760, h);
 		composite_shift = 200;
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		tv=tableViewer;
+		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
@@ -412,7 +410,6 @@ public class CustomerContentPart extends ContentPart{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-//		table.setBounds(0, 0, (int)(4*w/5), h);
 		table.setBounds(0, 0, 760, h);
 		
 		//set the columns of the table
@@ -425,7 +422,6 @@ public class CustomerContentPart extends ContentPart{
 		//the new column for delivering 
 		final TableColumn newColumnTableColumn_Deliver = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_Deliver.setWidth(85);
-//		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_Deliver.setText("");
 		newColumnTableColumn_Deliver.setMoveable(false);
 		newColumnTableColumn_Deliver.setResizable(false);	
@@ -492,7 +488,6 @@ public class CustomerContentPart extends ContentPart{
 		
 		final TableColumn newColumnTableColumn_5 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_5.setWidth(85);
-//		buttonWidth = (int)(columnWidth*5/9/2);
 		newColumnTableColumn_5.setText("");
 		newColumnTableColumn_5.setMoveable(false);
 		newColumnTableColumn_5.setResizable(false);		
@@ -502,13 +497,9 @@ public class CustomerContentPart extends ContentPart{
 		customerlist = new CustomerList(table);
 		tableViewer.setContentProvider(new CustomerContentProvider(tableViewer, customerlist));
 		tableViewer.setLabelProvider(new CustomerTableLabelProvider());
-		tableViewer.setUseHashlookup(true);//spead up
-		//always get the ID from the database!
-		
+		tableViewer.setUseHashlookup(true);//spead up		
 		Customer cus_new = new Customer(CustomerUtils.getNewLineID());//dynamic from the database
-		
-		//always keep a new line in the last of the table 
-//		CustomerValidator.setNewID(CustomerUtils.getNewLineID());
+
 		customerlist.addCustomer(cus_new);
 		tableViewer.setInput(customerlist);		
 		tableViewer.setColumnProperties(new String[]{"id","deliver","name","area","phone","address","operation"});		

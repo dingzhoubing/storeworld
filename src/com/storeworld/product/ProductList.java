@@ -1,5 +1,6 @@
 package com.storeworld.product;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -15,7 +19,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
 import com.storeworld.deliver.DeliverContentPart;
-import com.storeworld.extenddialog.ShowUpdateProgress;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
@@ -190,12 +193,12 @@ public class ProductList {
 	 * update the product table in UI & database
 	 * @param product
 	 */
-	public void productChanged(Product product) {
+	public void productChanged(final Product product) {
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).update(product);
 			//not the new row, we update, or we do not update, just update he table
-			Map<String, Object> prod = new HashMap<String ,Object>();
+			final Map<String, Object> prod = new HashMap<String ,Object>();
 			prod.put("id", product.getID());
 			prod.put("brand", product.getBrand());
 			prod.put("sub_brand", product.getSubBrand());
@@ -234,7 +237,7 @@ public class ProductList {
 						String old_sub="";
 						String old_size = "";
 						String old_unit = "";
-						Map<String, Object> prod_rec = new HashMap<String ,Object>();
+						final Map<String, Object> prod_rec = new HashMap<String ,Object>();
 						//it should contains only one element, or something wrong
 						if(!list.isEmpty()){
 							GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(0);
@@ -257,42 +260,76 @@ public class ProductList {
 							DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
 							ProductUtils.refreshBrands();
 						}else{//change other property
+							final String old_brand_final = old_brand;
+							final String old_sub_final = old_sub;
+							
 							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
 		    		    	messageBox.setMessage(String.format("品牌:%s，子品牌:%s，规格%s 的商品将被修改，进货与送货表中将会发生相应更新，确认要操作吗？", old_brand, old_sub, old_size));		    		    	
 		    		    	if (messageBox.open() == SWT.OK){	
 		    		    		
-//		    		    		ShowUpdateProgress sp = new ShowUpdateProgress(MainUI.getMainUI_Instance(Display.getDefault()), 0);
-//		    		    		Thread th = new Thread(sp);
-//		    		    		th.start();
 		    		    		
-		    		    		goodsinfo.updateGoodsInfo(product.getID(), prod);
-								//update the cache
-								//based on: the product/customer page will not often be changed
-								DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
-								ProductUtils.refreshBrands();
-//								sp.setStatus("更新库存表", 5);
-								
-								//update all the stock info and deliver info, a long time maybe
-								//update all stock info and current stock table
-								StockInfoService stockinfo = new StockInfoService();
-								stockinfo.updateAllStockInfoForProductChanged(prod, prod_rec);
-								
-//								sp.setStatus("更新进货表", 25);
-								
-								StockContentPart.reNewStock();
-								StockContentPart.reNewStockHistory();
-//								sp.setStatus("更新进货界面", 55);
+		    		    		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		    		    		IRunnableWithProgress runnable = new IRunnableWithProgress() {  
+		    		    		    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {  
+		    		    		    	
+		    		    		    Display.getDefault().asyncExec(new Runnable() {  
+		    		    		                public void run() {  
+		    		    		        monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  
+		    		    		        
+		    		    		        
+		    		    		        try {
+											goodsinfo.updateGoodsInfo(product.getID(), prod);
+										} catch (Exception e) {
+											System.out.println("update goods failed");
+										}
+										//update the cache
+										//based on: the product/customer page will not often be changed
+										DataCachePool.updateProductInfoOfCache(old_brand_final, old_sub_final, product.getBrand(), product.getSubBrand());					
+										ProductUtils.refreshBrands();
+										monitor.worked(10);  
+	    		    		            monitor.subTask("更新产品表");  
+										
+										//update all the stock info and deliver info, a long time maybe
+										//update all stock info and current stock table
+										StockInfoService stockinfo = new StockInfoService();
+										stockinfo.updateAllStockInfoForProductChanged(prod, prod_rec);
+										
+										monitor.worked(20);  
+	    		    		            monitor.subTask("更新进货表");  
 
-								//update all deliver info and current deliver table
-								DeliverInfoService deliverinfo = new DeliverInfoService();
-								deliverinfo.updateAllDeliverInfoForProductChanged(prod, prod_rec);
-//								sp.setStatus("更新送货表", 75);
-								
-								DeliverContentPart.reNewDeliver();
-								DeliverContentPart.reNewDeliverHistory();
-//								sp.setStatus("更新进货界面", 100);
-								
-//								th.destroy();
+										StockContentPart.reNewStock();
+										StockContentPart.reNewStockHistory();
+										monitor.worked(50);  
+	    		    		            monitor.subTask("更新进货界面");  
+
+										//update all deliver info and current deliver table
+										DeliverInfoService deliverinfo = new DeliverInfoService();
+										deliverinfo.updateAllDeliverInfoForProductChanged(prod, prod_rec);
+										monitor.worked(75);  
+	    		    		            monitor.subTask("更新送货表");  
+
+										DeliverContentPart.reNewDeliver();
+										DeliverContentPart.reNewDeliverHistory();
+										monitor.worked(100);  
+	    		    		            monitor.subTask("更新送货界面");  
+
+		    		    		        monitor.done();
+		    		    		                }
+		    		    		    	  });
+		    		    		    }  
+		    		    		};  
+		    		    		  
+		    		    		try {  
+		    		    		    progressDialog.run(true,/*是否开辟另外一个线程*/  
+		    		    		    false,/*是否可执行取消操作的线程*/  
+		    		    		    runnable/*线程所执行的具体代码*/  
+		    		    		    );  
+		    		    		} catch (InvocationTargetException e) {  
+		    		    		    e.printStackTrace();  
+		    		    		} catch (InterruptedException e) {  
+		    		    		    e.printStackTrace();  
+		    		    		}  
+		    		    		
 								
 		    		    	}else{//back to the same
 		    		    		Product s = new Product();

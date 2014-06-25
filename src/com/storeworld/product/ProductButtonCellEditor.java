@@ -69,10 +69,8 @@ public class ProductButtonCellEditor extends CellEditor {
 			public void widgetSelected(SelectionEvent e) {
 
 				int ptY = button.getBounds().y+1;//make it always not equals the up one
-//				System.out.println("button y: "+ptY);
 				int rowCount = table.getItemCount();				
 				int index = table.getTopIndex();	
-//				System.out.println("topIndex: "+index);
 				for (; index < rowCount; index++) {
 					TableItem item = table.getItem(index);
 					int rowY = item.getBounds().y;						

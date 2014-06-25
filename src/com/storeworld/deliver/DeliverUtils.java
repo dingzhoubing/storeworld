@@ -33,27 +33,32 @@ import com.storeworld.utils.Utils;
  */
 public class DeliverUtils {
 	
+	//record which timer is used now
 	private static boolean detailTimer = true;
+	
+	//record the new line id
 	private static String newLineID = "";
 	private static int currentBrandLine=0;
 	private static String current_sub_brand = "";
 	
+	//record time and order number
 	private static String time_record = "";	
 	private static String orderNumber = "";
 	
 	private static boolean firstTime = true;
 	private static DeliverFilter df = new DeliverFilter();
-	/**
-	 * record the composite or property for refreshing the left navigator
-	 */
+	
+	//record the composite or property for refreshing the left navigator	
 	private static ScrolledComposite composite_scroll_record;
 	private static Composite composite_fn_record;
 	private static Color color_record;
 	private static int width_record;
 	private static int height_record;
+	
 	private static DecimalFormat dataformat = new DecimalFormat("0.00");
 	//item composite
 	private static ItemComposite ic_record;
+	
 	//the table is in edit mode or not
 	private static boolean editMode = false;
 	private static boolean returnMode = false;
@@ -143,19 +148,7 @@ public class DeliverUtils {
 	 * else +1 based on current order number  
 	 */
 	public static void setOrderNumber(){
-		//mock data
-//		if(!orderNumber.equals("")){
-//			String prefix = orderNumber.substring(0, 8);
-//			String tmp = orderNumber.substring(8);//yyyyMMddXX, tmp is the current ordernumber
-//			orderNumber = prefix+(Integer.valueOf(tmp)+1);//add 1
-//		}else{
-//			//query the database to get the order number, by time prefix
-//			orderNumber = "2014041020";//
-//			//get time of today, 20140417
-//			//query the order in database, to get the number
-//			
-//		}
-		
+
 		//query the database to query how many order number here
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");		
@@ -168,10 +161,8 @@ public class DeliverUtils {
 			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-//			String last_order = "";
-	
-			if(list.size()>0){
-				
+
+			if(list.size()>0){				
 				int count = 1;
 				for(int i=0;i<list.size();i++){
 					DeliverInfoAllDTO dto = (DeliverInfoAllDTO)list.get(i);
@@ -191,8 +182,6 @@ public class DeliverUtils {
 				//if today still have no deliver, by default, it's 0001
 				orderNumber = prefix+"0001";				
 			}
-			
-			
 		} catch (Exception e) {
 			System.out.println("query deliver info by default deliver time failed");
 		}
@@ -209,22 +198,16 @@ public class DeliverUtils {
 		return orderNumber;
 	}
 	
-	/**
-	 * the item composite list
-	 */
+	//the item composite list
 	private static ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();
-	
-	/**
-	 * the item content is the history panel
-	 */
+	//the item content is the history panel	
 	private static ArrayList<DeliverHistory> historyList = new ArrayList<DeliverHistory>();	
 	
+	
 	public static void addToHistory(HashMap<String, ArrayList<DeliverInfoAllDTO>> delivermap){
-
 		ArrayList<String> keylist = new ArrayList<String>();
 		keylist.addAll(delivermap.keySet());
 		Collections.sort(keylist);
-//		for(String key : delivermap.keySet()){
 		for(String key : keylist){
 			String title = "";
 			double total = 0.000;
@@ -270,7 +253,6 @@ public class DeliverUtils {
 			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-//			String last_order = "";
 			//ordernumber -- > deliver
 			HashMap<String, ArrayList<DeliverInfoAllDTO>> delivers = new HashMap<String, ArrayList<DeliverInfoAllDTO>>();  
 			if(list.size()>0){
@@ -294,8 +276,7 @@ public class DeliverUtils {
 		
 	}
 	
-	//update history when change the value of item composite
-	//!!but we do not change the history, so...problems
+	//update history when change the common part info
 	public static void updateHistory(){
 		String title = "";
 		String area = DeliverContentPart.getArea();
@@ -306,8 +287,11 @@ public class DeliverUtils {
 		ic_record.setValue(shis.getTitleShow());
 	}
 	
-	public static void updateHistory(ArrayList<DataInTable> delivers){
-		
+	/**
+	 * update history when change delivers in deliver table
+	 * @param delivers
+	 */
+	public static void updateHistory(ArrayList<DataInTable> delivers){		
 		String title = "";
 		double total = 0.000;
 //		String time_tmp = "";
@@ -325,8 +309,7 @@ public class DeliverUtils {
 			n = Integer.valueOf(number);
 			total+=(p * n);	
 		}
-		
-//		String number_total = String.valueOf(total);
+
 		String number_total = dataformat.format(total);
 		//indeed is the same as total when update the table
 		DeliverHistory shis = (DeliverHistory)ic_record.getHistory();
@@ -358,8 +341,6 @@ public class DeliverUtils {
 		}
 
 		String time_tmp = getTime();
-//		int num = queryItemsFromDataBase(time_tmp);
-//		String number="50000";//fake data
 		String area = DeliverContentPart.getArea();
 		String name = DeliverContentPart.getName();
 		String ordernumber = DeliverContentPart.getOrderNumber();
@@ -391,7 +372,7 @@ public class DeliverUtils {
 	 */
 	public static void showHistoryPanel(ScrolledComposite composite_scroll, Composite composite_fn, Color color, int width, int height){
 		//search the database
-		if(firstTime){
+		if (firstTime) {
 			composite_scroll_record = composite_scroll;
 			composite_fn_record = composite_fn;
 			color_record = color;
@@ -399,24 +380,31 @@ public class DeliverUtils {
 			height_record = height;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 			String time_current = formatter.format(new Date());
-		getHistoryFromDataBase(time_current);
-		
-		for (int i = 0; i < historyList.size(); i++) {
-			DeliverHistory his = historyList.get(i);
-			ItemComposite ic = new ItemComposite(composite_fn, color, width, height, his);
-			ic.setValue(his.getTitleShow(), his.getTimeShow(), his.getValueShow());
-			itemList.add(ic);
-			composite_scroll.setMinSize(composite_fn.computeSize(SWT.DEFAULT,
-					SWT.DEFAULT));
-			composite_fn.layout();
-		}
-		firstTime = false;
-		}else{
+			getHistoryFromDataBase(time_current);
+
+			for (int i = 0; i < historyList.size(); i++) {
+				DeliverHistory his = historyList.get(i);
+				ItemComposite ic = new ItemComposite(composite_fn, color,
+						width, height, his);
+				ic.setValue(his.getTitleShow(), his.getTimeShow(),
+						his.getValueShow());
+				itemList.add(ic);
+				composite_scroll.setMinSize(composite_fn.computeSize(
+						SWT.DEFAULT, SWT.DEFAULT));
+				composite_fn.layout();
+			}
+			firstTime = false;
+		} else{
 			//??
 		}
 	}
 	
-	
+	/**
+	 * show the search result in history panel when user click the search button
+	 * @param dateSearch
+	 * @param area
+	 * @param cus
+	 */
 	public static void showSearchHistory(String dateSearch, String area, String cus){
 		//remove the navigator panel, clear all the result
 		for(int i=0;i<itemList.size();i++)
@@ -521,7 +509,7 @@ public class DeliverUtils {
 		return current_sub_brand;
 	}
 	
-	
+	//get and set the timer left navigator
 	public static void setDetailTimer(boolean detail){
 		detailTimer = detail;
 	}

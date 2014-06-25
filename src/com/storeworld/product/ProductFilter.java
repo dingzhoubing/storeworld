@@ -54,19 +54,6 @@ public class ProductFilter extends ViewerFilter {
 	
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		
-		//if there is no filter box, which means the old product page
-//		Product prod = (Product)element;
-//		String brand = prod.getBrand();
-//		if(isFirst){
-//			setFilter(brand);
-//			isFirst = false;
-//		}
-//		if(prod.getBrand().equals("") || prod.getSubBrand().equals("") || prod.getSize().equals(""))
-//			return true;
-//		if(prod.getBrand().contains(filterword))
-//			return true;
-//		
-//		return false;
 		Product prod = (Product)element;	
 		//if user click the search button
 		if(ProductUtils.getSearchButtonClicked()){

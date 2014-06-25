@@ -19,6 +19,6 @@ public class GeneralComboLabelProvider extends LabelProvider {
      * given to this label provider, the name at the position given by the
      * index is returned using the <code>toString()</code> function. */
     public String getText(Object element) {
-        return (element == null) ? "" : element.toString(); //$NON-NLS-1$
+        return (element == null) ? "" : element.toString(); 
     }
 }

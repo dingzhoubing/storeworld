@@ -77,10 +77,12 @@ public class StockInfoService extends BaseAction{
 		return type;
 	}
 	
-	
-	
-	
-	
+	/**
+	 * update the stock info due to product changed
+	 * @param mapnew
+	 * @param mapold
+	 * @return
+	 */
 	public int updateAllStockInfoForProductChanged(Map<String,Object> mapnew, Map<String,Object> mapold){
 		int ret = 0;
 		BaseAction tempAction=new BaseAction();
@@ -110,92 +112,7 @@ public class StockInfoService extends BaseAction{
 		return ret;
 	}
 	
-	
-	
-	/**
-	 * description:判断是否存在相同的记录
-	 * @param map
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean isExistStockInfo(Map<String,Object> map) throws Exception{
-		BaseAction tempAction=new BaseAction();
-		String time = (String) map.get("stock_time");
-		//String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_time=str_to_date(?, '%Y-%m-%d')";
-		//String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and date_format(si.stock_time,'%Y-%m-%d')=?";
-//		String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_from=? and si.stock_time=?";
-		String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_time=?";
-		/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date s_date =(Date)sdf.parse(time);*/
-		//Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),str2Timestamp(time)};
-		
-//		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),map.get("stock_from"),time};
-		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),time};
-		
-		List<Object> params=objectArray2ObjectList(params_tmp);
-		//System.out.println(params);
-		List list=null;
-		try{
-			list=tempAction.executeQuery(sql, params);
-		}catch(Exception e){
-			throw new Exception(DataBaseCommonInfo.EXE_QUERY_FAILED);
-		}
-		if(list==null||list.size()==0)
-		{
-			return false;
-		}
 
-		return true;
-	}
-	
-//	public boolean addBatch(Map<String,Object> map) throws Exception{
-//		String sql_query="select count(*) batchNo from goods_batch_info where brand=? and sub_brand=? and standard=?";
-//		String sql_insert="insert into goods_batch_info values(?,?,?,?,?,?,?,?,?)";
-//		Object[] params_query_temp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
-//		List<Object> params_query=objectArray2ObjectList(params_query_temp);
-//		List list=null;
-//		try {
-//			list=executeQuery(sql_query, params_query);
-//			Map retMap=(Map) list.get(0);
-//			String batchNo=String.valueOf(retMap.get("batchNo"));
-//			
-//			Object[] params_insert_temp={map.get("brand"),map.get("sub_brand"),map.get("standard"),map.get("unit_price"),map.get("quantity"),batchNo,map.get("reserve1"),map.get("reserve2"),map.get("reserve3")};
-//			List<Object> params_insert=objectArray2ObjectList(params_insert_temp);
-//			int snum=executeUpdate(sql_insert,params_insert);
-//			if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
-//				throw new Exception("新增货品批次失败，请检查数据!");
-//			}
-//		}catch(Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			throw new Exception("新增货品批次失败!"+e.getMessage());
-//		}
-//		return true;
-//	}
-	
-	/**
-	 * 批量新增进货信息
-	 * @param listMap 装的是多条进货信息
-	 * @return
-	 * @throws Exception
-	 */
-//	public boolean batchAddStockInfo (List<Map<String,Object>> listMap) throws Exception{
-//		boolean ret_total=true;//执行批量插入的返回值
-//		int num=listMap.size();
-//		try{
-//			for(int j=0;j<num;j++){
-//				boolean ret_one=addStockInfo(listMap.get(j));//执行一次插入的结果
-//				if(ret_one==false){
-//					ret_total=false;
-//					return ret_total;
-//				}
-//			}
-//		}catch(Exception e){
-//			throw new Exception("执行批量新增货品信息异常！");
-//		}
-//		return ret_total;
-//	}
-	
 	/**
 	 * 删除一条进货信息，用ID标识。delete操作表不能用别名
 	 * @param id
@@ -218,8 +135,8 @@ public class StockInfoService extends BaseAction{
 		}
 		
 		//find the product in product table, update the repository
-		String sql_u="select * from goods_info gi where gi.brand=? and gi.sub_brand=? and gi.standard=?";
-		Object[] params_u={stock.getBrand(),stock.getSubBrand(),stock.getSize()};
+		String sql_u="select * from goods_info gi where gi.brand=? and gi.sub_brand=?";// and gi.standard=?
+		Object[] params_u={stock.getBrand(),stock.getSubBrand()};//,stock.getSize()
 		List<Object> params_exe=objectArray2ObjectList(params_u);
 		//System.out.println(params);
 		List list_u=null;
@@ -344,6 +261,13 @@ public class StockInfoService extends BaseAction{
 		return type;
 	}
 	
+	/**
+	 * update the stock table indeed value by time
+	 * @param time
+	 * @param indeed
+	 * @return
+	 * @throws Exception
+	 */
 	public boolean updateStocksIndeedByTime(String time, String indeed) throws Exception{
 		boolean ret = false;
 		
@@ -357,33 +281,7 @@ public class StockInfoService extends BaseAction{
 		return ret;		
 	}
 	
-	
-	/**
-	 * 批量更新进货信息
-	 * @param listId
-	 * @param listMap
-	 * @return
-	 * @throws Exception
-	 */
-//	public boolean batchUpdateStockInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
-//
-//		boolean ret_total=true;//执行批量更新的返回值
-//		int num=listMap.size();
-//		try{
-//			for(int j=0;j<num;j++){
-//				boolean ret_one=updateStockInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
-//				if(ret_one!=true){
-//					ret_total=false;
-//					return ret_total;
-//				}
-//			}
-//		}catch(Exception e){
-//			throw new Exception("执行批量新增货品信息异常！");
-//		}
-//		return ret_total;
-//
-//	}
-	
+
 	
 	/**
 	 * description：查询所有进货信息，不带查询条件
@@ -475,11 +373,6 @@ public class StockInfoService extends BaseAction{
 		}
 		return ro;
 	}
-	
-	
-	
-	
-	
 	
 	
 	/**
@@ -574,6 +467,7 @@ public class StockInfoService extends BaseAction{
 		}
 		return ro;
 	}
+	
 	/**
 	 * description:默认查一个月的历史记录，从今天算
 	 * @param map
@@ -710,7 +604,130 @@ public class StockInfoService extends BaseAction{
 		return ro;
 	} 
 
+	/**
+	 * get the new stock row id
+	 * @return
+	 * @throws Exception
+	 */
 	public int getNextStockID() throws Exception{
 		return getNextID("stock_info");
 	}
+	
+	
+//==========================================================================================================	
+	
+	/**
+	 * description:判断是否存在相同的记录
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+//	private boolean isExistStockInfo(Map<String,Object> map) throws Exception{
+//		BaseAction tempAction=new BaseAction();
+//		String time = (String) map.get("stock_time");
+//		//String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_time=str_to_date(?, '%Y-%m-%d')";
+//		//String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and date_format(si.stock_time,'%Y-%m-%d')=?";
+////		String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_from=? and si.stock_time=?";
+//		String sql="select * from stock_info si where si.brand=? and si.sub_brand=? and si.standard=? and si.stock_time=?";
+//		/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		Date s_date =(Date)sdf.parse(time);*/
+//		//Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),str2Timestamp(time)};
+//		
+////		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),map.get("stock_from"),time};
+//		Object[] params_tmp={map.get("brand"),map.get("sub_brand"),map.get("standard"),time};
+//		
+//		List<Object> params=objectArray2ObjectList(params_tmp);
+//		//System.out.println(params);
+//		List list=null;
+//		try{
+//			list=tempAction.executeQuery(sql, params);
+//		}catch(Exception e){
+//			throw new Exception(DataBaseCommonInfo.EXE_QUERY_FAILED);
+//		}
+//		if(list==null||list.size()==0)
+//		{
+//			return false;
+//		}
+//
+//		return true;
+//	}
+	
+//	public boolean addBatch(Map<String,Object> map) throws Exception{
+//		String sql_query="select count(*) batchNo from goods_batch_info where brand=? and sub_brand=? and standard=?";
+//		String sql_insert="insert into goods_batch_info values(?,?,?,?,?,?,?,?,?)";
+//		Object[] params_query_temp={map.get("brand"),map.get("sub_brand"),map.get("standard")};
+//		List<Object> params_query=objectArray2ObjectList(params_query_temp);
+//		List list=null;
+//		try {
+//			list=executeQuery(sql_query, params_query);
+//			Map retMap=(Map) list.get(0);
+//			String batchNo=String.valueOf(retMap.get("batchNo"));
+//			
+//			Object[] params_insert_temp={map.get("brand"),map.get("sub_brand"),map.get("standard"),map.get("unit_price"),map.get("quantity"),batchNo,map.get("reserve1"),map.get("reserve2"),map.get("reserve3")};
+//			List<Object> params_insert=objectArray2ObjectList(params_insert_temp);
+//			int snum=executeUpdate(sql_insert,params_insert);
+//			if(snum<1){//插入记录失败，界面弹出异常信息,这里将异常抛出，由调用的去捕获异常
+//				throw new Exception("新增货品批次失败，请检查数据!");
+//			}
+//		}catch(Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			throw new Exception("新增货品批次失败!"+e.getMessage());
+//		}
+//		return true;
+//	}
+	
+	/**
+	 * 批量新增进货信息
+	 * @param listMap 装的是多条进货信息
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean batchAddStockInfo (List<Map<String,Object>> listMap) throws Exception{
+//		boolean ret_total=true;//执行批量插入的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=addStockInfo(listMap.get(j));//执行一次插入的结果
+//				if(ret_one==false){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//	}
+	
+	
+	
+	/**
+	 * 批量更新进货信息
+	 * @param listId
+	 * @param listMap
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean batchUpdateStockInfo(List<String> listId,List<Map<String,Object>> listMap) throws Exception{
+//
+//		boolean ret_total=true;//执行批量更新的返回值
+//		int num=listMap.size();
+//		try{
+//			for(int j=0;j<num;j++){
+//				boolean ret_one=updateStockInfo(listId.get(j),listMap.get(j));//执行一次更新的结果
+//				if(ret_one!=true){
+//					ret_total=false;
+//					return ret_total;
+//				}
+//			}
+//		}catch(Exception e){
+//			throw new Exception("执行批量新增货品信息异常！");
+//		}
+//		return ret_total;
+//
+//	}
+	
+	
+	
 }

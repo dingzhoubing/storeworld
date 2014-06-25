@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -19,25 +18,30 @@ import com.storeworld.common.DataInTable;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
-import com.storeworld.product.ProductContentPart;
-import com.storeworld.product.ProductFilter;
 import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
 public class StockUtils {
 	
+	//record the new line id 
 	private static String newLineID = "";
+	
+	//if click brand, record current line
 	private static int currentBrandLine=0;
+	//record current sub brand value
 	private static String current_sub_brand = "";
+		
 	//the time when click add a new stock
 	private static String time_record = "";
+	//to judge if the first time to show the history when at initialization
 	private static boolean firstTime = true;
+	
+	//the stock filter
 	private static StockFilter sf = new StockFilter();
-	private static DecimalFormat df = new DecimalFormat("#.00");
-	/**
-	 *  record the composite or property for refreshing the left navigator
-	 */
+	private static DecimalFormat df = new DecimalFormat("0.00");
+	
+	//record the composite or property for refreshing the left navigator	
 	private static ScrolledComposite composite_scroll_record;
 	private static Composite composite_fn_record;
 	private static Color color_record;
@@ -48,6 +52,10 @@ public class StockUtils {
 	private static ItemComposite ic_record;
 	//true: table&time etc. are in edit mode, false: normal mode|view mode
 	private static boolean editMode = false;
+	//current status, NEW, HISTORY
+	private static String status = "";
+	
+		
 	/**
 	 * 1. if add a new stock record, time_record = ""
 	 * 2. if change the table, set the time_record="yyyyMMddHHmmss"
@@ -69,12 +77,20 @@ public class StockUtils {
 		return time_record;
 	}
 	
+	/**
+	 * record current item composite, when user click item in history panel
+	 * @param ic
+	 */
 	public static void recordItemComposite(ItemComposite ic){
 		ic_record = ic;
 	}
 	public static ItemComposite getItemCompositeRecord(){
 		return ic_record;
 	}
+	
+	/**
+	 * edit mode operations
+	 */
 	public static void enterEditMode(){
 		editMode = true;
 	}
@@ -84,10 +100,11 @@ public class StockUtils {
 	public static boolean getEditMode(){
 		return editMode;
 	}
-	
-	private static String status = "";
-	
-	//NEW, HISTORY
+			
+	/**
+	 * current status
+	 * @param sta NEW HISTORY
+	 */
 	public static void setStatus(String sta){
 		status = sta;
 	}
@@ -95,16 +112,12 @@ public class StockUtils {
 		return status;
 	} 
 	
-	/**
-	 * the item composite list
-	 */
-	private static ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();
-	
-	/**
-	 * the item content is the history panel
-	 */
+	// the item composite list
+	private static ArrayList<ItemComposite> itemList = new ArrayList<ItemComposite>();	
+	//the item content is the history panel	 
 	private static ArrayList<StockHistory> historyList = new ArrayList<StockHistory>();
 	
+	//getters of item list & history list
 	public static ArrayList<ItemComposite> getItemList(){
 		return itemList;
 	}
@@ -144,9 +157,7 @@ public class StockUtils {
 					day = day.substring(1);
 				time_show =  month+"ÔÂ  " + day + "ÈÕ";
 			}
-//			StockHistory shis = (StockHistory) ic_record.getHistory();
-			ic_record.setValue("", time_show,
-					"0.00");
+			ic_record.setValue("", time_show, "0.00");
 		} else {//only if the size >= 2, there is a valid row 
 			Stock st = (Stock) stocks.get(stocks.size() - 2);
 			String price = st.getPrice();
@@ -155,10 +166,7 @@ public class StockUtils {
 			double p = Double.valueOf(price);
 			int n = Integer.valueOf(number);
 			total += (p * n);
-
 			title += (st.getBrand());// title
-
-//			String number_total = String.valueOf(total);
 			String number_total = df.format(total);
 			StockHistory shis = (StockHistory) ic_record.getHistory();
 			shis.setTitle(title);
@@ -174,18 +182,46 @@ public class StockUtils {
 	}
 	
 	/**
+	 * add the current table into the history panel
+	 * this happened when: there is something in stock table, and user click the 
+	 * "add a new stock table" button
+	 */
+	public static void addToHistory(){
+		ArrayList<DataInTable> stockList = StockList.getStocks();
+		String title = "";
+		for(int i=0;i<stockList.size()-2;i++){
+			Stock st = (Stock)stockList.get(i);
+			title+=(st.getBrand()+",");
+		}
+		Stock st = (Stock)stockList.get(stockList.size()-2);
+		title+=(st.getBrand());//title
+		String time_tmp = getTime();
+		String number = StockContentPart.getTotal().trim();
+		String indeed = StockContentPart.getIndeed().trim();
+		StockHistory his = new StockHistory(title,time_tmp,number, indeed);		
+		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
+		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+		itemList.add(ic);
+		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
+				SWT.DEFAULT));
+		composite_fn_record.layout();
+		
+	}
+	
+	/**
 	 * make multi-stocks into a history item
+	 * used when first time
 	 * @param stocks
 	 */
 	public static void addToHistory(HashMap<String, ArrayList<Stock>> stockmap){
 		
 		ArrayList<String> keylist = new ArrayList<String>();
 		keylist.addAll(stockmap.keySet());
+		//we sort the stocks by stock time
 		Collections.sort(keylist);
-//		for(String key : stockmap.keySet()){
+		
 		for(String key : keylist){
-			ArrayList<Stock> stocks = stockmap.get(key);
-			
+			ArrayList<Stock> stocks = stockmap.get(key);			
 			String title = "";
 			double total = 0.000;
 			String time_tmp = "";
@@ -211,17 +247,17 @@ public class StockUtils {
 			total+=(p * n);	
 			
 			title+=(st.getBrand());//title
-	
-//			String number_total = String.valueOf(total);
 			String number_total = df.format(total);
-//			String number_indeed = df.format(indeed);
 			StockHistory his = new StockHistory(title,time_tmp,number_total, indeed);
 			historyList.add(his);	
-		}
-		
-			
+		}	
 	}
 	
+	/**
+	 * add one stock into the stock list
+	 * @param st
+	 * @param stocks
+	 */
 	private static void addIntoStocks(Stock st, HashMap<String, ArrayList<Stock>> stocks){
 		String time = st.getTime();
 		if(stocks.containsKey(time)){
@@ -245,13 +281,10 @@ public class StockUtils {
 			ReturnObject ret = stockinfo.queryStockInfoByDefaultStocktime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-//			String last_time = "";
-//			ArrayList<Stock> stocks = new ArrayList<Stock>();
 			HashMap<String, ArrayList<Stock>> stocks = new HashMap<String, ArrayList<Stock>>(); 
 			for(int i=0;i<list.size();i++){
 				StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
 				Stock st_tmp = new Stock();
-//				String tmp_time = cDTO_tmp.getStock_time();
 				st_tmp.setBrand(cDTO_tmp.getBrand());
 				st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
 				st_tmp.setNumber(cDTO_tmp.getQuantity());
@@ -260,54 +293,24 @@ public class StockUtils {
 				addIntoStocks(st_tmp,stocks);
 			}
 			
-			addToHistory(stocks);
-			
+			addToHistory(stocks);			
 		} catch (Exception e) {
 			System.out.println("query the stocks by default time failed");
 		}	
-		
-		
 	}
 	
 	/**
-	 * add the current table into the history panel
-	 * this happened when: there is something in stock table, and user click the 
-	 * "add a new stock table" button
+	 * layout the item list(UI side action)	
 	 */
-	public static void addToHistory(){
-		ArrayList<DataInTable> stockList = StockList.getStocks();
-		String title = "";
-		for(int i=0;i<stockList.size()-2;i++){
-			Stock st = (Stock)stockList.get(i);
-			title+=(st.getBrand()+",");
-		}
-		Stock st = (Stock)stockList.get(stockList.size()-2);
-		title+=(st.getBrand());//title
-		String time_tmp = getTime();
-//		int num = queryItemsFromDataBase(time_tmp);
-//		String number="50000";//fake data
-		//it should be the indeed value
-		String number = StockContentPart.getTotal().trim();
-		String indeed = StockContentPart.getIndeed().trim();
-		StockHistory his = new StockHistory(title,time_tmp,number, indeed);
-		
-		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
-		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
-		itemList.add(ic);
-		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
-				SWT.DEFAULT));
-		composite_fn_record.layout();
-		
-	}
-	
 	public static void layoutItemList(){
 		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		composite_fn_record.layout();
 	}
+	
 	/**
 	 * show the history panel, when first into the stock panel
-	 * get the data(today, this month etc.) from database
+	 * get the data(today, this month etc.) from database, and we record the UI params
 	 * @param composite_scroll
 	 * @param composite_fn
 	 * @param color
@@ -341,13 +344,16 @@ public class StockUtils {
 		}
 	}
 	
+	/**
+	 * show history when user click the search button
+	 * @param dateSearch
+	 */
 	public static void showSearchHistory(String dateSearch){
 		//remove the navigator panel, clear all the result
 		for(int i=0;i<itemList.size();i++)
 			itemList.get(i).dispose();
 		itemList.clear();
-		historyList.clear();
-		
+		historyList.clear();		
 		//add search result
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("stock_time", dateSearch);
@@ -356,21 +362,17 @@ public class StockUtils {
 			ReturnObject ret = stockinfo.queryStockInfoByInputStocktime(map);
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-//			String last_time = "";
-//			ArrayList<Stock> stocks = new ArrayList<Stock>();
 			HashMap<String, ArrayList<Stock>> stocks = new HashMap<String, ArrayList<Stock>>(); 
 			for(int i=0;i<list.size();i++){
 				StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
 				Stock st_tmp = new Stock();
-//				String tmp_time = cDTO_tmp.getStock_time();
 				st_tmp.setBrand(cDTO_tmp.getBrand());
 				st_tmp.setPrice(String.valueOf(cDTO_tmp.getUnit_price()));
 				st_tmp.setNumber(cDTO_tmp.getQuantity());
 				st_tmp.setTime(cDTO_tmp.getStock_time());
 				st_tmp.setIndeed(cDTO_tmp.getReserve1());
 				addIntoStocks(st_tmp, stocks);
-			}			
-			
+			}						
 			//add into history
 			addToHistory(stocks);
 		} catch (Exception e) {
@@ -387,9 +389,7 @@ public class StockUtils {
 		}
 		
 	}
-	
-	
-	
+
 	/**
 	 * refresh the table if user select do not use the soft keyboard
 	 */
@@ -433,6 +433,11 @@ public class StockUtils {
 	public static int getCurrentLine(){
 		return currentBrandLine;
 	}
+	
+	/**
+	 * record current sub brand
+	 * @param sub
+	 */
 	public static void setCurrentSub_Brand(String sub){
 		current_sub_brand = sub;
 	}

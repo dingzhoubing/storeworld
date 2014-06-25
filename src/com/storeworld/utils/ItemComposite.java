@@ -69,37 +69,38 @@ public class ItemComposite extends Composite {
 		//composite size
 		this.setSize(width, height);
 		setSize();
-		setColor();
+//		setColor();
 		
 		up.setEnabled(false);
 		down_left.setEnabled(false);
 		down_right.setEnabled(false);	
+		
+		//if double click the item, we do actions
 		this.addListener(SWT.MouseDoubleClick, new Listener(){
 
 			@Override
 			public void handleEvent(Event event) {
 				History history = getHistory();
 				if(history instanceof StockHistory){
-					//if click to show history, leave edit mode
-
+					//add the stock in current data table into the history panel
 					if(StockUtils.getStatus().equals("NEW")){
 						if(StockList.getStocks().size() > 1){
 							StockUtils.addToHistory();
 						}
 					}
-					
+					//leave edit mode					
 					StockUtils.leaveEditMode();
 					StockList.showHistory((StockHistory)history);
 					StockUtils.recordItemComposite(getSelf());
-					StockUtils.setStatus("HISTORY");
+					StockUtils.setStatus("HISTORY");//mark the status now
 				}else{//DeliverHistory
-					
+					//delete the current info in deliver table
 					if(DeliverUtils.getStatus().equals("NEW") && !DeliverContentPart.getOrderNumber().equals("")){
 						if(DeliverList.getDelivers().size() > 1){
 							DeliverList.deleteDeliversUseLess(DeliverContentPart.getOrderNumber());							
 						}						
 					}
-					
+					//mark history status
 					DeliverUtils.setStatus("HISTORY");
 					//if click to show history, leave edit mode
 					DeliverUtils.leaveEditMode();
@@ -107,14 +108,15 @@ public class ItemComposite extends Composite {
 					
 					DeliverList.showHistory((DeliverHistory)history);
 					DeliverUtils.recordItemComposite(getSelf());
-					DeliverContentPart.resetInfo();
+					DeliverContentPart.resetInfo();//reset the info into "½ø»õ"
 				}
 				
 			}
 			
 		});
+		
+		//set the tooltip
 		this.addListener(SWT.MouseEnter, new Listener(){
-
 			@Override
 			public void handleEvent(Event event) {
 				 self.setBackgroundColor(color1);
@@ -122,6 +124,8 @@ public class ItemComposite extends Composite {
 			}
 			
 		});
+		
+		//make the tooltip invisible
 		this.addListener(SWT.MouseExit, new Listener(){
 
 			@Override
@@ -134,14 +138,20 @@ public class ItemComposite extends Composite {
 		
 		this.layout();
 	}
+	
+	/**
+	 * set backgroud color for each part of this item
+	 * @param color
+	 */
 	private void setBackgroundColor(Color color){
 		self.setBackground(color);
 		up.setBackground(color);
 		down_left.setBackground(color);
 		down_right.setBackground(color);
 	}
-	private void setSize() {
-		
+	
+	
+	private void setSize() {	
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		gd_text.widthHint = (int)((this.width-4)/2);
 		gd_text.heightHint = (int)(this.height/2);
@@ -158,17 +168,28 @@ public class ItemComposite extends Composite {
 		down_right.setLayoutData(gd_text_1);
 
 	}
+	
+	@Deprecated
 	private void setColor(){
 		up.setBackground(color);
 		down_left.setBackground(color);
 		down_right.setBackground(color);
 	}
 	
-	//set the title
+	/**
+	 * set the title value
+	 * @param u
+	 */
 	public void setValue(String u){
 		this.up.setText(u);
 	}
-	//set the three fields
+	
+	/**
+	 * set the value of each part of the item
+	 * @param u
+	 * @param dl
+	 * @param dr
+	 */
 	public void setValue(String u, String dl, String dr){
 		this.up.setText(u);
 		this.down_left.setText(dl);
@@ -176,6 +197,10 @@ public class ItemComposite extends Composite {
 		
 	}
 	
+	/**
+	 * set the indeed value
+	 * @param dr
+	 */
 	public void setDownRight(String dr){
 		this.down_right.setText(dr+Constants.SPACE);
 	}
@@ -185,6 +210,7 @@ public class ItemComposite extends Composite {
 	public ItemComposite getSelf(){
 		return this.self;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		ItemComposite ic = (ItemComposite)obj;

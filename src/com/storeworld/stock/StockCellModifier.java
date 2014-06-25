@@ -17,7 +17,7 @@ public class StockCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static StockList stocklist;	
 	private static Stock stock_backup = new Stock();
-	private static DecimalFormat df = new DecimalFormat("#.00");
+	private static DecimalFormat df = new DecimalFormat("0.00");
 	
 	public StockCellModifier(TableViewer tv_tmp, StockList stocklist_tmp) {
 		tv = tv_tmp;
@@ -43,28 +43,27 @@ public class StockCellModifier implements ICellModifier {
 	public static TableViewer getTableViewer(){
 		return tv;
 	}
-	//no use now
+	
+	@Deprecated
 	public static Stock getLastStock(){
 		return stock_backup;
 	}
 	
 	/**
-	 * 1. add a new row in table UI
-	 * 2. compute the total value here
+	 * add a new row in table UI
 	 * @param stock
 	 */
-	public static void addNewTableRow(Stock stock){
-//		if (CustomerValidator.checkID(c.getID()) && CustomerValidator.rowLegal(c)) {
-			int new_id = Integer.valueOf(stock.getID()) + 1;
-//			StockValidator.setNewID(String.valueOf(new_id));
-			StockUtils.setNewLineID(String.valueOf(new_id));
-			Stock stock_new = new Stock(String.valueOf(new_id));
-			stocklist.addStock(stock_new);
-			Utils.refreshTable(tv.getTable());
-//		}
+	public static void addNewTableRow(Stock stock) {
+		int new_id = Integer.valueOf(stock.getID()) + 1;
+		StockUtils.setNewLineID(String.valueOf(new_id));
+		Stock stock_new = new Stock(String.valueOf(new_id));
+		stocklist.addStock(stock_new);
+		Utils.refreshTable(tv.getTable());
 	}
 		
-	//when initial the table data
+	/**
+	 * when initial the table value
+	 */
 	public Object getValue(Object element, String property) {
 		Stock s = (Stock) element;		
 		if(property.equals("id")){			
@@ -91,7 +90,6 @@ public class StockCellModifier implements ICellModifier {
 				return String.valueOf("");			
 		}else if (property.equals("price")) {			
 			if(s.getPrice() != null)
-//				return String.valueOf(s.getPrice());
 				if(s.getPrice().equals(""))
 					return "";
 				else
@@ -107,10 +105,11 @@ public class StockCellModifier implements ICellModifier {
 			return null;// show the operation button
 		}
 		return null;
-//		throw new RuntimeException("error column name : " + property);
 	}
 
-	//when modify the table
+	/**
+	 * when modify the table value
+	 */
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;		
 		Stock s = (Stock) item.getData();
@@ -183,7 +182,6 @@ public class StockCellModifier implements ICellModifier {
 				pricelast = df.format(Double.valueOf(s.getPrice()));
 			String newValue = "";
 			if(!value.equals("")){
-//				newValue = df.format(Double.valueOf((String) value));
 				try{
 					newValue = df.format(Double.valueOf((String) value));
 				}catch(NumberFormatException e){
@@ -199,7 +197,6 @@ public class StockCellModifier implements ICellModifier {
 			} else {
 				hasBeenChanged = true;
 			}
-//			s.setPrice(newValue);
 			if(newValue.equals(""))
 				s.setPrice("");
 			else
@@ -219,7 +216,6 @@ public class StockCellModifier implements ICellModifier {
 			s.setNumber(newValue);
 		}else {
 			return;//just return, do nothing
-//			throw new RuntimeException("´íÎóÁÐÃû:" + property);
 		}
 		//validate if the change of the table is valid, if not, do not update the 
 		//table UI & database
@@ -227,39 +223,40 @@ public class StockCellModifier implements ICellModifier {
 		if (hasBeenChanged) {
 
 			if (property.equals("brand")) {
-				valid = StockValidator.validateBrand(s.getBrand());//tv.getTable(), item, 1, 
+				valid = StockValidator.validateBrand(s.getBrand()); 
 				if (!valid) {
 					s.setBrand(brandlast);
 				}
 
 			} else if (property.equals("sub_brand")) {
-				valid = StockValidator.validateSub_Brand(s.getSubBrand());//tv.getTable(), item, 2, 
+				valid = StockValidator.validateSub_Brand(s.getSubBrand()); 
 				if (!valid) {
 					s.setSubBrand(sub_brandlast);
 				}
 
 			} else if (property.equals("size")) {
-				valid = StockValidator.validateSize(s.getSize());//tv.getTable(), item, 3, 
+				valid = StockValidator.validateSize(s.getSize()); 
 				if (!valid) {
 					s.setSize(sizelast);
 				}
 			} else if (property.equals("unit")) {
-				valid = StockValidator.validateUnit(s.getUnit());//tv.getTable(), item, 4, 
+				valid = StockValidator.validateUnit(s.getUnit()); 
 				if (!valid) {
 					s.setUnit(unitlast);
 				}				
 			} else if (property.equals("price")) {
-				valid = StockValidator.validatePrice(s.getPrice());//tv.getTable(), item, 4, 
+				valid = StockValidator.validatePrice(s.getPrice()); 
 				if (!valid) {
 					s.setPrice(pricelast);
 				}				
 			} else if (property.equals("number")) {
-				valid = StockValidator.validateNumber(s.getNumber());//tv.getTable(), item, 4, 
+				valid = StockValidator.validateNumber(s.getNumber()); 
 				if (!valid) {
 					s.setNumber(numberlast);
 				}				
 			}
 			if (valid) {
+				//if the change of the table item is valid, we make the change valid in UI and database
 				stocklist.stockChanged(s);
 				
 			}

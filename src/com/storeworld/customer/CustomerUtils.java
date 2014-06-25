@@ -33,33 +33,7 @@ public class CustomerUtils {
 	private static boolean firstTime = true;
 	//record if clicked the search button
 	private static boolean searchButtonClicked = false;
-	//record the number of visible line of table
-//	private static int visibleLine = 0;
-//	private static int deliverButtonColumn = 1;
-//	private static int deleteButtonColumn = 6;
-//	/**
-//	 * initial the visible line before showing the filtered table
-//	 */
-//	public static void resetVisibleLine(){
-//		visibleLine = 0;
-//	} 
-//	
-//	/**
-//	 * visible line number +1
-//	 */
-//	public static void increaseVisibleLine(){
-//		visibleLine++;
-//	}
-//	
-//	/**
-//	 * get the visible line number
-//	 * @return
-//	 */
-//	public static int getVisibleLine(){
-//		return visibleLine;
-//	}
-	
-	
+
 	/**
 	 * inner class to add a listener for each checkbox of customer left navigator
 	 */
@@ -97,22 +71,9 @@ public class CustomerUtils {
     			}
     			tv.addFilter(cf);
     		}
-    		//set invisible of the button do not in current table
-//    		CellEditor[] cellEditor = CustomerContentPart.getCellEditor();
-//    		int start = getVisibleLine()-1;
-//    		Table table = CustomerContentPart.getTable();
+
     		TableEditor editor = CustomerContentPart.getEditor();
     		TableEditor editorDel = CustomerContentPart.getEditorDel();
-//    		for(int i=start; i<table.getItemCount()-1;i++){
-//    			editor.setEditor(cellEditor[deliverButtonColumn].getControl(), table.getItem(i), deliverButtonColumn);
-//    			if(!editor.getEditor().isDisposed()){
-//    				editor.getEditor().setVisible(false);
-//    			}
-//    			editorDel.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(i), deleteButtonColumn);
-//    			if(!editorDel.getEditor().isDisposed()){
-//    				editorDel.getEditor().setVisible(false);
-//    			}
-//    		}
     		if(editor!=null && editor.getEditor()!=null){
     			if(!editor.getEditor().isDisposed()){
     				editor.getEditor().setVisible(false);
@@ -258,12 +219,7 @@ public class CustomerUtils {
 		areas.addAll(DataCachePool.getArea2Names().keySet());
 	}
 	
-	//get the customers of a specified area
-//	private static ArrayList<String> customersOfArea(String area){
-//		ArrayList<String> customers = new ArrayList<String>();
-//		return customers;
-//	}
-	
+
 	/**
 	 * get all the first names from cache
 	 */
@@ -445,7 +401,6 @@ public class CustomerUtils {
 				composite_ar.layout();
 			}
 		}
-//		System.out.println("firstnames: "+firstnames);
 	}
 	
 	/**

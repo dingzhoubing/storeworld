@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -451,5 +453,25 @@ public class Utils {
 			return true;
 		return false;
 	}
+	
+	/**
+	 * get the pinyin header of the string
+	 * @param str
+	 * @return
+	 */
+    public  static String getPinYinHeadChar(String str) {
+
+        String convert = "";
+        for (int j = 0; j < str.length(); j++) {
+            char word = str.charAt(j);
+            String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
+            if (pinyinArray != null) {
+                convert += pinyinArray[0].charAt(0);
+            } else {
+                convert += word;
+            }
+        }
+        return convert;
+    }
 	
 }

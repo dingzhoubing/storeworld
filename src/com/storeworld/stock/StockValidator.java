@@ -154,7 +154,7 @@ public class StockValidator {
 			
 			if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){// && !p.getSize().equals("")
 
-				if(!p.getUnit().equals("")){
+				if(!p.getUnit().equals("") || !p.getSize().equals("")){
 					//already has one unit
 				}else{
 				//set the unit

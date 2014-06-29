@@ -372,6 +372,7 @@ public class DeliverList {
 				DeliverContentPart.setTotal(df.format(total));
 				DeliverContentPart.setIndeed(df.format(total));
 			}
+			
 		}
 
 	}

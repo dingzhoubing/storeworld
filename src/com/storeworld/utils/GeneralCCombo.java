@@ -150,8 +150,9 @@ public class GeneralCCombo extends Composite {
 								tip.setVisible(true);
 							} else {
 								// need to do anything?
-								// stock.setSize("");
-								// StockContentPart.getStockList().stockChanged(stock);
+								stock.setUnit("");
+								 stock.setSize("");
+								 StockContentPart.getStockList().stockChanged(stock);
 							}
 						}
 //						else if (col == SIZE_COLUMN) {
@@ -195,8 +196,9 @@ public class GeneralCCombo extends Composite {
 								tip.setVisible(true);
 							} else {
 								// need to do anything
-								// deliver.setSize("");
-								// DeliverContentPart.getDeliverList().deliverChanged(deliver);
+								deliver.setUnit("");
+								deliver.setSize("");
+								DeliverContentPart.getDeliverList().deliverChanged(deliver);
 							}
 						} 
 //						else if (col == SIZE_COLUMN) {
@@ -799,6 +801,85 @@ public class GeneralCCombo extends Composite {
 		list.deselectAll();
 	}
 
+	void dropDownForMatch(boolean drop){
+		if (drop == isDropped())
+			return;
+		Display display = getDisplay();
+		if (!drop) {
+			display.removeFilter(SWT.Selection, filter);
+			popup.setVisible(false);
+			if (!isDisposed() && isFocusControl()) {
+				text.setFocus();
+			}
+			return;
+		}
+		if (!isVisible())
+			return;
+		if (getShell() != popup.getParent()) {
+			String[] items = list.getItems();
+			int selectionIndex = list.getSelectionIndex();
+			list.removeListener(SWT.Dispose, listener);
+			popup.dispose();
+			popup = null;
+			list = null;
+			createPopup(items, selectionIndex);
+		}
+
+		Point comboSize = getSize();
+		int itemCount = list.getItemCount();
+		itemCount = (itemCount == 0) ? visibleItemCount : Math.min(
+				visibleItemCount, itemCount);
+		int itemHeight = list.getItemHeight() * itemCount;
+		Point listSize = list.computeSize(SWT.DEFAULT, itemHeight, false);
+		Rectangle displayRect = getMonitor().getClientArea();
+		list.setBounds(
+				1,
+				1,
+				Math.max(comboSize.x - 2,
+						Math.min(listSize.x, displayRect.width - 2)),
+				listSize.y);
+
+		int index = list.getSelectionIndex();
+		if (index != -1)
+			list.setTopIndex(index);
+		Rectangle listRect = list.getBounds();
+		Rectangle parentRect = display.map(getParent(), null, getBounds());
+		int width = listRect.width + 2;
+		int height = listRect.height + 2;
+		int x = parentRect.x;
+		if (x + width > displayRect.x + displayRect.width) {
+			x = displayRect.x + displayRect.width - width;
+		}
+		int y = parentRect.y + comboSize.y;
+		if (y + height > displayRect.y + displayRect.height) {
+			int popUpwardsHeight = (parentRect.y - height < displayRect.y) ? parentRect.y
+					- displayRect.y
+					: height;
+			int popDownwardsHeight = displayRect.y + displayRect.height - y;
+			if (popUpwardsHeight > popDownwardsHeight) {
+				height = popUpwardsHeight;
+				y = parentRect.y - popUpwardsHeight;
+			} else {
+				height = popDownwardsHeight;
+			}
+			list.setSize(listRect.width, height - 2);
+		}
+		popup.setBounds(x, y, width, height);
+		popup.setVisible(true);
+//		if (isFocusControl()){
+//			list.setFocus();
+//			text.setFocus();
+//		}
+
+		/*
+		 * Add a filter to listen to scrolling of the parent composite, when the
+		 * drop-down is visible. Remove the filter when drop-down is not
+		 * visible.
+		 */
+		display.removeFilter(SWT.Selection, filter);
+		display.addFilter(SWT.Selection, filter);
+
+	}
 	void dropDown(boolean drop) {
 		if (drop == isDropped())
 			return;
@@ -864,8 +945,9 @@ public class GeneralCCombo extends Composite {
 		}
 		popup.setBounds(x, y, width, height);
 		popup.setVisible(true);
-		if (isFocusControl())
+		if (isFocusControl()){
 			list.setFocus();
+		}
 
 		/*
 		 * Add a filter to listen to scrolling of the parent composite, when the
@@ -1418,7 +1500,7 @@ public class GeneralCCombo extends Composite {
 	boolean isDropped() {
 		return !isDisposed() && popup.getVisible();
 	}
-
+	
 	public boolean isFocusControl() {
 		checkWidget();
 		if (text.isFocusControl() || arrow.isFocusControl()
@@ -1438,6 +1520,9 @@ public class GeneralCCombo extends Composite {
 		return false;
 	}
 
+	public void lostFocus(){
+		popup.setVisible(false);
+	}
 	void internalLayout(boolean changed) {
 		if (isDropped())
 			dropDown(false);
@@ -2035,6 +2120,11 @@ public class GeneralCCombo extends Composite {
 	public void setListVisible(boolean visible) {
 		checkWidget();
 		dropDown(visible);
+	}
+	
+	public void setListVisibleAndDoNotFocus(boolean visible){
+		checkWidget();
+		dropDownForMatch(visible);
 	}
 
 	public void setMenu(Menu menu) {

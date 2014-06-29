@@ -46,7 +46,7 @@ public class CustomerList{
 	//hash set, so make it only has one of one kind
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final CustomerInfoService cusinfo = new CustomerInfoService();
-	
+	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
 	
 	public CustomerList() {
 		
@@ -261,6 +261,15 @@ public class CustomerList{
 							final String old_area_final = old_area;
 							final String old_name_final = old_name;
 							
+							boolean contain = deliverinfo.queryCommonInfo(old_area, old_name);
+							if(!contain){
+								//just update it
+								cusinfo.updateCustomerInfo(customer.getID(), cus);
+								//old area, old name, new area, new name
+		    					DataCachePool.updateCustomerInfoOfCache(old_area_final, old_name_final, customer.getArea(), customer.getName());	
+		    					CustomerUtils.refreshAreas_FirstName();
+							}else{
+							
 							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
 		    		    	messageBox.setMessage(String.format("片区:%s，客户:%s 的信息将被修改，送货表中将会发生相应更新，确认要操作吗？", old_area, old_name));		    		    	
 		    		    	if (messageBox.open() == SWT.OK){	
@@ -323,7 +332,7 @@ public class CustomerList{
 		    					c.setAddress(old_addr);
 		    					CustomerCellModifier.getCustomerList().customerChangedThree(c);
 		    		    	}
-
+							}
 						}
 					}					
 				} catch (Exception e) {

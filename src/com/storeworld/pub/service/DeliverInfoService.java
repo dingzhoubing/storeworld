@@ -670,7 +670,22 @@ public class DeliverInfoService extends BaseAction{
 		return true;
 	}
 
-	
+	public boolean queryCommonInfo(String area, String name) throws Exception{
+		try{
+			String sql_common="select * from  deliver_common_info where customer_area=? and customer_name=?";
+			
+			Object[] common_params_temp={area, name};
+			List<Object> common_params=objectArray2ObjectList(common_params_temp);
+			List list = executeQuery(sql_common,common_params);
+			if(list==null || list.size()==0)
+				return false;
+			else
+				return true;
+			
+		}catch(Exception e){
+			throw new Exception("查询commonInfo失败！");
+		}
+	}
 	
 	/**
 	 * 查询满足条件的某几条送货信息

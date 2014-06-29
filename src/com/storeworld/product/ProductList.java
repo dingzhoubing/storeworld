@@ -41,6 +41,8 @@ public class ProductList {
 	//hash set, so make it only has one of one kind
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final GoodsInfoService goodsinfo = new GoodsInfoService();
+	private static final StockInfoService stockinfo = new StockInfoService();
+	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
 	
 	public ProductList() {
 		super();
@@ -263,11 +265,26 @@ public class ProductList {
 							final String old_brand_final = old_brand;
 							final String old_sub_final = old_sub;
 							
+							
+							ReturnObject ro1 = stockinfo.queryStockInfoByBrandAndSub(old_brand, old_sub);
+							Map<String, Object> verify = new HashMap<String, Object>();
+							verify.put("brand", old_brand);
+							verify.put("sub_brand", old_sub);
+							ReturnObject ro2 = deliverinfo.queryDeliverInfo(verify);
+							Pagination page1 = (Pagination) ro1.getReturnDTO();
+							Pagination page2 = (Pagination) ro2.getReturnDTO();
+							//if no items in stock table and deliver table, then, just do the change
+							if(page1.getItems().isEmpty() && page2.getItems().isEmpty()){
+								goodsinfo.updateGoodsInfo(product.getID(), prod);
+								DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
+								ProductUtils.refreshBrands();
+							}else{
+							
+							
 							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
 		    		    	messageBox.setMessage(String.format("品牌:%s，子品牌:%s，规格%s 的商品将被修改，进货与送货表中将会发生相应更新，确认要操作吗？", old_brand, old_sub, old_size));		    		    	
 		    		    	if (messageBox.open() == SWT.OK){	
-		    		    		
-		    		    		
+		    		    				    		    		
 		    		    		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		    		    		IRunnableWithProgress runnable = new IRunnableWithProgress() {  
 		    		    		    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {  
@@ -342,7 +359,7 @@ public class ProductList {
 //		    					s.setTime(time);time and indeed?
 		    					ProductCellModifier.getProductList().productChangedThree(s);
 		    		    	}
-						
+							}
 						}
 					}
 				} catch (Exception e) {

@@ -16,6 +16,8 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -38,6 +40,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.jfree.data.KeyedValue;
 
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.NumberConverter;
@@ -917,7 +920,7 @@ public class DeliverContentPart extends ContentPart{
 		lbl_area.setText("Æ¬Çø:");
 		lbl_area.setBounds(12, 82, 32, 22);
 		
-		gc = new GeneralCCombo(composite_right, SWT.BORDER, 0, -1, Constants.DELIVER_TYPE);
+		gc = new GeneralCCombo(composite_right, SWT.BORDER, 0, -2, Constants.DELIVER_TYPE);
 		gc.setBounds(60, 82, 112, 22);
 		gc.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
 		gc.setForeground(new Color(composite.getDisplay(), 0x00, 0x00, 0x00));
@@ -930,6 +933,18 @@ public class DeliverContentPart extends ContentPart{
 				gc.setItems(DataCachePool.getCustomerAreas());
 			}
 		});
+		
+		gc.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				String area = gc.getText();
+				String[] names = DataCachePool.getCustomerNames(area);
+				if(names.length != 0){//no such areas
+					gcName.setItems(names);
+				}
+			}
+		});
+		
 	
 		//customer
 		Label lbl_cusname = new Label(composite_right, SWT.CENTER|SWT.NONE);
@@ -940,7 +955,7 @@ public class DeliverContentPart extends ContentPart{
 		lbl_cusname.setBounds(12, 114, 32, 22);
 
 		//customer name
-		gcName = new GeneralCCombo(composite_right, SWT.BORDER, 0, -2, Constants.DELIVER_TYPE);
+		gcName = new GeneralCCombo(composite_right, SWT.BORDER, 0, -1, Constants.DELIVER_TYPE);
 		gcName.setBounds(60, 114, 112, 22);
 		gcName.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));
 		gcName.setVisibleItemCount(5);
@@ -952,7 +967,8 @@ public class DeliverContentPart extends ContentPart{
 		});
 		gcName.addListener(SWT.MouseDown, new Listener() {
 			@Override
-        	public void handleEvent(Event event) {
+        	public void handleEvent(Event event){
+				gcName.removeAll();
 				String area = gc.getText();
 				String[] names = DataCachePool.getCustomerNames(area);
 				if(names.length != 0){//no such areas
@@ -987,6 +1003,42 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 
+		gcName.addKeyListener(new KeyAdapter(){
+
+			public void keyReleased(KeyEvent e){
+				if(!(e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN)){
+					if(e.keyCode == SWT.CR){
+						gcName.lostFocus();
+						
+					}else{
+				String area = gc.getText();
+				String[] names = DataCachePool.getCustomerNames(area);
+				if (names.length > 0) {
+					String index_str = gcName.getText();
+					int num = gcName.getItemCount();
+					gcName.remove(0, num - 1);
+					for (int i = 0; i < names.length; i++) {
+						gcName.add(names[i]);
+						String head_str = Utils.getPinYinHeadChar(names[i]);
+						if (!(head_str.contains(index_str))) {
+							gcName.remove(names[i]);
+						}
+					}
+					gcName.setListVisibleAndDoNotFocus(true);
+				}
+					}
+				}
+			}			
+		});
+		
+		gcName.addFocusListener(new FocusAdapter(){
+			@Override
+			public void focusLost(FocusEvent e) {
+				gcName.lostFocus();
+			}
+			
+		});
+		
 		//customer phone
 		Label lbl_phone = new Label(composite_right, SWT.CENTER|SWT.NONE);
 		lbl_phone.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 10, SWT.NORMAL));

@@ -1,20 +1,30 @@
 package com.storeworld.utils;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolTip;
 
 import com.storeworld.common.History;
+import com.storeworld.deliver.Deliver;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverHistory;
 import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
+import com.storeworld.mainui.MainUI;
+import com.storeworld.product.Product;
+import com.storeworld.stock.Stock;
 import com.storeworld.stock.StockHistory;
 import com.storeworld.stock.StockList;
 import com.storeworld.stock.StockUtils;
@@ -82,6 +92,19 @@ public class ItemComposite extends Composite {
 			public void handleEvent(Event event) {
 				History history = getHistory();
 				if(history instanceof StockHistory){
+					
+					ArrayList<Stock> stock_input = new ArrayList<Stock>();
+					double total = 0.00;
+					
+					try {
+						total = StockList.showHistory((StockHistory)history, stock_input);
+					} catch (Exception e) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("显示历史进货信息失败，请重试");
+						mbox.open();
+						return;
+					}
+					
 					//add the stock in current data table into the history panel
 					if(StockUtils.getStatus().equals("NEW")){
 						if(StockList.getStocks().size() > 1){
@@ -90,23 +113,52 @@ public class ItemComposite extends Composite {
 					}
 					//leave edit mode					
 					StockUtils.leaveEditMode();
-					StockList.showHistory((StockHistory)history);
+					//show the history table value
+					StockList.showHistoryTableValue((StockHistory)history, stock_input, total);
+					//record the current history
 					StockUtils.recordItemComposite(getSelf());
-					StockUtils.setStatus("HISTORY");//mark the status now
+					//mark the status now
+					StockUtils.setStatus("HISTORY");
+					
 				}else{//DeliverHistory
+					ArrayList<Product> products = new ArrayList<Product>();
+					ArrayList<Deliver> delivers = new ArrayList<Deliver>();
+					HashMap<String, String> kvs = new HashMap<String, String>();
+					
+					try {
+						DeliverList.showHistory((DeliverHistory)history, delivers, kvs);
+					} catch (SQLException e1) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("显示送货信息失败");
+						mbox.open();
+						return;
+					}
+					
+					
 					//delete the current info in deliver table
 					if(DeliverUtils.getStatus().equals("NEW") && !DeliverContentPart.getOrderNumber().equals("")){
 						if(DeliverList.getDelivers().size() > 1){
-							DeliverList.deleteDeliversUseLess(DeliverContentPart.getOrderNumber());							
+							try {
+								products = DeliverList.deleteDeliversUseLess(DeliverContentPart.getOrderNumber());
+							} catch (Exception e) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("删除废弃送货信息失败");
+								mbox.open();
+								return;
+							}							
 						}						
 					}
+					
+					//change the product table
+					DeliverList.relatedProductChange(products, false);
+					
 					//mark history status
 					DeliverUtils.setStatus("HISTORY");
 					//if click to show history, leave edit mode
 					DeliverUtils.leaveEditMode();
 					DeliverUtils.leaveReturnMode();
 					
-					DeliverList.showHistory((DeliverHistory)history);
+					DeliverList.showHistoryTableValue((DeliverHistory)history, delivers, kvs);
 					DeliverUtils.recordItemComposite(getSelf());
 					DeliverContentPart.resetInfo();//reset the info into "进货"
 				}

@@ -1,5 +1,6 @@
 package com.storeworld.customer;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -17,6 +18,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.mysql.jdbc.Connection;
+import com.storeworld.database.BaseAction;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
@@ -37,6 +40,8 @@ public class CustomerButtonCellEditor extends CellEditor {
     private static TableEditor editor = null;
     private static final int deliverButtonColumn = 1;
     private static CustomerInfoService customerinfo = new CustomerInfoService();
+    private static BaseAction baseAction = new BaseAction();
+    
     public CustomerButtonCellEditor() {
         setStyle(0);
     }
@@ -81,7 +86,40 @@ public class CustomerButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Customer c = (Customer)(table.getItem(index).getData());	
 						
-						ReturnObject ret = customerinfo.queryCustomerInfoByID(c.getID());
+						Connection conn=null;
+						try {
+							conn = baseAction.getConnection();
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库失败");
+							mbox.open();
+						}
+						ReturnObject ret = null;
+						try{
+							conn.setAutoCommit(false);
+							ret = customerinfo.queryCustomerInfoByID(conn, c.getID());
+						conn.commit();
+						}catch(Exception ex){
+							try {
+								conn.rollback();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("连接数据库异常");
+								mbox.open();
+							}
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库异常");
+							mbox.open();
+							return;
+						}finally{
+							try {
+								conn.close();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("连接数据库异常");
+								mbox.open();
+							}
+						}
 						Pagination page = (Pagination) ret.getReturnDTO();
 						List<Object> list = page.getItems();
 						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
@@ -99,7 +137,14 @@ public class CustomerButtonCellEditor extends CellEditor {
 						if(!editor.getEditor().isDisposed()){
 							editor.getEditor().setVisible(false);//false
 						}
-						customerlist.removeCustomer(c);
+						try {
+							customerlist.removeCustomer(c);
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("删除客户失败，请重试");
+							mbox.open();
+							return;
+						}
 						button.setVisible(false);
 						Utils.refreshTable(table);											
 								 

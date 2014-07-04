@@ -16,10 +16,12 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -28,6 +30,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
 /**
@@ -151,18 +154,9 @@ public class CustomerContentPart extends ContentPart{
 							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 							Text text = (Text)(editorEdit.getEditor());	
 							callKeyBoard(text);
-							Customer c = (Customer)(table.getItem(rowCurrent).getData());					
-							String phonelast = c.getPhone();
-							////
+
 							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-								c.setPhone(Utils.getInput());
-								text.setText(c.getPhone());//validate the text
-								if(CustomerValidator.validatePhone(c.getPhone())){
-									customerlist.customerChanged(c);	
-									text.setText(c.getPhone());
-								}else{
-									c.setPhone(phonelast);
-								}
+								CustomerCellModifier.staticModify(table.getItem(rowCurrent), "phone", Utils.getInput());
 								//initial the next click
 								Utils.setClickButton(false);
 							}
@@ -263,14 +257,14 @@ public class CustomerContentPart extends ContentPart{
 	 * initialize the table elements
 	 */
 	public void initialization(){
-		final int w = current.getBounds().width;
-		int h = current.getBounds().height;
+		final int w = current.getBounds().width;//960
+		int h = current.getBounds().height;//570
 		composite.setBounds(0, 0, w, h);
 		
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds(200, 0, 760, h);
+		composite_right.setBounds(200, 0, 760, 570);
 		composite_shift = 200;
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL|SWT.H_SCROLL);//shell, SWT.CHECK
 		tv=tableViewer;
@@ -279,16 +273,16 @@ public class CustomerContentPart extends ContentPart{
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, 200, h);
+		composite_left.setBounds(0, 0, 200, 570);
 
 		//search button
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
-		btnNewButton.setBounds((int)(w/5/20), (int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		btnNewButton.setBounds(10, 10, 38, 19);
 		btnNewButton.setText("ËÑ");
 	
 		//search text
 		final Text text = new Text(composite_left, SWT.BORDER);
-		text.setBounds((int)(w/5/20)+(int)(2*3*w/5/10/3), (int)(w/5/10/2), (int)(5*w/5/10), (int)(2*w/5/10/2));		
+		text.setBounds(48, 10, 96, 19);		
 		//click search button
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -304,13 +298,13 @@ public class CustomerContentPart extends ContentPart{
 		
 		//area label		
 		Label lblNewLabel = new Label(composite_left, SWT.NONE);
-		lblNewLabel.setBounds((int)(w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		lblNewLabel.setBounds(10, 38, 38, 19);
 		lblNewLabel.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
 		lblNewLabel.setBackground(base);
 		lblNewLabel.setText("Æ¬Çø");
 		
 		Link link_1 = new Link(composite_left, 0);
-		link_1.setBounds((int)(w/5)-(int)(4*w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		link_1.setBounds(154, 38, 38, 19);
 		link_1.setText("<a>È«²¿</a>");
 		link_1.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 11, SWT.NORMAL));
 		link_1.setBackground(base);
@@ -323,7 +317,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		//area base composite
 		Composite composite_area = new Composite(composite_left, SWT.NONE);
-		composite_area.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), (int)(2*(h-3*w/50)/5));
+		composite_area.setBounds(10, 58, 173, 205);
 		composite_area.setBackground(base);
 		composite_area.setLayout(new FillLayout());
 		
@@ -346,14 +340,14 @@ public class CustomerContentPart extends ContentPart{
            
 		//first name label
 		Label label = new Label(composite_left, SWT.NONE);
-		label.setBounds((int)(w/5/20), (int)(3*w/5/10)+(int)(2*(h-3*w/50)/5)+(int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		label.setBounds(10, 272, 38, 19);
 		label.setText("ÐÕÊÏ");
 		label.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
 		label.setBackground(base);
 		//show all of the customer
 		Link link = new Link(composite_left, 0);
 		link.setText("<a>È«²¿</a>");
-		link.setBounds((int)(w/5)-(int)(4*w/5/20), (int)(3*w/5/10)+(int)(2*(h-3*w/50)/5)+(int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		link.setBounds(154,  272, 38, 19);
 		link.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 11, SWT.NORMAL));
 		link.setBackground(base);   
 		link.addSelectionListener(new SelectionAdapter() {
@@ -365,7 +359,7 @@ public class CustomerContentPart extends ContentPart{
 		
 		//first name scroll composite
         Composite composite_firstname = new Composite(composite_left, SWT.NONE);
-        composite_firstname.setBounds((int)(w/5/20), (int)(4*w/5/10)+(int)(2*(h-3*w/50)/5)+(int)(w/5/10/2), (int)(9*w/5/10), (int)((h-3*w/50)/2));
+        composite_firstname.setBounds(10, 291, 173, 256);
         composite_firstname.setLayout(new FillLayout());
         composite_firstname.setBackground(base);
         
@@ -410,7 +404,7 @@ public class CustomerContentPart extends ContentPart{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, 0, 760, h);
+		table.setBounds(0, 0, 760, 570);
 		
 		//set the columns of the table
 		int columnWidth = 144;		
@@ -425,7 +419,7 @@ public class CustomerContentPart extends ContentPart{
 		newColumnTableColumn_Deliver.setText("");
 		newColumnTableColumn_Deliver.setMoveable(false);
 		newColumnTableColumn_Deliver.setResizable(false);	
-		column_shift = (int)(4*4*w/40/5);
+		column_shift = 79;
 		
 		final TableColumn newColumnTableColumn_1 = new TableColumn(table, SWT.NONE);
 		newColumnTableColumn_1.setWidth(columnWidth);
@@ -533,10 +527,10 @@ public class CustomerContentPart extends ContentPart{
 		composite_right.setLayout(new FillLayout());
 		
 		//show the area checkbox button
-        CustomerUtils.showAreaCheckBoxes(composite_ar, (int)(4*w/5/10), composite_scrollarea, tableViewer, base);
+        CustomerUtils.showAreaCheckBoxes(composite_ar, 79, composite_scrollarea, tableViewer, base);
         //show all the firstname checkbox button
         //always under the area call
-        CustomerUtils.showFirstNameCheckBoxes(composite_fn, (int)(4*w/5/10), composite_scroll, tableViewer, base);
+        CustomerUtils.showFirstNameCheckBoxes(composite_fn, 79, composite_scroll, tableViewer, base);
 		
 		
 		

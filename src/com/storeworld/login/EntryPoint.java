@@ -3,6 +3,7 @@ package com.storeworld.login;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,6 +30,10 @@ public class EntryPoint {
 		MainUI shell = null;
 		try {
 			
+
+			Display display = Display.getDefault();
+			shell = MainUI.getMainUI_Instance(display);
+			
 			Thread thread = new Thread(new DataBaseService());
 			thread.start();
 			
@@ -36,8 +41,6 @@ public class EntryPoint {
 			int screenH =720;
 			int screenW =960;
 
-			Display display = Display.getDefault();
-			shell = MainUI.getMainUI_Instance(display);
 			//set the percent of the north part
 			shell.setSize(screenW, screenH);
 			shell.setRatio(0.15);//no use in fixed with & height
@@ -102,7 +105,14 @@ public class EntryPoint {
 					display.sleep();
 			}			
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+	    	messageBox.setMessage("初始化软件失败，请重新启动"); 	
+	    	if (messageBox.open() == SWT.OK){	    			    	
+	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+	    		System.exit(0);
+//	    		return;
+	    	}
 		}
 		return shell;
 	}

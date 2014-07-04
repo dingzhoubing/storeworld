@@ -2,8 +2,12 @@ package com.storeworld.product;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
+import com.storeworld.stock.StockCellModifier;
 import com.storeworld.utils.Utils;
 
 /**
@@ -14,12 +18,23 @@ import com.storeworld.utils.Utils;
 public class ProductCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static ProductList productlist;
-
+	private static ProductCellModifier smodifier = null;
+	
 	public ProductCellModifier(TableViewer tv_tmp, ProductList productlist_tmp) {
 		tv = tv_tmp;
 		productlist = productlist_tmp;
 	}
 
+	private static ProductCellModifier getInstance(){
+		if(smodifier == null){
+			smodifier = new ProductCellModifier(tv, productlist);
+			return smodifier;
+		}else{
+			//nothing
+			return smodifier;
+		}
+	}
+	
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
@@ -76,6 +91,10 @@ public class ProductCellModifier implements ICellModifier {
 		return null;
 	}
 
+	public static void staticModify(Object element, String property, Object value){
+		getInstance().modify(element, property, value);
+	}
+	
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
 		TableItem item = (TableItem) element;
@@ -191,7 +210,24 @@ public class ProductCellModifier implements ICellModifier {
 				}
 			}
 			if (valid) {
-				productlist.productChanged(p);
+				try {
+					productlist.productChanged(p);
+				} catch (Exception e) {
+					if (property.equals("brand")) {						
+						p.setBrand(brandlast);						
+					} else if (property.equals("sub_brand")) {						
+						p.setSubBrand(sub_brandlast);						
+					} else if (property.equals("size")) {						
+						p.setSize(sizelast);						
+					} else if (property.equals("unit")) {						
+						p.setUnit(unitlast);						
+					}else if (property.equals("repository")) {						
+						p.setUnit(unitlast);						
+					}
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("更新产品表失败，请重试");
+					mbox.open();
+				}
 				
 			}
 		}

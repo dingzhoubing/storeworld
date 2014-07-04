@@ -2,6 +2,7 @@ package com.storeworld.login;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
 import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Constants;
@@ -40,7 +41,14 @@ public class Login {
 					display.sleep();
 			}			
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+	    	messageBox.setMessage("初始化软件失败，请重新启动"); 	
+	    	if (messageBox.open() == SWT.OK){	    			    	
+	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+	    		System.exit(0);
+//	    		return;
+	    	}
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package com.storeworld.customer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,8 +18,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.database.BaseAction;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
@@ -47,7 +50,7 @@ public class CustomerList{
 	private Set<IDataListViewer> changeListeners = new HashSet<IDataListViewer>();
 	private static final CustomerInfoService cusinfo = new CustomerInfoService();
 	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
-	
+	private static final BaseAction baseAction = new BaseAction();
 	public CustomerList() {
 		
 	}
@@ -62,35 +65,33 @@ public class CustomerList{
 	 * when system start up, do this once
 	 */
 	public static void initial(){		
-		
+				
 		String newID = "";
 		try {
-			ReturnObject ret = cusinfo.queryCustomerInfoAll();
 			newID = String.valueOf(cusinfo.getNextCustomerID());
-			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();
-			for(int i=0;i<list.size();i++){
-				CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(i);
-				Customer cus = new Customer();
-				cus.setID(cDTO.getId());
-				cus.setName(cDTO.getCustomer_name());
-				cus.setArea(cDTO.getCustomer_area());
-				cus.setPhone(cDTO.getTelephone());
-				cus.setAddress(cDTO.getCustomer_addr());
-				//cache the data
-				DataCachePool.addArea2Names(cDTO.getCustomer_area(), cDTO.getCustomer_name());
-				customerList.add(cus);
-			}
 		} catch (Exception e) {
-			System.out.println("failed");
+			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+	    	messageBox.setMessage("初始化数据库失败，请重新启动"); 	
+	    	if (messageBox.open() == SWT.OK){	    			    	
+	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+	    		System.exit(0);
+	    		return;
+	    	}
 		}
-		//-1 means no record now, get null by show table status where Name="?"
+				
 		//no record
-		if(newID.equals("-1") || newID.equals(""))
+		if(newID.equals("-1") || newID.equals(""))//is this right?
 			newID="1";//empty
 		//by the list of Customer from database
-		CustomerUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));//no need to +1
+		CustomerUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
 		
+		try {
+			DataCachePool.cacheCustomerInfo2(customerList);
+		} catch (Exception e) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("缓存客户信息失败");
+			mbox.open();
+		}		
 	}
 	
 	/**
@@ -120,23 +121,41 @@ public class CustomerList{
 	 * 1. delete a customer from database, refresh the table filter
 	 * 2. update he DataCachePool
 	 * @param customer
+	 * @throws Exception 
 	 */
-	public void removeCustomer(Customer customer) {
-		customerList.remove(customer);
+	public void removeCustomer(Customer customer) throws Exception {
+		
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+		
+
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).remove(customer);
 			//delete the customer
 			try {
-				cusinfo.deleteCustomerInfo(customer.getID());
+				conn.setAutoCommit(false);
+				cusinfo.deleteCustomerInfo(conn, customer.getID());
+				conn.commit();
 			} catch (Exception e) {
-				System.out.println("delete customer failed");
+				conn.rollback();
+				throw e;
+			}finally{
+				conn.close();
 			}
 
 			//remove the info from DataCachePool
 			DataCachePool.removeCustomerInfoOfCache(customer.getArea(), customer.getName());	
 			//refresh the table filter
 			CustomerUtils.refreshAreas_FirstName();
+			customerList.remove(customer);
 		}
 	}
 	
@@ -193,13 +212,45 @@ public class CustomerList{
 			}			
 		}		
 		return ret;
+//		return DataCachePool.ifExistAreaName(customer.getArea(), customer.getName());
+	}
+	
+	public static void relatedCustomerChange(ArrayList<Customer> custsomers_changed){
+
+		String current = CustomerUtils.getNewLineID();
+		int dup = 0;
+		for(Customer p : custsomers_changed){//update product table UI
+			if(p.getID().equals(current)){
+				int tid = Integer.valueOf(p.getID());
+				int nid = tid + dup;//new id
+				p.setID(String.valueOf(nid));
+				//already do the cache
+				CustomerCellModifier.getCustomerList().customerChangedTwo(p);
+				dup++;									
+			}else{
+				CustomerCellModifier.getCustomerList().customerChangedThree(p);
+			}								
+		}	
+//		return info;
 	}
 	
 	/**
 	 * update the info of a customer
 	 * @param customer
+	 * @throws Exception 
 	 */
-	public void customerChanged(final Customer customer) {
+	public void customerChanged(final Customer customer) throws Exception {
+		
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+		
 		// no matter valid or not, we should update the table
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()) {
@@ -211,9 +262,12 @@ public class CustomerList{
 			cus.put("customer_name", customer.getName());
 			cus.put("telephone", customer.getPhone());
 			cus.put("customer_addr", customer.getAddress());
-			if(!CustomerValidator.checkID(customer.getID()) && CustomerValidator.rowLegal(customer)){
+			
+			try {
+				conn.setAutoCommit(false);
+				if(!CustomerValidator.checkID(customer.getID()) && CustomerValidator.rowLegal(customer)){
 				//update the database here				
-				try {
+				
 					if(checkSameCustomer(customer)){
 						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
 	    		    	messageBox.setMessage(String.format("存在相同的客户在客户表中，请重新填写！"));		    		    	
@@ -231,7 +285,7 @@ public class CustomerList{
 						//before update the database, record the old area/name, for updating the cache
 						Map<String, Object> cus_old = new HashMap<String, Object>();
 						cus_old.put("id", customer.getID());
-						ReturnObject ret = cusinfo.queryCustomerInfo(cus_old);
+						ReturnObject ret = cusinfo.queryCustomerInfo(conn, cus_old);
 						Pagination page = (Pagination) ret.getReturnDTO();
 						List<Object> list = page.getItems();
 						String old_area="";
@@ -257,14 +311,17 @@ public class CustomerList{
 						if(customer.getArea().equals(old_area) && customer.getName().equals(old_name) 
 								&& customer.getPhone().equals(old_tele) && customer.getAddress().equals(old_addr)){
 							//do nothing?
+							//not the same as product, product has the property quantity
 						}else{
 							final String old_area_final = old_area;
 							final String old_name_final = old_name;
 							
-							boolean contain = deliverinfo.queryCommonInfo(old_area, old_name);
-							if(!contain){
+							boolean contain = deliverinfo.queryCommonInfo(conn, old_area, old_name);
+							if(!contain){//means no such deliver related to this customer, we can just change it
 								//just update it
-								cusinfo.updateCustomerInfo(customer.getID(), cus);
+								cusinfo.updateCustomerInfo(conn, customer.getID(), cus);
+								conn.commit();
+								
 								//old area, old name, new area, new name
 		    					DataCachePool.updateCustomerInfoOfCache(old_area_final, old_name_final, customer.getArea(), customer.getName());	
 		    					CustomerUtils.refreshAreas_FirstName();
@@ -282,29 +339,60 @@ public class CustomerList{
 		    		    		                public void run() {  
 		    		    		        monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  
 		    		    		        
-		    		    		        
-		    		    		        try {
-											cusinfo.updateCustomerInfo(customer.getID(), cus);
-										} catch (Exception e) {
-											
+										Connection connin; 
+										try {
+											connin = baseAction.getConnection();
+										} catch (Exception e1) {
+											MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+											mbox.setMessage("连接数据库失败");
+											mbox.open();
+											return;
 										}
-				    					//old area, old name, new area, new name
-				    					DataCachePool.updateCustomerInfoOfCache(old_area_final, old_name_final, customer.getArea(), customer.getName());	
-				    					CustomerUtils.refreshAreas_FirstName();
-				    							 
+										
+		    		    		        try {
+		    		    		        	connin.setAutoCommit(false);
+											cusinfo.updateCustomerInfo(connin, customer.getID(), cus);
+				 
 				    					monitor.worked(20);  
 	    		    		            monitor.subTask("更新客戶表");
 	    		    		            
 				    					//update all deliver info and current deliver table
 										DeliverInfoService deliverinfo = new DeliverInfoService();
-										deliverinfo.updateAllDeliverInfoForCustomerChanged(cus, cus_rec);
+										deliverinfo.updateAllDeliverInfoForCustomerChanged(connin, cus, cus_rec);
+										
 										monitor.worked(60);  
 	    		    		            monitor.subTask("更新送货表");
 										
 										DeliverContentPart.reNewDeliver();
 										DeliverContentPart.reNewDeliverHistory();
+										
+				    					//old area, old name, new area, new name
+				    					DataCachePool.updateCustomerInfoOfCache(old_area_final, old_name_final, customer.getArea(), customer.getName());	
+				    					CustomerUtils.refreshAreas_FirstName();
+				    						
 										monitor.worked(100);  
 	    		    		            monitor.subTask("更新送货界面");
+	    		    		            
+										connin.commit();										
+										
+										} catch (Exception e) {
+											try {
+												connin.rollback();
+											} catch (SQLException e1) {
+												MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+												mbox.setMessage("连接数据库异常");
+												mbox.open();
+											}
+										}finally{
+											try {
+												connin.close();
+											} catch (SQLException e) {
+												MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+												mbox.setMessage("连接数据库异常");
+												mbox.open();
+											}
+										}
+
 	    		    		            
 		    		    		        monitor.done();
 		    		    		                }
@@ -318,9 +406,15 @@ public class CustomerList{
 		    		    		    runnable/*线程所执行的具体代码*/  
 		    		    		    );  
 		    		    		} catch (InvocationTargetException e) {  
-		    		    		    e.printStackTrace();  
+		    		    			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("未知异常");
+									mbox.open();
+									return;
 		    		    		} catch (InterruptedException e) {  
-		    		    		    e.printStackTrace();  
+		    		    			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("未知异常");
+									mbox.open();
+									return;
 		    		    		}  
 
 		    		    	}else{
@@ -335,13 +429,9 @@ public class CustomerList{
 							}
 						}
 					}					
-				} catch (Exception e) {
-					System.out.println("update customer failed");
-				}
 				
 			}
 			if(CustomerValidator.checkID(customer.getID()) && CustomerValidator.rowLegal(customer)){				
-				try {
 					if(checkSameCustomer(customer)){
 						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
 	    		    	messageBox.setMessage(String.format("存在相同的客户在客户表中，请重新填写！"));		    		    	
@@ -355,19 +445,25 @@ public class CustomerList{
 	    					CustomerCellModifier.getCustomerList().customerChangedThree(c);
 	    		    	}						
 					}else{
-						cusinfo.addCustomerInfo(cus);
+						cusinfo.addCustomerInfo(conn, cus);
+						conn.commit();
+						
 						CustomerCellModifier.addNewTableRow(customer);
 						//add the new info to the cache
 						DataCachePool.addArea2Names(customer.getArea(), customer.getName());						
 						CustomerUtils.refreshAreas_FirstName();
 					}
-				} catch (Exception e) {
-					System.out.println("add customer failed");
-				}
+
 			}
-			
+			} catch (Exception e) {
+				System.out.println("add customer failed");
+				conn.rollback();
+				throw e;
+			}finally{
+				conn.close();
+			}
 		}
-		
+
 	}
 
 	/**

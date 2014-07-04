@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -41,10 +42,13 @@ import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.swt.widgets.TypedListener;
 
 import com.storeworld.deliver.Deliver;
+import com.storeworld.deliver.DeliverCellModifier;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.deliver.DeliverValidator;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.stock.Stock;
+import com.storeworld.stock.StockCellModifier;
 import com.storeworld.stock.StockContentPart;
 import com.storeworld.stock.StockUtils;
 import com.storeworld.stock.StockValidator;
@@ -119,15 +123,15 @@ public class GeneralCCombo extends Composite {
 					if (type.equals(Constants.STOCK_TYPE)) {
 						Table table = (Table) text.getParent().getParent();
 						TableItem item = table.getItem(StockUtils.getCurrentLine());
-						Stock stock = (Stock) item.getData();
+//						Stock stock = (Stock) item.getData();
 						if (col == BRAND_COLUMN) {//for brand
 							valid = StockValidator.validateBrand(text.getText());
 							//if not valid, set the value back
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// reset the last sub_brand
-								stock.setSubBrand(StockUtils.getCurrentSub_Brand());
-								StockContentPart.getStockList().stockChanged(stock);
+								StockCellModifier.staticModify(item, "sub_brand", StockUtils.getCurrentSub_Brand());
+								
 								//set the tip
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);//
 								tip.setMessage(BRAND_MESSAGE);
@@ -135,9 +139,7 @@ public class GeneralCCombo extends Composite {
 							} else {//if valid, we make the change
 								String current_brand = text.getText();
 								if (current_brand == null || current_brand.equals("") || !Utils.checkBrand(current_brand)) {
-									stock.setSubBrand("");
-									stock.setSize("");
-									StockContentPart.getStockList().stockChanged(stock);
+//									StockCellModifier.staticModify(item, "sub_brand", "");
 								}
 
 							}
@@ -149,42 +151,30 @@ public class GeneralCCombo extends Composite {
 								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
 							} else {
-								// need to do anything?
-								stock.setUnit("");
-								 stock.setSize("");
-								 StockContentPart.getStockList().stockChanged(stock);
+								
+//								StockCellModifier.staticModify(item, "unit", "");
+//								StockCellModifier.staticModify(item, "size", "");
+																
 							}
 						}
-//						else if (col == SIZE_COLUMN) {
-//							valid = StockValidator.validateSize(text.getText());
-//							if (!valid && !text.getText().equals("")) {
-//								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//								tip.setLocation(loc.x + ADJUST_X - 10, loc.y+ text.getLocation().y + ADJUST_Y);
-//								tip.setMessage(SIZE_MESSAGE);
-//								tip.setVisible(true);
-//								StockContentPart.getStockList().stockChanged(stock);
-//							}
-//						}
 					} else {// for deliver table
 						Table table = (Table) text.getParent().getParent();
 						TableItem item = table.getItem(DeliverUtils.getCurrentLine());
-						Deliver deliver = (Deliver) item.getData();
+//						Deliver deliver = (Deliver) item.getData();
 						if (col == BRAND_COLUMN) {//for deliver brand
 							valid = DeliverValidator.validateBrand(text.getText());
 							if (!valid && !text.getText().equals("")) {
 								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
 								// reset the last sub_brand
-								deliver.setSubBrand(DeliverUtils.getCurrentSub_Brand());
-								DeliverContentPart.getDeliverList().deliverChanged(deliver);
+								DeliverCellModifier.staticModify(item, "sub_brand", DeliverUtils.getCurrentSub_Brand());
+								
 								tip.setLocation(loc.x + ADJUST_X,loc.y + text.getLocation().y + ADJUST_Y);
 								tip.setMessage(BRAND_MESSAGE);
 								tip.setVisible(true);
 							} else {
 								String current_brand = text.getText();
 								if (current_brand == null || current_brand.equals("") || !Utils.checkBrand(current_brand)) {
-									deliver.setSubBrand("");
-									deliver.setSize("");
-									DeliverContentPart.getDeliverList().deliverChanged(deliver);
+//									DeliverCellModifier.staticModify(item, "sub_brand", "");
 								}
 							}
 						} else if (col == SUB_BRAND_COLUMN) {//for deliver sub brand
@@ -195,22 +185,12 @@ public class GeneralCCombo extends Composite {
 								tip.setMessage(SUB_BRAND_MESSAGE);
 								tip.setVisible(true);
 							} else {
-								// need to do anything
-								deliver.setUnit("");
-								deliver.setSize("");
-								DeliverContentPart.getDeliverList().deliverChanged(deliver);
+								//??
+//								DeliverCellModifier.staticModify(item, "unit", "");
+//								DeliverCellModifier.staticModify(item, "size", "");
+								
 							}
 						} 
-//						else if (col == SIZE_COLUMN) {
-//							valid = DeliverValidator.validateSize(text.getText());
-//							if (!valid && !text.getText().equals("")) {
-//								Point loc = text.getParent().getParent().toDisplay(text.getParent().getLocation());
-//								tip.setLocation(loc.x + ADJUST_X - 10, loc.y+ text.getLocation().y + ADJUST_Y);//
-//								tip.setMessage(SIZE_MESSAGE);
-//								tip.setVisible(true);
-//								DeliverContentPart.getDeliverList().deliverChanged(deliver);
-//							}
-//						}
 
 					}
 				}
@@ -2182,7 +2162,14 @@ public class GeneralCCombo extends Composite {
 	 *                thread that created the receiver</li>
 	 *                </ul>
 	 */
+	
+//	public void setTestEmpty(String txt){
+//		text.
+//		text.update();
+//		text.setText("");
+//	}
 	public void setText(String string) {
+		try{
 		checkWidget();
 		if (string == null)
 			SWT.error(SWT.ERROR_NULL_ARGUMENT);
@@ -2196,6 +2183,9 @@ public class GeneralCCombo extends Composite {
 		text.selectAll();
 		list.setSelection(index);
 		list.showSelection();
+		}catch(Exception e){
+			//do nothing??
+		}
 	}
 
 	/**

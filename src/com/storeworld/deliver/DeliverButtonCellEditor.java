@@ -8,9 +8,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
 /**
@@ -65,7 +68,14 @@ public class DeliverButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Deliver c = (Deliver)(table.getItem(index).getData());		
 						//delete the deliver from table & database
-						deliverlist.removeDeliver(c);
+						try {
+							deliverlist.removeDeliver(c);
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("É¾³ýËÍ»õÐÅÏ¢Ê§°Ü£¬ ÇëÖØÊÔ");
+							mbox.open();
+							return;
+						}
 						button.setVisible(false);
 						Utils.refreshTable(table);											
 								 

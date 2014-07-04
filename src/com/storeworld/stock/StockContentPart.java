@@ -1,5 +1,6 @@
 package com.storeworld.stock;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,15 +38,19 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.mysql.jdbc.Connection;
+import com.storeworld.database.BaseAction;
 import com.storeworld.extenddialog.ConfirmEdit;
 import com.storeworld.extenddialog.IndeedKeyBoard;
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.MainUI;
+import com.storeworld.pub.service.StockInfoService;
 import com.storeworld.utils.ComboUtils;
 import com.storeworld.utils.Constants;
 import com.storeworld.utils.GeneralCCombo;
 import com.storeworld.utils.GeneralComboCellEditor;
+import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
 /**
@@ -112,7 +117,11 @@ public class StockContentPart extends ContentPart{
 	//the data formatter of each column with number format in
 	private static DecimalFormat df = new DecimalFormat("0.00");
 	//the pattern of indeed value
-	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+//	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+	private static Pattern pattern_indeed_val = Pattern.compile("^([1-9][0-9]*(\\.[0-9]{1,2})?|0\\.(?!0+$)[0-9]{1,2})$");
+	
+	private static final StockInfoService stockinfo = new StockInfoService();
+	private static BaseAction baseAction = new BaseAction();
 	
 	public StockContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);	
@@ -122,19 +131,6 @@ public class StockContentPart extends ContentPart{
 		addListenerForTable();
 	}
 	
-
-//	public static CellEditor[] getCellEditors(){
-//		return cellEditor;
-//	}
-//	public static TableEditor getEditor(){
-//		return editorEdit;
-//	}
-//	public static int getRowCurrent(){
-//		return rowCurrent;
-//	}
-//	public static Table getTable(){
-//		return table;
-//	}
 	/**
 	 * when refresh table in StockUtils, we need to get the table viewer of this data table
 	 * and add/remove filter
@@ -310,32 +306,16 @@ public class StockContentPart extends ContentPart{
 							Text text = (Text) (editorEdit.getEditor());
 							callKeyBoard(text);//call the software keyboard
 							//get current stock item value
-							Stock c = (Stock) (table.getItem(rowCurrent).getData());
 							if (colCurrent == priceColumn) {//price column
-								String pricelast = c.getPrice();//record the old value
 								if (Utils.getClickButton() && Utils.getInputNeedChange()) {
-									c.setPrice(Utils.getInput());
-									text.setText(c.getPrice());
-									//if the new value of price is valid, update it
-									if (StockValidator.validatePrice(c.getPrice())) {
-										stocklist.stockChanged(c);
-									} else {//else back to the old value
-										c.setPrice(pricelast);
-									}
+									StockCellModifier.staticModify(table.getItem(rowCurrent), "price", Utils.getInput());
 									// initial the next click
 									Utils.setClickButton(false);
 								}
 							} else if (colCurrent == numberColumn) {//number column
-								String numberlast = c.getNumber();
 								//we click the "OK" button of software keyboard, and the value in software keyboard is valid
 								if (Utils.getClickButton() && Utils.getInputNeedChange()) {
-									c.setNumber(Utils.getInput());
-									text.setText(c.getNumber());
-									if (StockValidator.validateNumber(c.getNumber())) {
-										stocklist.stockChanged(c);
-									} else {
-										c.setNumber(numberlast);
-									}
+									StockCellModifier.staticModify(table.getItem(rowCurrent), "number", Utils.getInput());
 									// initial the next click
 									Utils.setClickButton(false);
 								}
@@ -369,8 +349,7 @@ public class StockContentPart extends ContentPart{
 						if (current_brand == null || current_brand.equals("")
 								|| !Utils.checkBrand(current_brand)) {
 							combo.removeAll();
-							c.setSubBrand("");
-							stocklist.stockChanged(c);
+							StockCellModifier.staticModify(table.getItem(rowCurrent), "sub_brand", "");
 						} else {
 							// set data into objects of sub brand by brand name
 							List<String> list = Utils.getSub_Brands(current_brand);
@@ -378,34 +357,7 @@ public class StockContentPart extends ContentPart{
 							combo.setItems(list.toArray(new String[list.size()]));
 						}
 					}
-					//the size column, no use now
-					// else if(colCurrent == sizeColumn){
-					// editorCombo.setEditor(cellEditor[colCurrent].getControl(),
-					// table.getItem(rowCurrent), colCurrent);
-					// GeneralCCombo combo =
-					// (GeneralCCombo)(editorCombo.getEditor());
-					// combo.setVisibleItemCount(5);
-					// Stock c = (Stock)(table.getItem(rowCurrent).getData());
-					// String current_brand = c.getBrand();
-					// String current_sub = c.getSubBrand();
-					// //all this will make the size column with empty
-					// if(current_brand == null || current_brand.equals("") ||
-					// current_sub==null || current_sub.equals("")
-					// || !Utils.checkBrand(current_brand) ||
-					// !Utils.checkSubBrand(current_sub)){
-					// combo.removeAll();
-					// c.setSize("");
-					// stocklist.stockChanged(c);
-					// }else{
-					// //query the database to get the available size
-					// List<String> list = Utils.getSizes(current_brand,
-					// current_sub);
-					// //set data into objects
-					// comboboxCellEditor3.setObjects(list);
-					// combo.setItems(list.toArray(new String[list.size()]));
-					// }
-					//
-					// }
+					
 					//if delete button column, we show the delete button in this row and make delete button in other row invisible
 					else if (colCurrent == deleteButtonColumn) {
 						if (rowCurrent == table.getItemCount() - 1) {
@@ -491,7 +443,13 @@ public class StockContentPart extends ContentPart{
 			month = "0"+month;
 		//date to search
 		String dateSearch = year+month;
+		try{
 		StockUtils.showSearchHistory(dateSearch);
+		}catch(Exception e){
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("显示历史记录失败");
+			mbox.open();
+		}
 	}
 	
 	/**
@@ -506,14 +464,14 @@ public class StockContentPart extends ContentPart{
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);		
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, 200, h);
+		composite_left.setBounds(0, 0, 200, 570);
 		
 		//right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds(200, 0, 760, h);
+		composite_right.setBounds(200, 0, 760, 570);
 		composite_shift = 200;//the right composite left shift from the edge of parent
-		composite_updown = 30+24+37; //the up margin of table from parent edge
+		composite_updown = 91; //the up margin of table from parent edge
 		
 		//define a table
 		final TableViewer tableViewer = new TableViewer(composite_right, SWT.BORDER |SWT.FULL_SELECTION |SWT.V_SCROLL);
@@ -615,7 +573,13 @@ public class StockContentPart extends ContentPart{
 					month = "0"+month;
 				//date to search
 				String dateSearch = year+month;
-				StockUtils.showSearchHistory(dateSearch);//show the history
+				try {
+					StockUtils.showSearchHistory(dateSearch);
+				} catch (SQLException ex) {
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("显示历史记录失败");
+					mbox.open();
+				}//show the history
 			}
 		});
 
@@ -627,7 +591,13 @@ public class StockContentPart extends ContentPart{
         	public void widgetSelected(SelectionEvent e) {
 				dateTime_stock.setEnabled(false);
 				//update all the time value in table & update the history panel
-				StockList.changeStocksTime();
+				try {
+					StockList.changeStocksTime();
+				} catch (Exception e1) {
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("更新进货时间失败");
+					mbox.open();
+				}
 				dateTime_stock.setEnabled(true);
 			}
 		});		
@@ -641,13 +611,36 @@ public class StockContentPart extends ContentPart{
 		btn_delete.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
+				
+				try {
+					StockList.removeCurrentHistory();
+				} catch (Exception e1) {					
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("删除当前进货记录失败，请重试");
+					mbox.open();
+					//what's next still go on, if there is a database exception, just return, and do nothing
+					return;
+				}
+				
+				
 				//first leave the edit mode, avoid update the table
 				StockUtils.leaveEditMode();
 				//clear table
 				table.removeAll();
 				StockList.removeAllStocks();
 				//remove current history from database
-				StockList.removeCurrentHistory();
+
+				//remove history & item composite
+				ItemComposite itemCurrent = StockUtils.getItemCompositeRecord();
+				ArrayList<ItemComposite> itemlist = StockUtils.getItemList();
+				ArrayList<StockHistory> hislist = StockUtils.getHistoryList();
+				StockHistory his = (StockHistory)itemCurrent.getHistory();
+				hislist.remove(his);//remove the StockHistory
+				itemlist.remove(itemCurrent);
+				itemCurrent.dispose();
+				//layout the item list
+				StockUtils.layoutItemList();
+				
 				initialTimer();
 				//will not show delete button anymore
 				total_val.setText("0.00");//+Constants.SPACE
@@ -709,8 +702,20 @@ public class StockContentPart extends ContentPart{
 							indeed_val.setText(format_str);
 							indeed_val.setEnabled(false);
 							// update the database when indeed is not the same as total
-							if (!indeed_val.getText().equals(total_val.getText()))
-								StockList.updateStocksByTime(StockUtils.getTime(),indeed_val.getText());
+							if (!indeed_val.getText().equals(total_val.getText())){
+								try {
+									StockList.updateStocksByTime(StockUtils.getTime(),indeed_val.getText());
+								} catch (Exception e1) {
+									indeed_val.setText(total_val.getText());
+									indeed_val.setEnabled(true);
+									
+									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("更新进货表失败");
+									mbox.open();
+									return;
+								}
+							}
+							
 							if (StockUtils.getEditMode()&& StockUtils.getStatus().equals("HISTORY")) {
 								// update the history panel
 								StockUtils.getItemCompositeRecord().setDownRight(indeed_val.getText());
@@ -900,7 +905,7 @@ public class StockContentPart extends ContentPart{
 		tableViewer.setLabelProvider(new StockTableLabelProvider());
 		tableViewer.setUseHashlookup(true);//spead up
 		Stock stock_new = new Stock(StockUtils.getNewLineID());//dynamic from the database
-		stocklist.addStock(stock_new);
+		stocklist.basicAddStock(stock_new);
 		
 		tableViewer.setInput(stocklist);		
 		tableViewer.setColumnProperties(new String[]{"id","brand","sub_brand","size","unit","price", "number", "operation"});	

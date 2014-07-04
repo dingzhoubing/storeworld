@@ -169,9 +169,9 @@ public class CoolBarPart extends NorthPart{
 		Button button_lock = new Button(this, SWT.NONE);
 //		button_lock.setBounds((int)(5*w*0.03+4*w/18), (int)(h*0.15), (int)(w/18),(int)(w/18));
 		button_lock.setBounds(348, 20, 64, 64);
-		button_lock.setText("保密");
+		button_lock.setText("锁定");
 		Label lbl_lock = new Label(this, SWT.CENTER);
-		lbl_lock.setText("保密");
+		lbl_lock.setText("锁定");
 		lbl_lock.setBounds(348, 92, 64, 15);
 		lbl_lock.setBackground(new Color(getDisplay(),21, 23,26));
 		lbl_lock.setForeground(new Color(getDisplay(),255, 255,255));

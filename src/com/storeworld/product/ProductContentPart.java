@@ -16,10 +16,12 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -28,6 +30,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.extenddialog.SoftKeyBoard;
 import com.storeworld.mainui.ContentPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
 /**
@@ -133,18 +136,9 @@ public class ProductContentPart extends ContentPart{
 						editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 						Text text = (Text)(editorEdit.getEditor());	
 						callKeyBoard(text);
-						Product p = (Product)(table.getItem(rowCurrent).getData());
 						if(colCurrent == repColumn){
-							String repositorylast = p.getRepository();
 							if(Utils.getClickButton() && Utils.getInputNeedChange()){
-								p.setRepository(Utils.getInput());
-								text.setText(p.getRepository());
-								if(ProductValidator.validateRepository(p.getRepository())){
-									productlist.productChanged(p);
-									text.setText(p.getRepository());
-								}else{
-									p.setRepository(repositorylast);;
-								}
+								ProductCellModifier.staticModify(table.getItem(rowCurrent), "repository", Utils.getInput());
 								//initial the next click
 								Utils.setClickButton(false);
 							}
@@ -215,29 +209,29 @@ public class ProductContentPart extends ContentPart{
 	 * initialize the table elements
 	 */
 	public void initialization(){
-		int w = current.getBounds().width;
-		int h = current.getBounds().height;
+		int w = current.getBounds().width;//960
+		int h = current.getBounds().height;//570
 		composite.setBounds(0, 0, w, h);
 		
 		 //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds(200, 0, 760, h);
+		composite_right.setBounds(200, 0, 760, 570);
 		composite_shift = 200;		
 		//left side navigate
 		Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);//??
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, 200, h);
+		composite_left.setBounds(0, 0, 200, 570);
 
 		//search button
 		Button btnNewButton = new Button(composite_left, SWT.NONE);
-		btnNewButton.setBounds((int)(w/5/20), (int)(w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		btnNewButton.setBounds(10, 10, 38, 19);
 		btnNewButton.setText("ËÑ");
 	
 		//search text
 		final Text text = new Text(composite_left, SWT.BORDER);
-		text.setBounds((int)(w/5/20)+(int)(2*3*w/5/10/3), (int)(w/5/10/2), (int)(5*w/5/10), (int)(2*w/5/10/2));		
+		text.setBounds(48, 10, 96, 19);		
 		//click search button
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -253,13 +247,13 @@ public class ProductContentPart extends ContentPart{
 		
 		//area label		
 		Label lblNewLabel = new Label(composite_left, SWT.NONE);
-		lblNewLabel.setBounds((int)(w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		lblNewLabel.setBounds(10, 38, 38, 19);
 		lblNewLabel.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 12, SWT.NORMAL));
 		lblNewLabel.setBackground(base);
 		lblNewLabel.setText("Æ·ÅÆ");
 		
 		Link link_1 = new Link(composite_left, 0);
-		link_1.setBounds((int)(w/5)-(int)(4*w/5/20), (int)(2*w/5/10/2)+(int)(2*w/5/10/2), (int)(2*3*w/5/10/3), (int)(2*w/5/10/2));
+		link_1.setBounds(154, 38, 38, 19);
 		link_1.setText("<a>È«²¿</a>");
 		link_1.setFont(SWTResourceManager.getFont("Î¢ÈíÑÅºÚ", 11, SWT.NORMAL));
 		link_1.setBackground(base);
@@ -272,7 +266,7 @@ public class ProductContentPart extends ContentPart{
 		
 		//area base composite
 		Composite composite_brand = new Composite(composite_left, SWT.NONE);
-		composite_brand.setBounds((int)(w/5/20), (int)(3*w/5/10), (int)(9*w/5/10), 400);
+		composite_brand.setBounds(10, 58, 193, 400);
 		composite_brand.setBackground(base);
 		composite_brand.setLayout(new FillLayout());
 		
@@ -317,7 +311,7 @@ public class ProductContentPart extends ContentPart{
 		table = tableViewer.getTable();
 		table.setLinesVisible(false);
 		table.setHeaderVisible(true);		
-		table.setBounds(0, 0, 760, h);
+		table.setBounds(0, 0, 760, 570);
 		tv = tableViewer;
 		//set the columns of the table
 
@@ -439,7 +433,7 @@ public class ProductContentPart extends ContentPart{
 		ICellModifier modifier = new ProductCellModifier(tableViewer, productlist);
 		tableViewer.setCellModifier(modifier);
 		
-		ProductUtils.showBrandCheckBoxes(composite_br, (int)(4*w/5/10), composite_scrollbrand, tableViewer, base);
+		ProductUtils.showBrandCheckBoxes(composite_br, 77, composite_scrollbrand, tableViewer, base);
 		
 		Utils.refreshTable(table);
 		composite.setLayout(new FillLayout());

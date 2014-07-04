@@ -1,5 +1,6 @@
 package com.storeworld.customer;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -16,6 +17,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.mysql.jdbc.Connection;
+import com.storeworld.database.BaseAction;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
@@ -43,6 +46,8 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
     protected CustomerList customerlist;
     protected int rowHeight = 0;
     private static CustomerInfoService customerinfo = new CustomerInfoService();
+    private static BaseAction baseAction = new BaseAction();
+    
     public CustomerDeliverButtonCellEditor() {
         setStyle(0);
     }
@@ -83,9 +88,42 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						
 						Customer c = (Customer)(table.getItem(index).getData());
+						Connection conn=null;
+						try {
+							conn = baseAction.getConnection();
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库失败");
+							mbox.open();
+						}
 						
-						if(c.getArea().equals("") || c.getName().equals("")){						
-						ReturnObject ret = customerinfo.queryCustomerInfoByID(c.getID());
+						if(c.getArea().equals("") || c.getName().equals("")){
+							ReturnObject ret = null;
+							try{
+								conn.setAutoCommit(false);
+								ret = customerinfo.queryCustomerInfoByID(conn, c.getID());
+								conn.commit();
+							}catch(Exception ex){
+								try {
+									conn.rollback();
+								} catch (SQLException e1) {
+									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("连接数据库异常");
+									mbox.open();
+								}
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("连接数据库异常");
+								mbox.open();
+								return;
+							}finally{
+								try {
+									conn.close();
+								} catch (SQLException e1) {
+									MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("连接数据库异常");
+									mbox.open();
+								}
+							}
 						Pagination page = (Pagination) ret.getReturnDTO();
 						List<Object> list = page.getItems();
 						CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(0);
@@ -98,6 +136,16 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 				    			old_area, old_name));
 				    	if (messageBox.open() == SWT.OK){//give up the edit
 				    		
+				    		//show the basic message
+							try {
+								DeliverUtils.setOrderNumber();//set the order number for the deliver table
+							} catch (Exception e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("重置送货单号失败，请重试");
+								mbox.open();
+								return;
+							}
+							
 				    		//record some info
 							System.out.println("jump into the deliver page");
 							//record the customer info
@@ -117,8 +165,7 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 							Utils.setFunctinLast(FUNCTION.DELIVER);
 							shell.show_Content_deliver();
 							
-							//show the basic message
-							DeliverUtils.setOrderNumber();//set the order number for the deliver table
+							
 							
 							DeliverContentPart.clearContent();
 							DeliverContentPart.getTableViewer().getTable().removeAll();
@@ -158,6 +205,16 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 				    	}				    	
 						}else{
 						
+						//show the basic message
+						try {
+							DeliverUtils.setOrderNumber();//set the order number for the deliver table
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("重置送货单号失败，请重试");
+							mbox.open();
+							return;
+						}
+						
 						//record some info
 						System.out.println("jump into the deliver page");
 						//record the customer info
@@ -176,9 +233,6 @@ public class CustomerDeliverButtonCellEditor extends CellEditor {
 						shell.show_North_index();
 						Utils.setFunctinLast(FUNCTION.DELIVER);
 						shell.show_Content_deliver();
-						
-						//show the basic message
-						DeliverUtils.setOrderNumber();//set the order number for the deliver table
 						
 						DeliverContentPart.clearContent();
 						DeliverContentPart.getTableViewer().getTable().removeAll();

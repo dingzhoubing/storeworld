@@ -91,6 +91,7 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 			instance = new LoginMainUI(display);
 			instance.setActive();
 	       }
+
 	       return instance;
 	}
 	

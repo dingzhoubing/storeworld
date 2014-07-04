@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
@@ -18,8 +19,8 @@ public class StockValidator {
 	//start with number, end with(out) Chinese character or 26 English character
 	private static Pattern pattern_size = Pattern.compile("^\\d+[\\u4E00-\\u9FA5\\uF900-\\uFA2DA-Za-z]*$");
 	private static Pattern pattern_unit = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]{1,5}$");
-	private static Pattern pattern_price = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
-	private static Pattern pattern_number = Pattern.compile("\\d+");
+	private static Pattern pattern_price = Pattern.compile("^([1-9][0-9]*(\\.[0-9]{1,2})?|0\\.(?!0+$)[0-9]{1,2})$");
+	private static Pattern pattern_number = Pattern.compile("^([1-9][0-9]*)$");
 	private static final int unitColumn = 4;
 	
 	private static GoodsInfoService goodsinfo = new GoodsInfoService();
@@ -148,14 +149,16 @@ public class StockValidator {
 	 * check if the current row is legal
 	 * @param p
 	 * @return
+	 * @throws Exception 
 	 */
-	public static boolean rowLegal(Stock p){
+	public static boolean rowLegal(Connection conn, Stock p) throws Exception{
 		if(p.getBrand() !=null && p.getSubBrand()!=null){
 			
 			if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){// && !p.getSize().equals("")
 
-				if(!p.getUnit().equals("") || !p.getSize().equals("")){
+				if(StockUtils.getSizeUnitChanged()){//!p.getUnit().equals("") || !p.getSize().equals("")
 					//already has one unit
+					
 				}else{
 				//set the unit
 				Map<String, Object> prod = new HashMap<String, Object>();
@@ -164,7 +167,7 @@ public class StockValidator {
 //				prod.put("standard", p.getSize());
 				ReturnObject ret;
 				try {
-					ret = goodsinfo.queryGoodsInfo(prod);
+					ret = goodsinfo.queryGoodsInfo(conn, prod);
 					Pagination page = (Pagination) ret.getReturnDTO();
 					List<Object> list = page.getItems();
 					if(list.size() > 0){
@@ -176,7 +179,7 @@ public class StockValidator {
 						p.setUnit("");
 					}							
 				} catch (Exception e) {
-					System.out.println("query the size & unit with brand & sub failed");//&size
+					throw e;
 				}				
 				StockCellModifier.getStockList().stockChangedForUnit(p);
 				}
@@ -196,6 +199,15 @@ public class StockValidator {
 	 */
 	public static boolean rowComplete(Stock p){
 		if(!p.getPrice().equals("") && !p.getNumber().equals("")){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+	
+	public static boolean rowLegal2(Stock p){
+		if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){
 			return true;
 		}else{
 			return false;

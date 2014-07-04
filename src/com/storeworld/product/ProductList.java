@@ -1,6 +1,7 @@
 package com.storeworld.product;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +17,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.IDataListViewer;
+import com.storeworld.database.BaseAction;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
@@ -43,6 +46,7 @@ public class ProductList {
 	private static final GoodsInfoService goodsinfo = new GoodsInfoService();
 	private static final StockInfoService stockinfo = new StockInfoService();
 	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
+	private static final BaseAction baseAction = new BaseAction();
 	
 	public ProductList() {
 		super();
@@ -54,40 +58,31 @@ public class ProductList {
 		
 		String newID = "";
 		try {
-			ReturnObject ret = goodsinfo.queryGoodsInfoAll();
 			newID = String.valueOf(goodsinfo.getNextGoodsID());
-			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();
-			for(int i=0;i<list.size();i++){
-				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
-				Product prod = new Product();
-//				newID = cDTO.getId();
-				prod.setID(cDTO.getId());
-				prod.setBrand(cDTO.getBrand());
-				prod.setSubBrand(cDTO.getSub_brand());
-				prod.setSize(cDTO.getStandard());
-				if(cDTO.getUnit() == null)
-					prod.setUnit("");
-				else
-					prod.setUnit(cDTO.getUnit());
-				if(cDTO.getRepertory() == null)
-					prod.setRepository("");
-				else
-					prod.setRepository(String.valueOf(cDTO.getRepertory()));
-				
-				productList.add(prod);
-//				System.out.println("name: "+cDTO.getCustomer_name());
-				//add to cache
-				DataCachePool.addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());
-			}
 		} catch (Exception e) {
-			System.out.println("failed");
+			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+	    	messageBox.setMessage("初始化数据库失败，请重新启动"); 	
+	    	if (messageBox.open() == SWT.OK){	    			    	
+	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+	    		System.exit(0);
+	    		return;
+	    	}
 		}
+		
 		//no record
-		if(newID.equals("-1") || newID.equals(""))
+		if(newID.equals("-1") || newID.equals(""))//is this right?
 			newID="1";//empty
 		//by the list of Customer from database
 		ProductUtils.setNewLineID(String.valueOf(Integer.valueOf(newID)));
+		
+		try {
+			DataCachePool.cacheProductInfo2(productList);
+		} catch (Exception e) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("缓存货品信息失败");
+			mbox.open();
+		}
+				
 		
 	}
 	
@@ -113,21 +108,41 @@ public class ProductList {
 	/**
 	 * delete a product UI table & database
 	 * @param product
+	 * @throws Exception 
 	 */
-	public void removeProduct(Product product) {
-		this.productList.remove(product);
+	public void removeProduct(Product product) throws Exception {
+		
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).remove(product);
 			try {
-				goodsinfo.deleteGoodsInfo(product.getID());
+				conn.setAutoCommit(false);
+				goodsinfo.deleteGoodsInfo(conn, product.getID());
+				conn.commit();
+				
 			} catch (Exception e) {
+				conn.rollback();
 				System.out.println("remove product failed");
+				throw e;
+			}finally{
+				conn.close();
 			}
+			
 			//update the cache
 			DataCachePool.removeProductInfoOfCache(product.getBrand(), product.getSubBrand());
 			ProductUtils.refreshBrands();
 		}
+		this.productList.remove(product);
 	}
 
 	public void productChangedThree(Product product) {
@@ -187,6 +202,7 @@ public class ProductList {
 			}			
 		}		
 		return ret;
+//		return DataCachePool.ifExistBrandSub(product.getBrand(), product.getSubBrand());
 	}
 	
 	
@@ -194,8 +210,20 @@ public class ProductList {
 	/**
 	 * update the product table in UI & database
 	 * @param product
+	 * @throws Exception 
 	 */
-	public void productChanged(final Product product) {
+	public void productChanged(final Product product) throws Exception {
+		
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+		
 		Iterator<IDataListViewer> iterator = changeListeners.iterator();
 		while (iterator.hasNext()){
 			(iterator.next()).update(product);
@@ -207,10 +235,12 @@ public class ProductList {
 			prod.put("standard", product.getSize());
 			prod.put("unit", product.getUnit());
 			prod.put("repertory", product.getRepository());
-			if(!ProductValidator.checkID(product.getID()) && ProductValidator.rowLegal(product)){
-				//update the database here				
-				try {
-
+			
+			try {				
+				conn.setAutoCommit(false);
+				
+				if(!ProductValidator.checkID(product.getID()) && ProductValidator.rowLegal(product)){
+					//update the database here				
 					//check if exist the same product
 					if(checkSameProduct(product)){
 						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
@@ -228,11 +258,11 @@ public class ProductList {
 	    		    	}
 						
 					}else{
-					
+
 						//before update the database, record the old brand/sub, for updating the cache
 						Map<String, Object> prod_old = new HashMap<String, Object>();
 						prod_old.put("id", product.getID());
-						ReturnObject ret = goodsinfo.queryGoodsInfo(prod_old);
+						ReturnObject ret = goodsinfo.queryGoodsInfo(conn, prod_old);
 						Pagination page = (Pagination) ret.getReturnDTO();
 						List<Object> list = page.getItems();
 						String old_brand="";
@@ -254,83 +284,123 @@ public class ProductList {
 						}else{
 							System.out.println("query a product with an exist ID returns empty");
 						}
-						
+						//if change the repository, just change it
 						if(product.getBrand().equals(old_brand) && product.getSubBrand().equals(old_sub) && product.getSize().equals(old_size)
 								&&product.getUnit().equals(old_unit)){
 							//update the repository, just update it
-							goodsinfo.updateGoodsInfo(product.getID(), prod);
-							DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
-							ProductUtils.refreshBrands();
+							goodsinfo.updateGoodsInfo(conn, product.getID(), prod);
+							conn.commit();
+							
+							//only change the repository, no need to refresh the navigator
+//							DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
+//							ProductUtils.refreshBrands();
 						}else{//change other property
 							final String old_brand_final = old_brand;
 							final String old_sub_final = old_sub;
-							
-							
-							ReturnObject ro1 = stockinfo.queryStockInfoByBrandAndSub(old_brand, old_sub);
+														
+							ReturnObject ro1 = stockinfo.queryStockInfoByBrandAndSub(conn, old_brand, old_sub);
 							Map<String, Object> verify = new HashMap<String, Object>();
 							verify.put("brand", old_brand);
 							verify.put("sub_brand", old_sub);
-							ReturnObject ro2 = deliverinfo.queryDeliverInfo(verify);
+							ReturnObject ro2 = deliverinfo.queryDeliverInfo(conn, verify);
 							Pagination page1 = (Pagination) ro1.getReturnDTO();
 							Pagination page2 = (Pagination) ro2.getReturnDTO();
 							//if no items in stock table and deliver table, then, just do the change
 							if(page1.getItems().isEmpty() && page2.getItems().isEmpty()){
-								goodsinfo.updateGoodsInfo(product.getID(), prod);
+								goodsinfo.updateGoodsInfo(conn, product.getID(), prod);
+								conn.commit();
+								
 								DataCachePool.updateProductInfoOfCache(old_brand, old_sub, product.getBrand(), product.getSubBrand());					
 								ProductUtils.refreshBrands();
 							}else{
-							
-							
-							MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
-		    		    	messageBox.setMessage(String.format("品牌:%s，子品牌:%s，规格%s 的商品将被修改，进货与送货表中将会发生相应更新，确认要操作吗？", old_brand, old_sub, old_size));		    		    	
-		    		    	if (messageBox.open() == SWT.OK){	
+														
+								MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);						
+								messageBox.setMessage(String.format("品牌:%s，子品牌:%s，规格%s 的商品将被修改，进货与送货表中将会发生相应更新，确认要操作吗？", old_brand, old_sub, old_size));		    		    	
+								if (messageBox.open() == SWT.OK){	
 		    		    				    		    		
-		    		    		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-		    		    		IRunnableWithProgress runnable = new IRunnableWithProgress() {  
-		    		    		    public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {  
+									ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+									IRunnableWithProgress runnable = new IRunnableWithProgress() {  
+										public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException{  
 		    		    		    	
-		    		    		    Display.getDefault().asyncExec(new Runnable() {  
-		    		    		                public void run() {  
-		    		    		        monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  
+											Display.getDefault().asyncExec(new Runnable() {  
+													public void run() {  
+														monitor.beginTask("正在进行更新，请勿关闭系统...", 100);  		    		    		        
 		    		    		        
-		    		    		        
-		    		    		        try {
-											goodsinfo.updateGoodsInfo(product.getID(), prod);
-										} catch (Exception e) {
-											System.out.println("update goods failed");
-										}
-										//update the cache
-										//based on: the product/customer page will not often be changed
-										DataCachePool.updateProductInfoOfCache(old_brand_final, old_sub_final, product.getBrand(), product.getSubBrand());					
-										ProductUtils.refreshBrands();
-										monitor.worked(10);  
-	    		    		            monitor.subTask("更新产品表");  
-										
-										//update all the stock info and deliver info, a long time maybe
-										//update all stock info and current stock table
-										StockInfoService stockinfo = new StockInfoService();
-										stockinfo.updateAllStockInfoForProductChanged(prod, prod_rec);
-										
-										monitor.worked(20);  
-	    		    		            monitor.subTask("更新进货表");  
+														Connection connin; 
+														try {
+															connin = baseAction.getConnection();
+														} catch (Exception e1) {
+															MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+															mbox.setMessage("连接数据库失败");
+															mbox.open();
+															return;
+														}
+														
+														try {
+															connin.setAutoCommit(false);
+															goodsinfo.updateGoodsInfo(connin, product.getID(), prod);
+															monitor.worked(10);  
+															monitor.subTask("更新产品表");  
+															
+															//update all the stock info and deliver info, a long time maybe
+															//update all stock info and current stock table
+															StockInfoService stockinfo = new StockInfoService();
+															stockinfo.updateAllStockInfoForProductChanged(connin, prod, prod_rec);
+															
+															monitor.worked(20);  
+															monitor.subTask("更新进货表");  
+															
+															
+															//update all deliver info and current deliver table
+															DeliverInfoService deliverinfo = new DeliverInfoService();
+															deliverinfo.updateAllDeliverInfoForProductChanged(connin, prod, prod_rec);
 
-										StockContentPart.reNewStock();
-										StockContentPart.reNewStockHistory();
-										monitor.worked(50);  
-	    		    		            monitor.subTask("更新进货界面");  
 
-										//update all deliver info and current deliver table
-										DeliverInfoService deliverinfo = new DeliverInfoService();
-										deliverinfo.updateAllDeliverInfoForProductChanged(prod, prod_rec);
-										monitor.worked(75);  
-	    		    		            monitor.subTask("更新送货表");  
+															StockContentPart.reNewStock();
+															StockContentPart.reNewStockHistory();
+															
+															connin.commit();															
+															//update the cache
+															//based on: the product/customer page will not often be changed
+															DataCachePool.updateProductInfoOfCache(old_brand_final, old_sub_final, product.getBrand(), product.getSubBrand());					
+															ProductUtils.refreshBrands();
+		
+															monitor.worked(50);  
+															monitor.subTask("更新进货界面");  
 
-										DeliverContentPart.reNewDeliver();
-										DeliverContentPart.reNewDeliverHistory();
-										monitor.worked(100);  
-	    		    		            monitor.subTask("更新送货界面");  
 
-		    		    		        monitor.done();
+															monitor.worked(75);  
+															monitor.subTask("更新送货表");  
+
+															DeliverContentPart.reNewDeliver();
+															DeliverContentPart.reNewDeliverHistory();
+														} catch (Exception e) {
+															try {
+																connin.rollback();
+															} catch (SQLException e1) {
+																MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+																mbox.setMessage("连接数据库异常");
+																mbox.open();
+															}
+															System.out.println("update goods failed");
+															MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+															mbox.setMessage("连接数据库异常");
+															mbox.open();
+															return;
+														}finally{
+															try {
+																connin.close();
+															} catch (SQLException e) {
+																MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+																mbox.setMessage("连接数据库异常");
+																mbox.open();
+															}
+														}
+
+														monitor.worked(100);  
+														monitor.subTask("更新送货界面");  
+
+														monitor.done();
 		    		    		                }
 		    		    		    	  });
 		    		    		    }  
@@ -342,9 +412,15 @@ public class ProductList {
 		    		    		    runnable/*线程所执行的具体代码*/  
 		    		    		    );  
 		    		    		} catch (InvocationTargetException e) {  
-		    		    		    e.printStackTrace();  
+		    		    			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("未知异常");
+									mbox.open();
+									return;
 		    		    		} catch (InterruptedException e) {  
-		    		    		    e.printStackTrace();  
+		    		    			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+									mbox.setMessage("未知异常");
+									mbox.open(); 
+									return;
 		    		    		}  
 		    		    		
 								
@@ -362,13 +438,8 @@ public class ProductList {
 							}
 						}
 					}
-				} catch (Exception e) {
-					System.out.println("update product failed");
 				}
-			}
-			if(ProductValidator.checkID(product.getID()) && ProductValidator.rowLegal(product)){				
-				try {
-					
+				if(ProductValidator.checkID(product.getID()) && ProductValidator.rowLegal(product)){				
 					if(checkSameProduct(product)){
 						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.ICON_WARNING);						
 	    		    	messageBox.setMessage(String.format("存在相同的货品在库存表中，请重新选择！"));		    		    	
@@ -384,16 +455,23 @@ public class ProductList {
 	    					ProductCellModifier.getProductList().productChangedThree(s);
 	    		    	}						
 					}else{					
-						goodsinfo.addGoodsInfo(prod);
+						goodsinfo.addGoodsInfo(conn, prod);
+						conn.commit();
+						
 						ProductCellModifier.addNewTableRow(product);					
 						DataCachePool.addBrand2Sub(product.getBrand(), product.getSubBrand());					
 						ProductUtils.refreshBrands();
 					}
-				} catch (Exception e) {
-					System.out.println("add product failed");
-				}
+			}
+//				conn.commit();
+			}catch(Exception e){
+				conn.rollback();
+				throw e;
+			}finally{
+				conn.close();
 			}
 		}
+
 	}
 
 	/**

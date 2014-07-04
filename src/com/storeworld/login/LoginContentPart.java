@@ -64,6 +64,7 @@ public class LoginContentPart extends ContentPart{
 	private static boolean firstInput = false;
 	
 	private boolean resetPW = false;
+	private boolean whileChanging = false;
 	
 	private boolean wrongcase = false;
 	public LoginContentPart(Composite parent, int style, Image image, Color color) {
@@ -85,6 +86,13 @@ public class LoginContentPart extends ContentPart{
 	}
 	public void setResetPW(boolean ft){
 		this.resetPW = ft;
+	}
+	
+	public boolean getWhileChanging(){
+		return whileChanging;
+	}
+	public void setWhileChanging(boolean swc){
+		this.whileChanging = swc;
 	}
 	
 	class PasswordSelectionAdapter extends SelectionAdapter{
@@ -143,11 +151,12 @@ public class LoginContentPart extends ContentPart{
 		}
 	}
 	private void authCheck(){
-		if(!Utils.getStatus()){//login
+		if(!Utils.getStatus() || getWhileChanging()){//login
 		//not the first time
-		if(!first){
+		if(!first){//test if the first time to login, if not the first time, should already exist an pw
 			if(pwFirst.equals(PasswordHandler.getPassword())){//by default, it should be password
 				counter = 1;
+				lbl_tips.setText("正在登陆系统。。。");
 				pwFirst = "";
 				LoginMainUI.setInstanceNull();
 				progressBar.setVisible(true);
@@ -164,9 +173,9 @@ public class LoginContentPart extends ContentPart{
 				counter = 1;
 				pwFirst="";
 			}		
-		}else{
-			if(!firstInput){
-				if(!getResetPW()){
+		}else{//no pw or reset the pw, we need to input the pw twice
+			if(!firstInput){//if first time
+				if(!getResetPW()){//if not reset the pw
 				lbl_tips.setText("请您再次输入同样的数字，此数字将作为您以后的登陆密码");
 				text1.setText("");
 				text2.setText("");
@@ -211,17 +220,36 @@ public class LoginContentPart extends ContentPart{
 					pwFirst = "";
 					pwSecond = "";
 				}else{
+					
 					counter = 1;
+					lbl_tips.setText("正在登陆系统。。。");
 					setPasswordStored(pwFirst);
 					PasswordHandler.setPassword(pwFirst);
 					pwFirst = "";
 					pwSecond = "";
+					firstInput = false;
 					LoginMainUI.setInstanceNull();
 //					current.getParent().dispose();			
 //					EntryPoint.entry(progressBar);
-					progressBar.setVisible(true);					
-					EntryPoint.entry(progressBar, current.getParent());	
 					
+					if(!Utils.getStatus() && getWhileChanging()){//in login ui, we reset pw
+						progressBar.setVisible(true);					
+						EntryPoint.entry(progressBar, current.getParent());
+					}else{//in unlock ui, we reset ow
+						current.getParent().dispose();		
+						Utils.changeStatus();//be false again
+						//show the progress bar here to identify the progress 
+						//TODO:
+//						progressBar.setVisible(true);
+//						progressBar.setSelection(5);
+						MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());						
+						shell.setActive();
+//						System.out.println("shell is null: " + (shell==null));
+						shell.setVisible(true);
+					}
+					
+					
+					setWhileChanging(false);//if reset, then, reset is false
 				}
 			}
 		}
@@ -353,6 +381,7 @@ public class LoginContentPart extends ContentPart{
 //				this.first = true;
 				setFirst(true);
 				setResetPW(true);
+				setWhileChanging(true);
 				lbl_tips.setText("重置密码，请您输入旧密码");
 				counter = 1;
 				pwFirst = "";
@@ -385,7 +414,7 @@ public class LoginContentPart extends ContentPart{
 			reset.setVisible(false);//
 		}else if(pw.equals("-2")){
 			this.wrongcase = true;
-			lbl_tips.setText("请联系客服");
+			lbl_tips.setText("验证文件损毁，请联系客服");
 			reset.setVisible(false);
 		}else{
 			reset.setVisible(true);

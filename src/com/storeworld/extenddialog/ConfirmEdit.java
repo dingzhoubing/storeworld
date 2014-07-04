@@ -10,7 +10,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.storeworld.database.PasswordHandler;
 import com.storeworld.utils.Utils;
+
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.DisposeEvent;
 
@@ -95,7 +97,7 @@ public class ConfirmEdit extends Dialog {
 	}
 
 	private void authCheck(){
-		if(pw.equals("1234")){
+		if(pw.equals(PasswordHandler.getPassword())){
 			auth_right = true;
 		}
 	}

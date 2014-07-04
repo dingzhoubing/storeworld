@@ -1,5 +1,6 @@
 package com.storeworld.product;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -16,6 +17,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.mysql.jdbc.Connection;
+import com.storeworld.database.BaseAction;
 import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
@@ -36,7 +39,7 @@ public class ProductButtonCellEditor extends CellEditor {
     protected ProductList productlist;
     protected int rowHeight = 0;
     private static GoodsInfoService goodsinfo = new GoodsInfoService();
-    
+    private static BaseAction baseAction = new BaseAction();
     public ProductButtonCellEditor() {
         setStyle(0);
     }
@@ -77,10 +80,50 @@ public class ProductButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Product p = (Product)(table.getItem(index).getData());	
 						
+						Connection conn=null;
+						try {
+							conn = baseAction.getConnection();
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库失败");
+							mbox.open();
+							return;
+						}
+						ReturnObject ret = null;
+						try{
 						//we query if we met some blank item
-						ReturnObject ret = goodsinfo.queryProductInfoByID(p.getID());
+							conn.setAutoCommit(false);
+							ret = goodsinfo.queryProductInfoByID(conn, p.getID());
+							conn.commit();
+						}catch(Exception e2){
+							try {
+								conn.rollback();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
+							}
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("数据库异常");
+							mbox.open();
+							return;
+						}finally{
+							try {
+								conn.close();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
+							}
+						}
 						Pagination page = (Pagination) ret.getReturnDTO();
 						List<Object> list = page.getItems();
+						if(list.size() < 0){
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("未知错误");
+							mbox.open();
+							return;
+						}
 						GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(0);
 						String old_brand = cDTO.getBrand();
 						String old_sub = cDTO.getSub_brand();
@@ -89,10 +132,16 @@ public class ProductButtonCellEditor extends CellEditor {
 						String old_repo = cDTO.getRepertory();
 						
 						MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK|SWT.CANCEL);
-				    	messageBox.setMessage(String.format("品牌:%s， 子品牌:%s, 规格:%s 将不在统计中出现，同时将不出现于进货，送货表中，确定删除？",
-				    			old_brand, old_sub, old_size));		    		    	
+				    	messageBox.setMessage(String.format("品牌:%s， 子品牌:%s 将不在统计中出现，同时将不出现于进货，送货表中，确定删除？",old_brand, old_sub));//, 规格:%s, old_size	    		    	
 				    	if (messageBox.open() == SWT.OK){ 
-				    		productlist.removeProduct(p);
+				    		try {
+								productlist.removeProduct(p);
+							} catch (Exception e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("删除产品失败，请重试");
+								mbox.open();
+								return;
+							}
 				    		button.setVisible(false);
 				    		Utils.refreshTable(table);																			 
 				    		break;

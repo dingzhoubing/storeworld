@@ -3,8 +3,11 @@ package com.storeworld.printer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
+import com.storeworld.customer.Customer;
 import com.storeworld.deliver.Deliver;
+import com.storeworld.product.Product;
 
 public class PrintHandler {
 	
@@ -14,13 +17,30 @@ public class PrintHandler {
 	private String indeed_val = "";
 	private static DecimalFormat df = new DecimalFormat("0.00");
 	private String ordernum = "";
+	private Connection conn;
+	private String historyIndeed = "";
+	private ArrayList<Product> products = new ArrayList<Product>();
+	private ArrayList<Customer> customers = new ArrayList<Customer>();
 	
-	public PrintHandler(ArrayList<DataInTable> ds, boolean type, String indeed, String ordernum){
+	public PrintHandler(Connection conn, ArrayList<DataInTable> ds, boolean type, String indeed, String ordernum){
 		this.dataset.clear();
 		this.dataset.addAll(ds);
 		this.indeed_val = indeed;		
 		this.type = type;		
 		this.ordernum = ordernum;
+		this.conn = conn;
+	}
+	
+	public void setHistoryIndeed(String indeed){
+		this.historyIndeed = indeed;
+	}
+	
+	public void setProductsChanged(ArrayList<Product> products){
+		this.products = products;
+	}
+	
+	public void setCustomersChanged(ArrayList<Customer> customers){
+		this.customers = customers;
 	}
 	
 	public void doPrint(){
@@ -48,14 +68,22 @@ public class PrintHandler {
 			temp.add(dataset.get(i));
 			//a list contains 7 elements
 			if((counter%7)==0){
-				Thread td = new Thread(new Print(temp, (int)(counter/7), part, total_str, indeed_str, type, ordernum));
+				Print p = new Print(temp, (int)(counter/7), part, total_str, indeed_str, type, ordernum, conn);
+				p.setHistoryIndeed(historyIndeed);//even if change multi-times, still right!
+				p.setProductsChanged(products);
+				p.setCustomersChanged(customers);
+				Thread td = new Thread(p);
 				td.start();
 				temp.clear();
 			}
 		}
 		//still need one table
 		if(!temp.isEmpty()){
-			Thread td = new Thread(new Print(temp, part, part, total_str, indeed_str, type, ordernum));
+			Print p = new Print(temp, part, part, total_str, indeed_str, type, ordernum, conn);
+			p.setHistoryIndeed(historyIndeed);
+			p.setProductsChanged(products);
+			p.setCustomersChanged(customers);
+			Thread td = new Thread(p);
 			td.start();			
 		}
 

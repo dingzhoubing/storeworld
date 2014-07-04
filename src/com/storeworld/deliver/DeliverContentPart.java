@@ -1,5 +1,6 @@
 package com.storeworld.deliver;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,17 +35,19 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.jfree.data.KeyedValue;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.NumberConverter;
+import com.storeworld.customer.Customer;
 import com.storeworld.customer.CustomerContentPart;
+import com.storeworld.customer.CustomerList;
+import com.storeworld.database.BaseAction;
 import com.storeworld.extenddialog.ConfirmEdit;
 import com.storeworld.extenddialog.IndeedKeyBoard;
 import com.storeworld.extenddialog.SoftKeyBoard;
@@ -55,6 +58,9 @@ import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.printer.PrintHandler;
+import com.storeworld.product.Product;
+import com.storeworld.product.ProductCellModifier;
+import com.storeworld.product.ProductUtils;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.returndeliver.ReturnComposite;
@@ -132,13 +138,17 @@ public class DeliverContentPart extends ContentPart{
 	private static DateTime dateTime = null;
 	private static DateTime dateTime2 = null;
 	
-	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+//	private static Pattern pattern_indeed_val = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
+	private static Pattern pattern_indeed_val = Pattern.compile("^([1-9][0-9]*(\\.[0-9]{1,2})?|0\\.(?!0+$)[0-9]{1,2})$");
 	private static DecimalFormat df = new DecimalFormat("0.00");
 	private static ReturnComposite composite_return = null;
 	private static ArrayList<Integer> tpShift = new ArrayList<Integer>();
 	private static Button button_swkb = null;
 	private static CCombo area = null;
 	private static CCombo cus = null;
+	private static final BaseAction baseAction =  new BaseAction();
+	private static ArrayList<Product> products = new ArrayList<Product>();
+	private static final DeliverInfoService deliverinfo = new DeliverInfoService();
 	
 	public static ArrayList<Integer> getTpShift(){
 		return tpShift;
@@ -215,10 +225,30 @@ public class DeliverContentPart extends ContentPart{
 		table.setEnabled(true);
 	}
 	
+	public static void afterPrintFinished(){
+		table.clearAll();
+		table.removeAll();					
+		DeliverList.removeAllDelivers();
+		clearContent();
+		disableEditContent();	
+		DeliverUtils.setTime("");
+		
+		total_val.setText("");
+		total_big.setText("");
+		btn_edit.setVisible(false);
+		btn_return.setVisible(false);
+		//show the save button?
+		btn_save.setVisible(true);
+	}
+	
+	
+	
 	public static void disableEditContent(){
 		//clear the context 
+		gc.clearSelection();
+		gcName.clearSelection();
 		gc.setText("");
-		gcName.setText("");
+		gcName.setText("");//??
 		text_phone.setText("");
 		text_address.setText("");
 		text_serial.setText("");
@@ -327,7 +357,7 @@ public class DeliverContentPart extends ContentPart{
 	}
 	
 	
-	public static void doSearch(){
+	public static void doSearch() throws Exception{
 		if (DeliverUtils.getDetailTimer()) {//dateTime.isVisible()
 			String year = String.valueOf(dateTime.getYear());
 			int mon = dateTime.getMonth() + 1;
@@ -340,7 +370,11 @@ public class DeliverContentPart extends ContentPart{
 				day = "0" + day;
 			// date to search
 			String dateSearch = year + month + day;
-			DeliverUtils.showSearchHistory(dateSearch, "", "");
+			try {
+				DeliverUtils.showSearchHistory(dateSearch, "", "");
+			} catch (Exception e) {
+				throw e;
+			}
 		}else{
 			String year = String.valueOf(dateTime2.getYear());
 			int mon = dateTime2.getMonth() + 1;
@@ -351,7 +385,11 @@ public class DeliverContentPart extends ContentPart{
 			String dateSearch = year + month;
 			String str_area = area.getText();
 			String str_cus = cus.getText();
-			DeliverUtils.showSearchHistory(dateSearch, str_area, str_cus);
+			try {
+				DeliverUtils.showSearchHistory(dateSearch, str_area, str_cus);
+			} catch (Exception e) {
+				throw e;
+			}
 		}
 	} 
 	
@@ -403,32 +441,16 @@ public class DeliverContentPart extends ContentPart{
 							editorEdit.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
 							Text text = (Text)(editorEdit.getEditor());	
 							callKeyBoard(text);
-							Deliver c = (Deliver)(table.getItem(rowCurrent).getData());	
+							
 							if(colCurrent == priceColumn){
-								String pricelast = c.getPrice();
 								if(Utils.getClickButton() && Utils.getInputNeedChange()){
-									c.setPrice(Utils.getInput());
-									text.setText(c.getPrice());//validate the text
-									if(DeliverValidator.validatePrice(c.getPrice())) 
-									{
-										deliverlist.deliverChanged(c);	
-									}else{
-										c.setPrice(pricelast);
-									}
+									DeliverCellModifier.staticModify(table.getItem(rowCurrent), "price", Utils.getInput());
 									//initial the next click
 									Utils.setClickButton(false);
 								}
 							}else if(colCurrent == numberColumn){
-								String numberlast = c.getNumber();
 								if(Utils.getClickButton() && Utils.getInputNeedChange()){
-									c.setNumber(Utils.getInput());
-									text.setText(c.getNumber());//validate the text
-									if(DeliverValidator.validateNumber(c.getNumber()))//table, table.getItem(rowCurrent), colCurrent, 
-									{
-										deliverlist.deliverChanged(c);	
-									}else{
-										c.setNumber(numberlast);
-									}
+									DeliverCellModifier.staticModify(table.getItem(rowCurrent), "number", Utils.getInput());
 									//initial the next click
 									Utils.setClickButton(false);
 								}
@@ -456,8 +478,7 @@ public class DeliverContentPart extends ContentPart{
 						String current_brand = c.getBrand();
 						if( current_brand == null ||current_brand.equals("") || !Utils.checkBrand(current_brand)){
 							combo.removeAll();
-							c.setSubBrand("");
-							deliverlist.deliverChanged(c);	
+							DeliverCellModifier.staticModify(table.getItem(rowCurrent), "sub_brand", "");	
 						}else{
 							List<String> list = Utils.getSub_Brands(current_brand);
 							//set data into objects
@@ -465,27 +486,7 @@ public class DeliverContentPart extends ContentPart{
 							combo.setItems(list.toArray(new String[list.size()]));
 						}
 					}
-//					else if(colCurrent == sizeColumn){
-//						editorCombo.setEditor(cellEditor[colCurrent].getControl(), table.getItem(rowCurrent), colCurrent);
-//						GeneralCCombo combo = (GeneralCCombo)(editorCombo.getEditor());	
-//						Deliver c = (Deliver)(table.getItem(rowCurrent).getData());
-//						String current_brand = c.getBrand();
-//						String current_sub = c.getSubBrand();
-//						//all this will make the size column with empty
-//						if(current_brand == null || current_brand.equals("") || current_sub==null || current_sub.equals("")
-//								|| !Utils.checkBrand(current_brand) || !Utils.checkSubBrand(current_sub)){
-//							combo.removeAll();
-//							c.setSize("");
-//							deliverlist.deliverChanged(c);	
-//						}else{
-//							//query the database to get the available size
-//							List<String> list = Utils.getSizes(current_brand, current_sub);
-//							//set data into objects
-//							comboboxCellEditor3.setObjects(list);
-//							combo.setItems(list.toArray(new String[list.size()]));
-//						}
-//													
-//					}
+
 					else if(colCurrent == deleteButtonColumn){
 						if(rowCurrent == table.getItemCount()-1){
 							editor.setEditor(cellEditor[deleteButtonColumn].getControl(), table.getItem(rowCurrent), deleteButtonColumn);
@@ -540,13 +541,25 @@ public class DeliverContentPart extends ContentPart{
 	
 	/**
 	 * when update the product table we reset the deliver table
+	 * @throws Exception 
 	 */
-	public static void reNewDeliver(){	
+	public static void reNewDeliver() throws Exception{	
+		
+		try {
+			DeliverUtils.setOrderNumber();
+		} catch (Exception e) {
+//			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+//			mbox.setMessage("重置送货单号失败，请重试");
+//			mbox.open();
+//			return;
+			throw e;
+		}
+	
+		
 		DeliverUtils.setStatus("NEW");
 		DeliverUtils.leaveEditMode();
 		DeliverUtils.leaveReturnMode();
-		DeliverUtils.setOrderNumber();//set the order number for the deliver table
-	
+
 		clearContent();
 		enableEditContent();
 		DeliverUtils.setTime(null);					
@@ -570,8 +583,9 @@ public class DeliverContentPart extends ContentPart{
 	
 	/**
 	 * re-search the the history
+	 * @throws Exception 
 	 */
-	public static void reNewDeliverHistory(){
+	public static void reNewDeliverHistory() throws Exception{
 		doSearch();
 	}
 	
@@ -579,20 +593,20 @@ public class DeliverContentPart extends ContentPart{
 	 * initialize the table elements
 	 */
 	public void initialization(){
-		final int w = current.getBounds().width;
-		final int h = current.getBounds().height;
+		final int w = current.getBounds().width;//960
+		final int h = current.getBounds().height;//570
 		composite.setBounds(0, 0, w, h);
 		
 		//left side navigate
 		final Composite composite_left = new Composite(composite, SWT.NONE);
 		final Color base = new Color(composite.getDisplay(), 0xed, 0xf4, 0xfa);
 		composite_left.setBackground(base);
-		composite_left.setBounds(0, 0, 200, h);
+		composite_left.setBounds(0, 0, 200, 570);
 		 
 	    //right part		
 		Composite composite_right  = new Composite(composite, SWT.NONE);
 		composite_right.setBackground(new Color(composite.getDisplay(), 255, 250, 250));
-		composite_right.setBounds(200, 0, 760, h);
+		composite_right.setBounds(200, 0, 760, 570);
 		composite_shift = 200;
 		
 		//define a table
@@ -604,17 +618,35 @@ public class DeliverContentPart extends ContentPart{
 			@Override
         	public void widgetSelected(SelectionEvent e) {
 				
+					ArrayList<Product> products_changed = new ArrayList<Product>();
 					//if there are items in the table, we need to delete the info from the database
 					if(DeliverUtils.getStatus().equals("NEW") && !text_serial.getText().equals("")){
 						if(DeliverList.getDelivers().size() > 1){
-							DeliverList.deleteDeliversUseLess(getOrderNumber());							
+							try {
+								products_changed = DeliverList.deleteDeliversUseLess(getOrderNumber());
+							} catch (Exception e1) {								
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+								mbox.setMessage("删除废弃送货信息失败");
+								mbox.open();
+								return;
+							}							
 						}						
 					}
-				
+					try {
+						DeliverUtils.setOrderNumber();//set the order number for the deliver table
+					} catch (Exception e1) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+						mbox.setMessage("计算单号失败，请重试");
+						mbox.open();	
+						return;
+					}
+					//update the product table UI side
+					DeliverList.relatedProductChange(products_changed, false);
+					
 					DeliverUtils.setStatus("NEW");
 					DeliverUtils.leaveEditMode();
 					DeliverUtils.leaveReturnMode();
-					DeliverUtils.setOrderNumber();//set the order number for the deliver table
+
 				
 					clearContent();
 					enableEditContent();
@@ -768,7 +800,13 @@ public class DeliverContentPart extends ContentPart{
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {				
-				doSearch();
+				try {
+					doSearch();
+				} catch (Exception e1) {
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+					mbox.setMessage("搜索历史记录失败，请重试");
+					mbox.open();	
+				}
 			}
 		});
 		
@@ -823,14 +861,24 @@ public class DeliverContentPart extends ContentPart{
 		btn_delete.addSelectionListener(new SelectionAdapter() {
 			@Override
         	public void widgetSelected(SelectionEvent e) {
+				
+				//remove current history from database
+				try {
+					DeliverList.removeCurrentHistory();
+				} catch (Exception e1) {
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+					mbox.setMessage("删除送货信息失败");
+					mbox.open();	
+					return;
+				}
+				
 //				//first leave the edit mode, avoid update the table
 				DeliverUtils.leaveEditMode();
 				DeliverUtils.leaveReturnMode();
 				//clear table
 				table.removeAll();
 				DeliverList.removeAllDelivers();
-				//remove current history from database
-				DeliverList.removeCurrentHistory();
+
 				//will not show delete button anymore
 				btn_delete.setVisible(false);
 				DeliverUtils.setStatus("NEW");
@@ -911,7 +959,7 @@ public class DeliverContentPart extends ContentPart{
 			}
 		});
 		
-		composite_updown = (int)(h/3);//wait for adjust
+		composite_updown = 190;//wait for adjust
 		//area
 		Label lbl_area = new Label(composite_right, SWT.CENTER|SWT.NONE);
 		lbl_area.setFont(SWTResourceManager.getFont("微软雅黑", 10, SWT.NORMAL));
@@ -982,13 +1030,25 @@ public class DeliverContentPart extends ContentPart{
         	public void widgetSelected(SelectionEvent e) {
 				String area = gc.getText();
 				String name = gcName.getText();
+				Connection conn=null;
+				try {
+					conn = baseAction.getConnection();
+				} catch (Exception e1) {
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("连接数据库失败");
+					mbox.open();
+					return;
+				}
+				
 				try {
 					//		
 					CustomerInfoService cusinfo = new CustomerInfoService();		
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("customer_area", area);
 					map.put("customer_name", name);
-					ReturnObject ret = cusinfo.queryCustomerInfo(map);
+					conn.setAutoCommit(false);
+					ReturnObject ret = cusinfo.queryCustomerInfo(conn, map);
+					conn.commit();
 					Pagination page = (Pagination) ret.getReturnDTO();
 					List<Object> list = page.getItems();
 					if(list.size() > 0){
@@ -998,6 +1058,21 @@ public class DeliverContentPart extends ContentPart{
 					}					
 				} catch (Exception ex) {
 					System.out.println("get customer names of a specfied area & name failed");
+					try {
+						conn.rollback();
+					} catch (SQLException e1) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("连接数据库异常");
+						mbox.open();
+					}
+				}finally{
+					try {
+						conn.close();
+					} catch (SQLException e1) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("连接数据库异常");
+						mbox.open();
+					}
 				}
 				
 			}
@@ -1180,9 +1255,16 @@ public class DeliverContentPart extends ContentPart{
 						indeed_big.setText(NumberConverter.getInstance().number2CNMontrayUnit(format_str));
 						
 						indeed_val.setEnabled(false);
-						//update the database
-						if(!indeed_val.getText().equals(total_val.getText()))
-							DeliverList.updateDeliversByOrderNumber(DeliverUtils.getOrderNumber(), indeed_val.getText());
+						//update the database, only when not in return mode
+						if(!indeed_val.getText().equals(total_val.getText()) && !DeliverUtils.getReturnMode()){
+							try {
+								DeliverList.updateDeliversByOrderNumber(DeliverUtils.getOrderNumber(), indeed_val.getText());
+							} catch (Exception e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+								mbox.setMessage("更新送货表实付款失败");
+								mbox.open();	
+							}
+						}
 						if(DeliverUtils.getEditMode() && DeliverUtils.getStatus().equals("HISTORY")){
 							//update the history panel
 							DeliverUtils.getItemCompositeRecord().setDownRight(indeed_val.getText());
@@ -1225,10 +1307,25 @@ public class DeliverContentPart extends ContentPart{
 					ds.clear();
 					//2. update the deliver table
 					ArrayList<ReturnItemComposite> items = ReturnComposite.getReturnItems();
+					String indeed_u = "";
+					
+					Connection conn=null;
+					try {
+						conn = baseAction.getConnection();
+					} catch (Exception e3) {
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("连接数据库失败");
+						mbox.open();
+					}
+					DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
+					boolean existReturn = false;
+					try{
+					conn.setAutoCommit(false);
 					for(int i=0;i<items.size();i++){
 						ReturnItemComposite rc = items.get(i);
 						//the number has to be changed, we update the database
 						if(rc.getCheck() && !rc.getReturnNumber().equals("0")){
+							existReturn = true;
 							Map<String, Object> common = new HashMap<String ,Object>();
 							Map<String, Object> st = new HashMap<String ,Object>();
 							st.put("id", rc.getID());
@@ -1243,46 +1340,82 @@ public class DeliverContentPart extends ContentPart{
 							int deli = Integer.valueOf(rc.getDeliverNumber());
 							int ret = Integer.valueOf(rc.getReturnNumber());
 							st.put("quantity", (deli-ret));
-							DeliverInfoService deliverinfo = new DeliverInfoService();	
 
+							DeliverInfoService deliverinfo = new DeliverInfoService();	
+							products.clear();
+							Product prec = null;
 							if((deli-ret) == 0){
-								try {									
-									deliverinfo.deleteDeliverInfoAndUpdateGoods(Integer.valueOf(rc.getID()), d);//deleteDeliverInfo
-								} catch (Exception e1) {
-									System.out.println("remove the deliver failed");
-								}
-							}else{
-							try {
-								deliverinfo.updateDeliverInfo(rc.getID(),st, "return");		
-								} catch (Exception e1) {
-									System.out.println("update deliver failed");
-								}
+								prec = deliverinfo.deleteDeliverInfoAndUpdateGoods(conn, Integer.valueOf(rc.getID()), d);//deleteDeliverInfo
+								if(prec!=null)
+									products.add(prec);
+							}else{							
+								deliverinfo.updateDeliverInfo(conn, rc.getID(),st, "return", products);									
 							}
 						}
-					}
-							    	
-					String indeed_minus = indeed_val.getText();
-					DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
-					String indeed_old = dh.getIndeed();
-					String indeed_u = df.format(Double.valueOf(indeed_old) - Double.valueOf(indeed_minus));
-					try {
-						DeliverInfoService deliverinfo = new DeliverInfoService();	
-						deliverinfo.updateDeliversIndeedByOrderNumber(DeliverUtils.getOrderNumber(), indeed_u);
-					} catch (Exception e1) {
-						System.out.println("remove the deliver failed");
+					}					
+					if(!existReturn){
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("未选择退货商品！");
+						mbox.open();
+						return;
 					}
 					
+					
+					String indeed_minus = indeed_val.getText();
+					
+					String indeed_old = dh.getValueShow();//getIndeed();
+					indeed_u = df.format(Double.valueOf(indeed_old) - Double.valueOf(indeed_minus));
+					deliverinfo.updateDeliversIndeedByOrderNumber(conn, DeliverUtils.getOrderNumber(), indeed_u);
+//					conn.commit();
 			    	
 					//how to get the indeed value
-					PrintHandler ph = new PrintHandler(ds, true, indeed_val.getText(), "");
+					PrintHandler ph = new PrintHandler(conn, ds, true, indeed_val.getText(), "");
+					ph.setHistoryIndeed(indeed_u);
+					ph.setProductsChanged(products);
+					
 					ph.doPrint();
 					
-					DeliverUtils.leaveReturnMode();
-//					doSearch();
-					DeliverUtils.getItemCompositeRecord().setDownRight(indeed_u);
-					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-					mbox.setMessage("退货成功");
-					mbox.open();
+					
+					} catch (Exception e1) {
+						System.out.println("remove the deliver failed");
+						try {
+							conn.rollback();
+						} catch (SQLException e2) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("数据库异常");
+							mbox.open();
+						}
+						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+						mbox.setMessage("退货失败， 请重试");
+						mbox.open();
+						return;
+					}finally{
+						try {
+							conn.close();
+						} catch (SQLException e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("数据库异常");
+							mbox.open();
+						}
+					}
+//					//after return, show this
+//					dh.setIndeed(indeed_u);//this is needed
+//					DeliverUtils.getItemCompositeRecord().setDownRight(indeed_u);
+//					//change the product table ui side
+//					DeliverList.relatedProductChange(products, true);					
+					
+//			    	
+//					//how to get the indeed value
+//					PrintHandler ph = new PrintHandler(conn, ds, true, indeed_val.getText(), "");
+//					ph.doPrint();
+					
+					//put this after the print is succeed?
+//					DeliverUtils.leaveReturnMode();
+//					
+//					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+//					mbox.setMessage("退货成功");
+//					mbox.open();
+					
 					
 				}else{
 				//not return mode
@@ -1290,7 +1423,7 @@ public class DeliverContentPart extends ContentPart{
 					//check if all the deliver items are complete
 					for(int i=0; i< DeliverList.getDelivers().size()-1;i++){
 						Deliver d = (Deliver)DeliverList.getDelivers().get(i);
-						if(!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))){
+						if(!(DeliverValidator.rowLegal2(d) && DeliverValidator.rowComplete(d))){
 							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 							mbox.setMessage(String.format("第 %d 条送货信息不全", i+1));
 							mbox.open();
@@ -1301,17 +1434,14 @@ public class DeliverContentPart extends ContentPart{
 					//check area & name, if both are not empty, add to history, or popup an message box
 					if(!gc.getText().equals("") && !gcName.getText().equals("")){
 						
-						if(DeliverUtils.getStatus().equals("NEW")){
-							DeliverUtils.addToHistory();
+						Connection conn = null;
+						try {
+							conn = baseAction.getConnection();
+						} catch (Exception e2) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库失败");
+							mbox.open();
 						}
-						
-						ArrayList<DataInTable> ds = new ArrayList<DataInTable>();
-						ds.clear();
-						//the last one will not print
-						ds.addAll(DeliverList.getDelivers().subList(0, DeliverList.getDelivers().size()-1));
-						//how to get the indeed value
-						PrintHandler ph = new PrintHandler(ds, false, indeed_val.getText(), DeliverUtils.getOrderNumber());
-						ph.doPrint();
 						
 						//step 1: add the deliver common info into database
 						DeliverInfoService deliverinfo = new DeliverInfoService();
@@ -1322,36 +1452,73 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("deliver_addr", text_address.getText());
 						commonMap.put("deliver_time", DeliverUtils.getTime());
 						commonMap.put("telephone", text_phone.getText());
+						ArrayList<Customer> customers = new ArrayList<Customer>();
+						try{
 						if(DeliverUtils.getStatus().equals("NEW")){
-							deliverinfo.printSaveCommonInfo(commonMap);
+							deliverinfo.printSaveCommonInfo(conn, commonMap, customers);
 						}else{//update
 							if(DeliverUtils.getEditMode()){
+								deliverinfo.updateCommonInfo(conn, commonMap, customers);							
+							}
+						}			
+						ArrayList<DataInTable> ds = new ArrayList<DataInTable>();
+						ds.clear();
+						//the last one will not print
+						ds.addAll(DeliverList.getDelivers().subList(0, DeliverList.getDelivers().size()-1));
+						//how to get the indeed value
+						PrintHandler ph = new PrintHandler(conn, ds, false, indeed_val.getText(), DeliverUtils.getOrderNumber());
+						ph.setCustomersChanged(customers);
+						ph.doPrint();
+												
+//						conn.commit();
+						} catch (Exception e1) {
+							System.out.println("update common info failed");
 							try {
-								deliverinfo.updateCommonInfo(commonMap);
-							} catch (Exception e1) {
-								System.out.println("update common info failed");
+								conn.rollback();
+							} catch (SQLException e2) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
 							}
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("打单出错，请重试");
+							mbox.open();
+							return;
+						}finally{
+							try {
+								conn.close();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
 							}
-						}						
-						//status: NEW, HISTORY, EMPTY, empty mode is necessary?
-						DeliverUtils.setStatus("EMPTY");
-						
-						//step 2: initial the deliver page
-						//clear table
-						//and add a new line					
-						table.clearAll();
-						table.removeAll();					
-						DeliverList.removeAllDelivers();
-						clearContent();
-						disableEditContent();	
-						DeliverUtils.setTime("");
-						
-						total_val.setText("");
-						total_big.setText("");
-						btn_edit.setVisible(false);
-						btn_return.setVisible(false);
-						//show the save button?
-						btn_save.setVisible(true);
+						}
+//						//update the customer table
+//						CustomerList.relatedCustomerChange(customers);
+//						
+//						if(DeliverUtils.getStatus().equals("NEW")){
+//							DeliverUtils.addToHistory();
+//						}
+//						
+//						//status: NEW, HISTORY, EMPTY, empty mode is necessary?
+//						DeliverUtils.setStatus("EMPTY");
+//						
+//						//step 2: initial the deliver page
+//						//clear table
+//						//and add a new line					
+//						table.clearAll();
+//						table.removeAll();					
+//						DeliverList.removeAllDelivers();
+//						clearContent();
+//						disableEditContent();	
+//						DeliverUtils.setTime("");
+//						
+//						total_val.setText("");
+//						total_big.setText("");
+//						btn_edit.setVisible(false);
+//						btn_return.setVisible(false);
+//						//show the save button?
+//						btn_save.setVisible(true);
 					}else{
 						MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 						mbox.setMessage("收货人片区和姓名需填写完整");
@@ -1373,7 +1540,7 @@ public class DeliverContentPart extends ContentPart{
 				if (DeliverList.getDelivers().size() > 1) {
 					for (int i = 0; i < DeliverList.getDelivers().size() - 1; i++) {
 						Deliver d = (Deliver) DeliverList.getDelivers().get(i);
-						if (!(DeliverValidator.rowLegal(d) && DeliverValidator.rowComplete(d))) {
+						if (!(DeliverValidator.rowLegal2(d) && DeliverValidator.rowComplete(d))) {
 							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 							mbox.setMessage(String.format("第 %d 条送货信息不全", i + 1));
 							mbox.open();
@@ -1385,9 +1552,16 @@ public class DeliverContentPart extends ContentPart{
 					// or popup an message box
 					if (!gc.getText().equals("")&& !gcName.getText().equals("")) {
 
-						if (DeliverUtils.getStatus().equals("NEW")) {
-							DeliverUtils.addToHistory();
+						Connection conn = null;
+						try {
+							conn = baseAction.getConnection();
+						} catch (Exception e2) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("连接数据库失败");
+							mbox.open();
 						}
+						
+						
 						// step 1: add the deliver common info into database
 						DeliverInfoService deliverinfo = new DeliverInfoService();
 						Map<String, Object> commonMap = new HashMap<String, Object>();
@@ -1397,19 +1571,48 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("deliver_addr", text_address.getText());
 						commonMap.put("deliver_time", DeliverUtils.getTime());
 						commonMap.put("telephone", text_phone.getText());
+						
+						ArrayList<Customer> customers = new ArrayList<Customer>();
 						// if already exist, update it
+						try{
+							conn.setAutoCommit(false);
 						if (DeliverUtils.getStatus().equals("NEW")) {
-							deliverinfo.printSaveCommonInfo(commonMap);
+							deliverinfo.printSaveCommonInfo(conn, commonMap, customers);
 						} else {// update
 							if (DeliverUtils.getEditMode()) {
-								try {
-									deliverinfo.updateCommonInfo(commonMap);
-								} catch (Exception e1) {
-									System.out.println("update common info failed");
-								}
+								deliverinfo.updateCommonInfo(conn, commonMap, customers);								
 							}
 						}
-
+						conn.commit();
+						} catch (Exception e1) {
+							System.out.println("update common info failed");
+							try {
+								conn.rollback();
+							} catch (SQLException e2) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
+							}
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("保存送货信息失败");
+							mbox.open();
+							return;
+						}finally{
+							try {
+								conn.close();
+							} catch (SQLException e1) {
+								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+								mbox.setMessage("数据库异常");
+								mbox.open();
+							}
+						}
+						//update the customer UI table
+						CustomerList.relatedCustomerChange(customers);
+						
+						if (DeliverUtils.getStatus().equals("NEW")) {
+							DeliverUtils.addToHistory();
+						}
+						
 						// status: NEW, HISTORY, EMPTY
 						DeliverUtils.setStatus("EMPTY");
 						// step 2: initial the deliver page

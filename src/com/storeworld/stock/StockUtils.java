@@ -1,5 +1,6 @@
 package com.storeworld.stock;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,8 +14,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
+import com.storeworld.database.BaseAction;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pojo.dto.StockInfoDTO;
@@ -25,7 +31,7 @@ import com.storeworld.utils.Utils;
 public class StockUtils {
 	
 	//record the new line id 
-	private static String newLineID = "";
+	private static String newLineID = "-1";//if getNewLineID is -1, means we need to restart?
 	
 	//if click brand, record current line
 	private static int currentBrandLine=0;
@@ -54,7 +60,10 @@ public class StockUtils {
 	private static boolean editMode = false;
 	//current status, NEW, HISTORY
 	private static String status = "";
+	//record if the size or unit changed
+	private static boolean sizeUnitChanged = false;
 	
+	private static BaseAction baseAction = new BaseAction();
 		
 	/**
 	 * 1. if add a new stock record, time_record = ""
@@ -129,9 +138,9 @@ public class StockUtils {
 	 * update history, the stocks contains the empty one
 	 * so: we use stocks.size()-2 to ignore the last one
 	 * @param stocks
+	 * @throws Exception 
 	 */
-	public static void updateHistory(ArrayList<DataInTable> stocks){
-		
+	public static void updateHistory(ArrayList<DataInTable> stocks) {
 		String title = "";
 		double total = 0.00;
 		String time_tmp = "";
@@ -144,7 +153,8 @@ public class StockUtils {
 			double p = Double.valueOf(price);
 			int n = Integer.valueOf(number);
 			total+=(p * n);	
-		}
+		}		
+
 		if (stocks.size() < 2) {
 			String time = StockContentPart.getStockTimer();
 			String time_show = "";
@@ -176,8 +186,7 @@ public class StockUtils {
 			ic_record.setValue(shis.getTitle(), shis.getTimeShow(),
 					shis.getValueShow());
 			
-			//update the stock by time, and set the indeed value back to the same as total
-			StockList.updateStocksByTime(time_tmp, "");
+
 		}
 	}
 	
@@ -200,8 +209,9 @@ public class StockUtils {
 		String indeed = StockContentPart.getIndeed().trim();
 		StockHistory his = new StockHistory(title,time_tmp,number, indeed);		
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
-		ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+		ic.setValue(his.getTitle(), his.getTimeShow(), his.getValueShow());
 		itemList.add(ic);
+		historyList.add(his);//??
 		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		composite_fn_record.layout();
@@ -272,13 +282,25 @@ public class StockUtils {
 	/**
 	 * the option to search the history, time threshold
 	 * @param option
+	 * @throws SQLException 
 	 */
-	private static void getHistoryFromDataBase(String option){
-		Map<String, Object> map = new HashMap<String ,Object>();
-		map.put("stock_time", option);
+	private static void getHistoryFromDataBase(String option) throws SQLException{
+//		Map<String, Object> map = new HashMap<String ,Object>();
+//		map.put("stock_time", option);
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
 		StockInfoService stockinfo = new StockInfoService();
 		try {
-			ReturnObject ret = stockinfo.queryStockInfoByDefaultStocktime(map);
+			conn.setAutoCommit(false);
+			ReturnObject ret = stockinfo.queryStockInfoByDefaultStocktime(conn, option);
+			conn.commit();
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
 			HashMap<String, ArrayList<Stock>> stocks = new HashMap<String, ArrayList<Stock>>(); 
@@ -295,7 +317,10 @@ public class StockUtils {
 			
 			addToHistory(stocks);			
 		} catch (Exception e) {
+			conn.rollback();
 			System.out.println("query the stocks by default time failed");
+		}finally{
+			conn.close();
 		}	
 	}
 	
@@ -327,7 +352,14 @@ public class StockUtils {
 			height_record = height;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 			String time_current = formatter.format(new Date());
-		    getHistoryFromDataBase(time_current);
+		    try {
+				getHistoryFromDataBase(time_current);
+			} catch (SQLException e) {
+				MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+				mbox.setMessage("查询当月进货记录失败");
+				mbox.open();
+				return;
+			}
 		
 		for (int i = 0; i < historyList.size(); i++) {
 			StockHistory his = historyList.get(i);
@@ -347,22 +379,26 @@ public class StockUtils {
 	/**
 	 * show history when user click the search button
 	 * @param dateSearch
+	 * @throws SQLException 
 	 */
-	public static void showSearchHistory(String dateSearch){
-		//remove the navigator panel, clear all the result
-		for(int i=0;i<itemList.size();i++)
-			itemList.get(i).dispose();
-		itemList.clear();
-		historyList.clear();		
-		//add search result
-		Map<String, Object> map = new HashMap<String ,Object>();
-		map.put("stock_time", dateSearch);
-		StockInfoService stockinfo = new StockInfoService();
+	public static void showSearchHistory(String dateSearch) throws SQLException{
+		HashMap<String, ArrayList<Stock>> stocks = new HashMap<String, ArrayList<Stock>>(); 
+		Connection conn;
 		try {
-			ReturnObject ret = stockinfo.queryStockInfoByInputStocktime(map);
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+		try {
+			conn.setAutoCommit(false);		
+			StockInfoService stockinfo = new StockInfoService();		
+			ReturnObject ret = stockinfo.queryStockInfoByInputStocktime(conn, dateSearch);
+			conn.commit();
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
-			HashMap<String, ArrayList<Stock>> stocks = new HashMap<String, ArrayList<Stock>>(); 
 			for(int i=0;i<list.size();i++){
 				StockInfoDTO cDTO_tmp = (StockInfoDTO) list.get(i);
 				Stock st_tmp = new Stock();
@@ -373,15 +409,26 @@ public class StockUtils {
 				st_tmp.setIndeed(cDTO_tmp.getReserve1());
 				addIntoStocks(st_tmp, stocks);
 			}						
-			//add into history
-			addToHistory(stocks);
+
 		} catch (Exception e) {
+			conn.rollback();
 			System.out.println("query the stocks by default time failed");
+		}finally{
+			conn.close();
 		}	
+		//remove the navigator panel, clear all the result
+		for(int i=0;i<itemList.size();i++)
+			itemList.get(i).dispose();
+		itemList.clear();
+		historyList.clear();	
+		
+		//add into history
+		addToHistory(stocks);
+		
 		for (int i = 0; i < historyList.size(); i++) {
 			StockHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
-			ic.setValue(his.getTitle(), his.getTimeShow(), his.getNumber());
+			ic.setValue(his.getTitle(), his.getTimeShow(), his.getValueShow());
 			itemList.add(ic);
 			composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT));
@@ -444,5 +491,11 @@ public class StockUtils {
 	public static String getCurrentSub_Brand(){
 		return current_sub_brand;
 	}
-		
+	
+	public static void setSizeUnitChanged(boolean change){
+		sizeUnitChanged = change;
+	}
+	public static boolean getSizeUnitChanged(){
+		return sizeUnitChanged;
+	}
 }

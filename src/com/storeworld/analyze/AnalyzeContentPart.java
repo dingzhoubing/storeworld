@@ -267,7 +267,10 @@ public class AnalyzeContentPart extends ContentPart{
 					ro.getMap().clear();
 					ro=statistic.startAnalyzing(args, monitor);
 				} catch (Exception e) {
-					e.printStackTrace();
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("分析数据失败，请重试");
+					mbox.open();
+					return;
 				}				
 				monitor.worked(100);  
 	            monitor.subTask("分析完成");
@@ -284,9 +287,15 @@ public class AnalyzeContentPart extends ContentPart{
 		    runnable/*线程所执行的具体代码*/  
 		    );  
 		} catch (InvocationTargetException e) {  
-		    e.printStackTrace();  
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("分析数据失败，请重试");
+			mbox.open();
+			return;
 		} catch (InterruptedException e) {  
-		    e.printStackTrace();  
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("分析数据失败，请重试");
+			mbox.open();
+			return;
 		}
 		
 		if(ro.getMap().isEmpty())
@@ -1037,8 +1046,15 @@ public class AnalyzeContentPart extends ContentPart{
         composite_content.layout();
 //      composite_scroll.layout();
         
-        DataCachePool.cacheProductInfo();
-        DataCachePool.cacheCustomerInfo();
+		try {
+			DataCachePool.cacheProductInfo();
+			 DataCachePool.cacheCustomerInfo();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库异常");
+			mbox.open();
+		}
+       
 
 	}
 }

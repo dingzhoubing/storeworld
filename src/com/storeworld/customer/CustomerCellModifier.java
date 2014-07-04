@@ -2,7 +2,12 @@ package com.storeworld.customer;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
+
+import com.storeworld.mainui.MainUI;
+import com.storeworld.stock.StockCellModifier;
 import com.storeworld.utils.Utils;
 
 /**
@@ -13,12 +18,23 @@ import com.storeworld.utils.Utils;
 public class CustomerCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static CustomerList customerlist;
-
+	private static CustomerCellModifier smodifier = null;
+	
 	public CustomerCellModifier(TableViewer tv_tmp, CustomerList customerlist_tmp) {
 		tv = tv_tmp;		
 		customerlist = customerlist_tmp;
 	}
 
+	private static CustomerCellModifier getInstance(){
+		if(smodifier == null){
+			smodifier = new CustomerCellModifier(tv, customerlist);
+			return smodifier;
+		}else{
+			//nothing
+			return smodifier;
+		}
+	}
+	
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
@@ -76,6 +92,10 @@ public class CustomerCellModifier implements ICellModifier {
 //		}
 	}
 	
+	public static void staticModify(Object element, String property, Object value){
+		getInstance().modify(element, property, value);
+	}
+
 	//when modify the table
 	public void modify(Object element, String property, Object value) {
 //		tip.setVisible(false);
@@ -177,7 +197,23 @@ public class CustomerCellModifier implements ICellModifier {
 				}
 			}
 			if (valid) {				
-				customerlist.customerChanged(c);
+				try {
+					customerlist.customerChanged(c);
+				} catch (Exception e) {
+					if (property.equals("name")) {					
+						c.setName(namelast);						
+					} else if (property.equals("area")) {						
+						c.setArea(arealast);						
+					} else if (property.equals("phone")) {						
+						c.setPhone(phonelast);						
+					} else if (property.equals("address")) {						
+						c.setAddress(addresslast);						
+					}
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("更新客户表失败，请重试");
+					mbox.open();
+//					return;
+				}
 				
 			}
 		}

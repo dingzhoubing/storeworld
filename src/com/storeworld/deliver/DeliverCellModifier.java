@@ -4,8 +4,12 @@ import java.text.DecimalFormat;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
+import com.storeworld.stock.StockCellModifier;
 import com.storeworld.utils.Utils;
 
 /**
@@ -17,12 +21,23 @@ public class DeliverCellModifier implements ICellModifier {
 	private static TableViewer tv;//just in case
 	private static DeliverList deliverlist;
 	private static DecimalFormat df = new DecimalFormat("#.00");
+	private static DeliverCellModifier smodifier = null;
 	
 	public DeliverCellModifier(TableViewer tv_tmp, DeliverList deliverlist_tmp) {
 		tv = tv_tmp;
 		deliverlist = deliverlist_tmp;
 	}
 
+	private static DeliverCellModifier getInstance(){
+		if(smodifier == null){
+			smodifier = new DeliverCellModifier(tv, deliverlist);
+			return smodifier;
+		}else{
+			//nothing
+			return smodifier;
+		}
+	}
+	
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
@@ -106,9 +121,15 @@ public class DeliverCellModifier implements ICellModifier {
 //		throw new RuntimeException("error column name : " + property);
 	}
 
+	public static void staticModify(Object element, String property, Object value){
+		getInstance().modify(element, property, value);
+	}
+	
 	//when modify the table
 	@Override
 	public void modify(Object element, String property, Object value) {
+		
+		DeliverUtils.setSizeUnitChanged(false);		
 		TableItem item = (TableItem) element;
 		Deliver s = (Deliver) item.getData();		
 		String brandlast = "";
@@ -235,11 +256,13 @@ public class DeliverCellModifier implements ICellModifier {
 				}
 
 			} else if (property.equals("size")) {
+				DeliverUtils.setSizeUnitChanged(true);
 				valid = DeliverValidator.validateSize(s.getSize());//tv.getTable(), item, 3, 
 				if (!valid) {
 					s.setSize(sizelast);
 				}
 			} else if (property.equals("unit")) {
+				DeliverUtils.setSizeUnitChanged(true);
 				valid = DeliverValidator.validateUnit(s.getUnit());//tv.getTable(), item, 4, 
 				if (!valid) {
 					s.setUnit(unitlast);
@@ -256,7 +279,26 @@ public class DeliverCellModifier implements ICellModifier {
 				}				
 			}
 			if (valid) {
-				deliverlist.deliverChanged(s);
+				try {
+					deliverlist.deliverChanged(s);
+				} catch (Exception e) {
+					if (property.equals("brand")) {					
+						s.setBrand(brandlast);						
+					} else if (property.equals("sub_brand")) {						
+						s.setSubBrand(sub_brandlast);						
+					} else if (property.equals("size")) {						
+						s.setSize(sizelast);						
+					} else if (property.equals("unit")) {						
+						s.setUnit(unitlast);									
+					} else if (property.equals("price")) {						
+						s.setPrice(pricelast);									
+					} else if (property.equals("number")) {						
+						s.setNumber(numberlast);										
+					}
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("修改送货信息失败");
+					mbox.open();
+				}
 			}
 		}
 	}

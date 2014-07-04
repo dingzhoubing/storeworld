@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
@@ -16,8 +17,8 @@ public class DeliverValidator {
 	private static Pattern pattern_brand = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]+$");
 	private static Pattern pattern_size = Pattern.compile("^\\d+[\\u4E00-\\u9FA5\\uF900-\\uFA2DA-Za-z]*$");
 	private static Pattern pattern_unit = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]{1,5}$");
-	private static Pattern pattern_price = Pattern.compile("\\d+|^\\d+.\\d{0,2}");
-	private static Pattern pattern_number = Pattern.compile("\\d+");
+	private static Pattern pattern_price = Pattern.compile("^([1-9][0-9]*(\\.[0-9]{1,2})?|0\\.(?!0+$)[0-9]{1,2})$");
+	private static Pattern pattern_number = Pattern.compile("^([1-9][0-9]*)$");
 	private static Pattern pattern_name = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D\\w]{1,5}$");
 	private static Pattern pattern_area = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D\\w]+$");
 	
@@ -123,15 +124,16 @@ public class DeliverValidator {
 	 * check if the current row is legal
 	 * @param p
 	 * @return
+	 * @throws Exception 
 	 */
-	public static boolean rowLegal(Deliver p){
+	public static boolean rowLegal(Connection conn, Deliver p) throws Exception{
 		if(p.getBrand() !=null && p.getSubBrand()!=null){
 			
 			if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){// &&!p.getSize().equals("")
 
 //				String sizeDefault = "";
 //				String unitDefault = "";
-				if(!p.getUnit().equals("") || !p.getSize().equals("")){
+				if(DeliverUtils.getSizeUnitChanged()){//!p.getUnit().equals("") || !p.getSize().equals("")
 //					already has one unit
 				}else{
 				//set the unit
@@ -141,7 +143,7 @@ public class DeliverValidator {
 //				prod.put("standard", p.getSize());
 				ReturnObject ret;
 				try {
-					ret = goodsinfo.queryGoodsInfo(prod);
+					ret = goodsinfo.queryGoodsInfo(conn, prod);
 					Pagination page = (Pagination) ret.getReturnDTO();
 					List<Object> list = page.getItems();
 					if(list.size() > 0){
@@ -156,7 +158,7 @@ public class DeliverValidator {
 						
 					}							
 				} catch (Exception e) {
-					System.out.println("query the size & unit with brand & sub&size failed");
+					throw e;
 				}
 				
 				DeliverCellModifier.getDeliverList().deliverChangedForUnit(p);
@@ -184,6 +186,14 @@ public class DeliverValidator {
 		
 	}
 	
+	public static boolean rowLegal2(Deliver p){
+		if(!p.getBrand().equals("") && !p.getSubBrand().equals("")){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
 	public static boolean validateName(String name){ 
 		Matcher matcher = pattern_name.matcher(name); 
 		if(name != null && !name.equals("") && matcher.matches()){

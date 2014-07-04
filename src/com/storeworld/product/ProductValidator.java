@@ -19,7 +19,10 @@ public class ProductValidator {
 	//start with number, end with(out) Chinese character or 26 English character
 	private static Pattern pattern_size = Pattern.compile("^\\d+[\\u4E00-\\u9FA5\\uF900-\\uFA2DA-Za-z]*$");
 	private static Pattern pattern_unit = Pattern.compile("^[\\u4E00-\\u9FA5\\uF900-\\uFA2D]{1,5}$");
-	private static Pattern pattern_repository = Pattern.compile("\\d+");
+	private static Pattern pattern_repository = Pattern.compile("^([1-9][0-9]*)$");
+//	private static Pattern pattern_price = Pattern.compile("^([1-9][0-9]*(\\.[0-9]{1,2})?|0\\.(?!0+$)[0-9]{1,2})$");
+//	private static Pattern pattern_number = Pattern.compile("^([1-9][0-9]*$");
+	
 	/**
 	 * validate the brand of the product
 	 * @param brand

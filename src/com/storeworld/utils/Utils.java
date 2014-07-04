@@ -144,28 +144,28 @@ public class Utils {
 	}
 	
 	//get the sizes by brand & sub from cache
-	public static List<String> getSizes(String brand, String sub){
-		//always need to new, if not, cause wrong
-		List<String> sizes  = new ArrayList<String>();
-		//now there is no cache, just get it from database
-		Map<String, Object> prod = new HashMap<String, Object>();
-		prod.put("brand", brand);
-		prod.put("sub_brand", sub);
-		ReturnObject ret;
-		try {
-			ret = goodsinfo.queryGoodsInfo(prod);
-			Pagination page = (Pagination) ret.getReturnDTO();
-			List<Object> list = page.getItems();
-			for(int i=0;i<list.size();i++){
-				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
-				sizes.add(cDTO.getStandard());
-				break;//one is ok
-			}			
-		} catch (Exception e) {
-			System.out.println("query the sizes with brand&sub failed");
-		}
-		return sizes;		
-	}
+//	public static List<String> getSizes(String brand, String sub){
+//		//always need to new, if not, cause wrong
+//		List<String> sizes  = new ArrayList<String>();
+//		//now there is no cache, just get it from database
+//		Map<String, Object> prod = new HashMap<String, Object>();
+//		prod.put("brand", brand);
+//		prod.put("sub_brand", sub);
+//		ReturnObject ret;
+//		try {
+//			ret = goodsinfo.queryGoodsInfo(prod);
+//			Pagination page = (Pagination) ret.getReturnDTO();
+//			List<Object> list = page.getItems();
+//			for(int i=0;i<list.size();i++){
+//				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
+//				sizes.add(cDTO.getStandard());
+//				break;//one is ok
+//			}			
+//		} catch (Exception e) {
+//			System.out.println("query the sizes with brand&sub failed");
+//		}
+//		return sizes;		
+//	}
 	
 	
 	

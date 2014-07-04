@@ -105,10 +105,6 @@ public class PasswordHandler extends BaseAction {
 				    }); 
 //				ret_pw = "-2";
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (Exception e) {//exception of desutil
 			Display.getDefault().syncExec(new Runnable() {
 			    public void run() {

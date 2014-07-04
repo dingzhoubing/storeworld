@@ -1,5 +1,6 @@
 package com.storeworld.deliver;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,14 +15,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
+import com.storeworld.database.BaseAction;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
-import com.storeworld.pojo.dto.DeliverInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
 import com.storeworld.pub.service.DeliverInfoService;
-import com.storeworld.stock.StockHistory;
 import com.storeworld.utils.ItemComposite;
 import com.storeworld.utils.Utils;
 
@@ -64,6 +68,8 @@ public class DeliverUtils {
 	private static boolean returnMode = false;
 	private static String status = "";
 	
+	private static boolean sizeUnitChanged = false;
+	private static final BaseAction baseAction = new BaseAction();
 	//NEW, HISTORY, EMPTY
 	public static void setStatus(String sta){
 		status = sta;
@@ -146,9 +152,19 @@ public class DeliverUtils {
 	/**
 	 * set the current order number, if first in deliver page, get the number from database
 	 * else +1 based on current order number  
+	 * @throws Exception 
 	 */
-	public static void setOrderNumber(){
+	public static void setOrderNumber() throws Exception{
 
+		Connection conn=null;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
 		//query the database to query how many order number here
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");		
@@ -158,7 +174,9 @@ public class DeliverUtils {
 		map.put("deliver_time", time_current);
 		HashSet<String> orderset = new HashSet<String>();
 		try {
-			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
+			conn.setAutoCommit(false);
+			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(conn, map);
+			conn.commit();
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
 
@@ -184,6 +202,10 @@ public class DeliverUtils {
 			}
 		} catch (Exception e) {
 			System.out.println("query deliver info by default deliver time failed");
+			conn.rollback();
+			throw e;
+		}finally{
+			conn.close();
 		}
 	}
 	
@@ -244,13 +266,26 @@ public class DeliverUtils {
 	 * when first in deliver page, initialize the history page
 	 * get the data from database
 	 * @param option : the time threshold or something else
+	 * @throws Exception 
 	 */
-	private static void getHistoryFromDataBase(String option){
+	private static void getHistoryFromDataBase(String option) throws Exception{
+		Connection conn=null;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+		
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("deliver_time", option);
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		try {
-			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(map);
+			conn.setAutoCommit(false);
+			ReturnObject ret = deliverinfo.queryDeliverInfoByDefaultDelivertime(conn, map);
+			conn.commit();
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
 			//ordernumber -- > deliver
@@ -271,7 +306,11 @@ public class DeliverUtils {
 			addToHistory(delivers);//finish
 		} catch (Exception e) {
 			System.out.println("query the delivers by default time failed");
-		}	
+			conn.rollback();
+			throw e;
+		}finally{
+			conn.close();
+		}
 		
 		
 	}
@@ -351,6 +390,7 @@ public class DeliverUtils {
 		ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
 		ic.setValue(his.getTitleShow(), his.getTimeShow(), his.getValueShow());
 		itemList.add(ic);
+		historyList.add(his);
 		composite_scroll_record.setMinSize(composite_fn_record.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		composite_fn_record.layout();
@@ -380,7 +420,14 @@ public class DeliverUtils {
 			height_record = height;
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 			String time_current = formatter.format(new Date());
-			getHistoryFromDataBase(time_current);
+			try {
+				getHistoryFromDataBase(time_current);
+			} catch (Exception e) {
+				MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+				mbox.setMessage("查询当天送货记录失败");
+				mbox.open();
+				return;
+			}
 
 			for (int i = 0; i < historyList.size(); i++) {
 				DeliverHistory his = historyList.get(i);
@@ -404,14 +451,25 @@ public class DeliverUtils {
 	 * @param dateSearch
 	 * @param area
 	 * @param cus
+	 * @throws Exception 
 	 */
-	public static void showSearchHistory(String dateSearch, String area, String cus){
-		//remove the navigator panel, clear all the result
-		for(int i=0;i<itemList.size();i++)
-			itemList.get(i).dispose();
-		itemList.clear();
-		historyList.clear();
+	public static void showSearchHistory(String dateSearch, String area, String cus) throws Exception{
 		
+		Connection conn=null;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return;
+		}
+//		//remove the navigator panel, clear all the result
+//		for(int i=0;i<itemList.size();i++)
+//			itemList.get(i).dispose();
+//		itemList.clear();
+//		historyList.clear();
+//		
 		//add search result
 		Map<String, Object> map = new HashMap<String ,Object>();
 		map.put("deliver_time", dateSearch);
@@ -425,7 +483,17 @@ public class DeliverUtils {
 		}
 		DeliverInfoService deliverinfo = new DeliverInfoService();
 		try {
-			ReturnObject ret = deliverinfo.queryDeliverInfoByInputDelivertime(map);
+			conn.setAutoCommit(false);
+			ReturnObject ret = deliverinfo.queryDeliverInfoByInputDelivertime(conn, map);
+			conn.commit();
+			
+			//remove the navigator panel, clear all the result
+			for(int i=0;i<itemList.size();i++)
+				itemList.get(i).dispose();
+			itemList.clear();
+			historyList.clear();
+			
+			
 			Pagination page = (Pagination) ret.getReturnDTO();
 			List<Object> list = page.getItems();
 			HashMap<String, ArrayList<DeliverInfoAllDTO>> delivers = new HashMap<String, ArrayList<DeliverInfoAllDTO>>();  
@@ -445,7 +513,12 @@ public class DeliverUtils {
 			addToHistory(delivers);//finish
 		} catch (Exception e) {
 			System.out.println("query the delivers by default time failed");
-		}	
+			conn.rollback();
+			throw e;
+		}finally{
+			conn.close();
+		}
+		
 		for (int i = 0; i < historyList.size(); i++) {
 			DeliverHistory his = historyList.get(i);
 			ItemComposite ic = new ItemComposite(composite_fn_record, color_record, width_record, height_record, his);
@@ -516,5 +589,11 @@ public class DeliverUtils {
 	public static boolean getDetailTimer(){
 		return detailTimer;
 	}
-		
+
+	public static void setSizeUnitChanged(boolean change){
+		sizeUnitChanged = change;
+	}
+	public static boolean getSizeUnitChanged(){
+		return sizeUnitChanged;
+	}
 }

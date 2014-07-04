@@ -8,18 +8,26 @@ import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.common.DataInTable;
 import com.storeworld.common.NumberConverter;
+import com.storeworld.customer.Customer;
+import com.storeworld.customer.CustomerList;
+import com.storeworld.database.BaseAction;
 import com.storeworld.deliver.Deliver;
+import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverHistory;
+import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.mainui.MainUI;
+import com.storeworld.product.Product;
 import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.utils.ItemComposite;
  
@@ -27,7 +35,7 @@ public class Print implements Printable, Runnable{
    private int pageSize;//打印的总页数
    private double paperW=609.1937007874016;//609.4;//打印的纸张宽度
    private double paperH=425.1968503937008;//425.2;//打印的纸张高度
-   
+   private static final BaseAction baseAction = new BaseAction();
    private ArrayList<DataInTable> elements = new ArrayList<DataInTable>();
    private int part = 0;
    private int total_part = 0;
@@ -35,8 +43,13 @@ public class Print implements Printable, Runnable{
    private String indeed = "";
    private boolean type = false;
    private String ordernum="";
-   
-   public Print(ArrayList<DataInTable> temp, int part, int total_part, String total, String indeed_val, boolean type, String ordernum){
+   private Connection conn;
+   private String historyIndeed = "";
+   private ArrayList<Product> products = new ArrayList<Product>();
+   private ArrayList<Customer> customers = new ArrayList<Customer>();	
+	
+	
+   public Print(ArrayList<DataInTable> temp, int part, int total_part, String total, String indeed_val, boolean type, String ordernum, Connection conn){
 	   elements.clear();
 	   elements.addAll(temp);
 	   this.part = part;
@@ -46,8 +59,28 @@ public class Print implements Printable, Runnable{
 	   this.type = type;
 	   this.pageSize = 1;
 	   this.ordernum = ordernum;
+	   this.conn = conn;
    }
       
+	public void setHistoryIndeed(String indeed){
+		this.historyIndeed = indeed;
+	}
+	public String getHistoryIndeed(){
+		return this.historyIndeed;
+	}
+	public void setProductsChanged(ArrayList<Product> products){
+		this.products = products;
+	}
+	public ArrayList<Product> getProductsChanged(){
+		return this.products;
+	}
+	public void setCustomersChanged(ArrayList<Customer> customers){
+		this.customers = customers;
+	}
+	public ArrayList<Customer> getCustomersChanged(){
+		return this.customers;
+	}
+	
    //实现java.awt.print.Printable接口的打印方法
    //pageIndex:打印的当前页，此参数是系统自动维护的，不需要手动维护，系统会自动递增
    @Override
@@ -154,25 +187,108 @@ public class Print implements Printable, Runnable{
          
         prnJob.print();//启动打印工作
         
-        //here we update the database
-        if(!ordernum.equals("")){
+//        //here we update the database
+        if(!ordernum.equals("") && this.part == this.total_part){
+//        	Connection conn=null;
+//			try {
+//				conn = baseAction.getConnection();
+//			} catch (Exception e1) {
+//				Display.getDefault().syncExec(new Runnable() {
+//				    public void run() {
+//				    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+//						mbox.setMessage("更新送货表为已打印失败");
+//						mbox.open();	
+//
+//				    }
+//				    });
+//				return;
+//			}
+//        	
         	DeliverInfoService deliverInfo = new DeliverInfoService();
         	try {
-				deliverInfo.updateIsPrintByOrderNumber(ordernum);
+//        		conn.setAutoCommit(false);
+				deliverInfo.updateIsPrintByOrderNumber(conn, ordernum);
+				conn.commit();
 			} catch (Exception e) {
 				System.out.println("update is_print failed");
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					Display.getDefault().syncExec(new Runnable() {
+					    public void run() {
+					    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+							mbox.setMessage("数据库异常");
+							mbox.open();	
+
+					    }
+					    });
+				}
+			}finally{
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					Display.getDefault().syncExec(new Runnable() {
+					    public void run() {
+					    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+							mbox.setMessage("数据库异常");
+							mbox.open();	
+					    }
+					    });
+				}
 			}
-        	Display.getDefault().syncExec(new Runnable() {
-    		    public void run() {
-    		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
-    		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
-    		    	if(!dh.getTitleShow().contains("已打单"))
-    		    		ic.setValue(dh.getTitle()+"(已打单)");
-    		    	}
-        	});
+
+        	
+            if(DeliverUtils.getReturnMode()){
+            	Display.getDefault().syncExec(new Runnable() {
+        		    public void run() {
+        	           	DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
+        				//after return, show this
+        				dh.setIndeed(historyIndeed);//this is needed
+        				DeliverUtils.getItemCompositeRecord().setDownRight(historyIndeed);
+        				//change the product table ui side
+        				DeliverList.relatedProductChange(products, true);		
+        				
+                    	DeliverUtils.leaveReturnMode();
+                    	
+        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+    					mbox.setMessage("退货打单成功， 请重试");
+    					mbox.open();
+        		    }
+            	});
+            	
+ 
+            	
+            }else{
+            	Display.getDefault().syncExec(new Runnable() {
+        		    public void run() {
+        		    	//update the customer table
+        				CustomerList.relatedCustomerChange(customers);
+        				
+        				if(DeliverUtils.getStatus().equals("NEW")){
+        					DeliverUtils.addToHistory();
+        				}
+        				
+        				//status: NEW, HISTORY, EMPTY, empty mode is necessary?
+        				DeliverUtils.setStatus("EMPTY");
+        				
+        				//step 2: initial the deliver page
+        				//clear table
+        				//and add a new line					
+        				DeliverContentPart.afterPrintFinished();
+        				
+        		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
+        		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
+        		    	if(!dh.getTitleShow().contains("已打单"))
+        		    		ic.setValue(dh.getTitle()+"(已打单)");
+        		    	
+        		    	}
+            	});
+            	
+            }
+
         }
         
-        
+
         
       } catch (PrinterException ex) {
     	//!!

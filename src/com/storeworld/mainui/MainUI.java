@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -32,6 +33,7 @@ import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.deliver.DeliverList;
 import com.storeworld.deliver.DeliverUtils;
 import com.storeworld.login.DataBaseService;
+import com.storeworld.login.LoginMainUI;
 import com.storeworld.utils.Constants.CONTENT_TYPE;
 import com.storeworld.utils.Constants.FUNCTION;
 import com.storeworld.utils.Constants.NORTH_TYPE;
@@ -87,6 +89,11 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 			instance = new MainUI(display);
 			instance.setActive();
 	       }
+		//when restart?
+//		if(instance.isDisposed()){
+//			instance =  new MainUI(Display.getDefault());
+//			instance.setActive();
+//		}
 	       return instance;
 	}
 	
@@ -506,6 +513,9 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 		}
 		}catch(Exception e){
 			System.out.println("delete the useless items of deliver table failed before log out");
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("删除废弃送货信息失败");
+			mbox.open();
 		}
 		
 		try {
@@ -524,6 +534,9 @@ public class MainUI extends Shell implements ControlListener, PaintListener,
 					}
 				} catch (IOException e) {
 					System.out.println("kill the database pid failed");
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("结束数据库进程失败");
+					mbox.open();
 				}		
 			}
 			northwestpart.dispose();

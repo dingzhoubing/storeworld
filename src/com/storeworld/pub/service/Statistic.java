@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 
+import com.mysql.jdbc.Connection;
 import com.storeworld.analyze.AnalyzerConstants;
 import com.storeworld.analyze.AnalyzerUtils.KIND;
 import com.storeworld.analyze.AnalyzerUtils.TYPE;
 import com.storeworld.database.BaseAction;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.AnalysticDTO;
 import com.storeworld.pojo.dto.DeliverInfoAllDTO;
 import com.storeworld.pojo.dto.Pagination;
@@ -22,7 +26,7 @@ public class Statistic extends BaseAction{
 	private static DeliverInfoService deliverinfo = new DeliverInfoService();
 	private static StockInfoService stockinfo = new StockInfoService();
 	private static IProgressMonitor monitor = null;
-	
+	private static final BaseAction baseAction = new BaseAction();
 	private static int BRAND_SUB = 5;
 	private static int AREA_CUS = 10;
 	
@@ -211,7 +215,7 @@ public class Statistic extends BaseAction{
 	 * @return
 	 * @throws Exception
 	 */
-	private ResultSetDTO analyzeCase_One(String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_One(Connection conn, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -232,8 +236,10 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeInterval(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeInterval(conn,
 				start_time, end_time);
+		
+		
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
 		
@@ -273,6 +279,10 @@ public class Statistic extends BaseAction{
 				
 			}//end for			
 	        
+			
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
+	        
 			//sort the brand, area
 			ArrayList<String> brands = new ArrayList<String>();
 			ArrayList<String> areas = new ArrayList<String>();
@@ -288,7 +298,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
 			combineKeySetForShipment(areas, area2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(brands.size() > 0){
@@ -377,7 +389,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn, brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -451,7 +463,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
 			combineKeySetForProfit(areas, area2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;		
 			if(brands.size() > 0){
@@ -518,7 +532,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Two(String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Two(Connection conn, String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -539,7 +553,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndCustomerArea(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndCustomerArea(conn,
 				start_time, end_time, customerArea);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -579,7 +593,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> brands = new ArrayList<String>();
 			ArrayList<String> customers = new ArrayList<String>();
@@ -595,7 +611,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;		
 			if(brands.size() > 0){
@@ -686,7 +704,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn, brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -757,7 +775,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
 			combineKeySetForProfit(customers, cus2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;		
 			if(brands.size() > 0){
@@ -822,7 +842,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Three(String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Three(Connection conn, String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -843,7 +863,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndCustomerAreaName(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndCustomerAreaName(conn, 
 				start_time, end_time, customerArea, customerName);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -875,7 +895,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> brands = new ArrayList<String>();
 			ArrayList<String> dates = new ArrayList<String>();			
@@ -887,7 +909,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForShipment(brands, brand2num, BRAND_SUB);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			for(int i=0;i<brands.size()-1;i++){
@@ -952,7 +976,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn, brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -1012,7 +1036,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForProfit(brands, brand2profit, BRAND_SUB);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(brands.size() > 0){
@@ -1055,7 +1081,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Four(String brandStr, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Four(Connection conn, String brandStr, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -1076,7 +1102,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrand(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrand(conn,
 				start_time, end_time, brandStr);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -1116,7 +1142,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> subs = new ArrayList<String>();
 			ArrayList<String> areas = new ArrayList<String>();
@@ -1132,7 +1160,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
 			combineKeySetForShipment(areas, area2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;	
 			if(subs.size() > 0){
@@ -1221,7 +1251,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn, brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -1292,7 +1322,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
 			combineKeySetForProfit(areas, area2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(subs.size() > 0){
@@ -1359,7 +1391,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Five(String brandStr, String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Five(Connection conn, String brandStr, String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -1380,7 +1412,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandArea(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandArea(conn,
 				start_time, end_time, brandStr, customerArea);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -1420,7 +1452,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> subs = new ArrayList<String>();
 			ArrayList<String> customers = new ArrayList<String>();
@@ -1436,7 +1470,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;	
 			if(subs.size() > 0){
@@ -1525,7 +1561,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn, brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -1596,7 +1632,9 @@ public class Statistic extends BaseAction{
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
 			combineKeySetForProfit(customers, cus2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(subs.size() > 0){
@@ -1663,7 +1701,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 
-	private ResultSetDTO analyzeCase_Six(String brandStr, String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Six(Connection conn, String brandStr, String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -1683,7 +1721,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandAreaName(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandAreaName(conn,
 				start_time, end_time, brandStr, customerArea, customerName);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -1714,7 +1752,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> subs = new ArrayList<String>();
 			ArrayList<String> dates = new ArrayList<String>();			
@@ -1726,7 +1766,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForShipment(subs, sub2num, BRAND_SUB);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(subs.size() > 0){
@@ -1793,7 +1835,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn,brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -1853,7 +1895,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForProfit(subs, sub2profit, BRAND_SUB);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			double left = 1.00;			
 			if(subs.size() > 0){
@@ -1898,7 +1942,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 
-	private ResultSetDTO analyzeCase_Seven(String brandStr, String subStr, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Seven(Connection conn, String brandStr, String subStr, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -1918,7 +1962,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSub(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSub(conn,
 				start_time, end_time, brandStr, subStr);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -1950,7 +1994,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> areas = new ArrayList<String>();
 			ArrayList<String> dates = new ArrayList<String>();			
@@ -1962,7 +2008,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForShipment(areas, area2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			
 			//cus ratio
@@ -2029,7 +2077,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn,brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -2090,7 +2138,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForProfit(areas, area2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			
 			//areas ratio
@@ -2135,7 +2185,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Eight(String brandStr, String subStr, String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Eight(Connection conn, String brandStr, String subStr, String customerArea, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -2155,7 +2205,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSubArea(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSubArea(conn,
 				start_time, end_time, brandStr, subStr, customerArea);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -2187,7 +2237,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 			ArrayList<String> customers = new ArrayList<String>();
 			ArrayList<String> dates = new ArrayList<String>();			
@@ -2199,7 +2251,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForShipment(customers, cus2num, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			
 			//cus ratio
@@ -2266,7 +2320,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn,brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -2327,7 +2381,9 @@ public class Statistic extends BaseAction{
 			
 			//combine the hashmap
 			combineKeySetForProfit(customers, cus2profit, AREA_CUS);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//brands ratio
 			
 			//areas ratio
@@ -2372,7 +2428,7 @@ public class Statistic extends BaseAction{
 		return ret;
 	}
 	
-	private ResultSetDTO analyzeCase_Nine(String brandStr, String subStr, String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
+	private ResultSetDTO analyzeCase_Nine(Connection conn, String brandStr, String subStr, String customerArea, String customerName, String start_time, String end_time, String profit_shipment, String timeType) throws Exception{
 		
 		ResultSetDTO ret = new ResultSetDTO();
 		int timeStartMarker = 4;//by default;
@@ -2391,7 +2447,7 @@ public class Statistic extends BaseAction{
 		Pagination page3 = new Pagination();
 		
 		
-		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSubAreaName(
+		ReturnObject tmp = deliverinfo.queryDeliverInfoByTimeIntervalAndBrandSubAreaName(conn,
 				start_time, end_time, brandStr, subStr, customerArea, customerName);
 		Pagination page = (Pagination) tmp.getReturnDTO();
 		List<Object> list = page.getItems();
@@ -2416,7 +2472,9 @@ public class Statistic extends BaseAction{
 				}
 				
 			}//end for
-			
+
+	        monitor.worked(60);  
+	        monitor.subTask("扫描数据");
 			//sort the brand, area
 
 			ArrayList<String> dates = new ArrayList<String>();			
@@ -2424,7 +2482,9 @@ public class Statistic extends BaseAction{
 			
 
 			sortKeySetForTrend(dates);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//combine the hashmap
 			
 			//brands ratio
@@ -2471,7 +2531,7 @@ public class Statistic extends BaseAction{
 				String sub = key.substring(marker+1);
 				int number = part2num.get(key);
 				//need to detect??
-				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(brand, sub);
+				ReturnObject retstock = stockinfo.queryStockInfoByBrandAndSub(conn,brand, sub);
 				Pagination pagestock = (Pagination) retstock.getReturnDTO();
 				List<Object> liststock = pagestock.getItems();
 				//sort the stocklist
@@ -2519,7 +2579,9 @@ public class Statistic extends BaseAction{
 			ArrayList<String> dates = new ArrayList<String>();			
 			dates.addAll(trendprofit.keySet());			
 			sortKeySetForTrend(dates);
-			
+
+	        monitor.worked(80);  
+	        monitor.subTask("分析计算");
 			//combine the hashmap
 			
 			//brands ratio
@@ -2546,7 +2608,18 @@ public class Statistic extends BaseAction{
 	
 	public ResultSetDTO startAnalyzing(Map<String,Object> params, IProgressMonitor mt) throws Exception{
 		
+
+		
 		ResultSetDTO ro=new ResultSetDTO();
+		Connection conn;
+		try {
+			conn = baseAction.getConnection();
+		} catch (Exception e1) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("连接数据库失败");
+			mbox.open();
+			return ro;
+		}
 		monitor = mt;		
 		String brand=String.valueOf(params.get("brand"));
 		String sub_brand=String.valueOf(params.get("sub_brand"));
@@ -2559,37 +2632,43 @@ public class Statistic extends BaseAction{
 		
         monitor.worked(35);  
         monitor.subTask("开始分析数据");
-        
+        try{
+        	conn.setAutoCommit(false);
 		if(brand.equals(AnalyzerConstants.ALL_BRAND) && customer_area.equals(AnalyzerConstants.ALL_AREA)){			
-			ro = analyzeCase_One(start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_One(conn, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(brand.equals(AnalyzerConstants.ALL_BRAND) && customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Two(customer_area, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Two(conn, customer_area, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(brand.equals(AnalyzerConstants.ALL_BRAND) && !customer_area.equals(AnalyzerConstants.ALL_AREA) && !customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Three(customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Three(conn, customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(sub_brand.equals(AnalyzerConstants.ALL_SUB) && customer_area.equals(AnalyzerConstants.ALL_AREA)){
-			ro = analyzeCase_Four(brand, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Four(conn, brand, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(sub_brand.equals(AnalyzerConstants.ALL_SUB) && customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Five(brand, customer_area, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Five(conn, brand, customer_area, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(sub_brand.equals(AnalyzerConstants.ALL_SUB) && !customer_area.equals(AnalyzerConstants.ALL_AREA) && !customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Six(brand, customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Six(conn, brand, customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub_brand.equals(AnalyzerConstants.ALL_SUB) && customer_area.equals(AnalyzerConstants.ALL_AREA)){
-			ro = analyzeCase_Seven(brand, sub_brand, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Seven(conn, brand, sub_brand, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub_brand.equals(AnalyzerConstants.ALL_SUB) && customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Eight(brand, sub_brand, customer_area, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Eight(conn, brand, sub_brand, customer_area, start_time, end_time, profitOrShipment, timeType);
 		}
 		else if(!brand.equals(AnalyzerConstants.ALL_BRAND) && !sub_brand.equals(AnalyzerConstants.ALL_SUB) && !customer_area.equals(AnalyzerConstants.ALL_AREA) & !customer_name.equals(AnalyzerConstants.ALL_CUSTOMER)){
-			ro = analyzeCase_Nine(brand, sub_brand, customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
+			ro = analyzeCase_Nine(conn, brand, sub_brand, customer_area, customer_name, start_time, end_time, profitOrShipment, timeType);
 		}else{
 			//show messages?
 		}
-		
+		conn.commit();
+        }catch(Exception e){
+        	conn.rollback();
+        }finally{
+        	conn.close();
+        }
 		return ro;
 	}
 	

@@ -1,13 +1,23 @@
 package com.storeworld.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+
+import com.mysql.jdbc.Connection;
+import com.storeworld.common.DataInTable;
+import com.storeworld.customer.Customer;
+import com.storeworld.database.BaseAction;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.pojo.dto.CustomerInfoDTO;
 import com.storeworld.pojo.dto.GoodsInfoDTO;
 import com.storeworld.pojo.dto.Pagination;
 import com.storeworld.pojo.dto.ReturnObject;
+import com.storeworld.product.Product;
 import com.storeworld.pub.service.CustomerInfoService;
 import com.storeworld.pub.service.GoodsInfoService;
 
@@ -43,6 +53,20 @@ public class DataCachePool {
 		}
 	}
 	
+	
+	public static boolean ifExistBrandSub(String brand, String sub){
+		boolean exist = false;
+		//update stock table and product table in database
+		//replace the database query
+//		HashMap<String, HashSet<String>> brand2sub = DataCachePool.getBrand2Sub();
+		if(brand2sub.containsKey(brand)){
+			if(brand2sub.get(brand).contains(sub)){
+				exist = true;
+			}
+		}
+		return exist;
+	}
+	
 	/**
 	 * cache the area -> names
 	 * @param area
@@ -61,7 +85,16 @@ public class DataCachePool {
 		}
 	}
 	
-	
+	public static boolean ifExistAreaName(String area, String name){
+		boolean exist = false;
+
+		if(area2names.containsKey(area)){
+			if(area2names.get(area).contains(name)){
+				exist = true;
+			}
+		}
+		return exist;
+	}
 	
 	/**
 	 * if a customer has been deleted, update the cache
@@ -148,42 +181,156 @@ public class DataCachePool {
 	/**
 	 * cache the product info if haven't yet(brand -> sub_brand)
 	 */
-	public static void cacheProductInfo(){
-		if(!isBrand2SubCached()){
-			try {
+	public static void cacheProductInfo() throws Exception{
+		BaseAction ba = new BaseAction();
+		Connection conn = ba.getConnection();
+		
+		conn.setAutoCommit(false);
+		try {
+			if(!isBrand2SubCached()){
 				GoodsInfoService goodsinfo = new GoodsInfoService();
-				ReturnObject ret = goodsinfo.queryGoodsInfoAll();
+				ReturnObject ret = goodsinfo.queryGoodsInfoAll(conn);
+				conn.commit();
 				Pagination page = (Pagination) ret.getReturnDTO();
 				List<Object> list = page.getItems();
 				for(int i=0;i<list.size();i++){
 					GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
 					addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());					
 				}
-			} catch (Exception e) {
-				System.out.println("cache the brand2sub failed");
 			}
+		} catch (Exception e) {
+			conn.rollback();
+			throw new Exception("查询货品表信息失败");
+		}finally{
+			conn.close();
 		}
+	}
+	
+
+	
+	/**
+	 * for initial the product page
+	 * @throws Exception
+	 */
+	public static void cacheProductInfo2(ArrayList<DataInTable> productlist) throws Exception{
+		BaseAction ba = new BaseAction();
+		Connection conn = ba.getConnection();
+		
+		conn.setAutoCommit(false);
+		try {
+			GoodsInfoService goodsinfo = new GoodsInfoService();
+			ReturnObject ret = goodsinfo.queryGoodsInfoAll(conn);
+			conn.commit();
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			for (int i = 0; i < list.size(); i++) {
+				GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
+				Product prod = new Product();
+				prod.setID(cDTO.getId());
+				prod.setBrand(cDTO.getBrand());
+				prod.setSubBrand(cDTO.getSub_brand());
+				prod.setSize(cDTO.getStandard());
+				prod.setUnit(cDTO.getUnit());
+				prod.setRepository(String.valueOf(cDTO.getRepertory()));
+
+				productlist.add(prod);
+				// add to cache
+				DataCachePool.addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());
+			}
+		} catch (Exception e) {
+			conn.rollback();
+			throw new Exception("查询货品表信息失败");
+		}finally{
+			conn.close();
+		}
+	}
+	
+	public static void reCacheProductInfo(Connection conn) throws Exception{
+		brand2sub.clear();
+		GoodsInfoService goodsinfo = new GoodsInfoService();
+		ReturnObject ret = goodsinfo.queryGoodsInfoAll(conn);
+		Pagination page = (Pagination) ret.getReturnDTO();
+		List<Object> list = page.getItems();
+		for(int i=0;i<list.size();i++){
+			GoodsInfoDTO cDTO = (GoodsInfoDTO) list.get(i);
+			addBrand2Sub(cDTO.getBrand(), cDTO.getSub_brand());					
+		}
+		
 	}
 	
 	
 	/**
 	 * cache the customer info if haven't yet
 	 */
-	public static void cacheCustomerInfo(){
-		if(!isArea2NamesCached()){
-			try {	
+	public static void cacheCustomerInfo() throws Exception{
+		BaseAction ba = new BaseAction();
+		Connection conn = ba.getConnection();
+		
+		conn.setAutoCommit(false);
+		try {
+			if(!isArea2NamesCached()){
+				
 				CustomerInfoService cusinfo = new CustomerInfoService();			
-				ReturnObject ret = cusinfo.queryCustomerInfoAll();
+				ReturnObject ret = cusinfo.queryCustomerInfoAll(conn);
+				conn.commit();
 				Pagination page = (Pagination) ret.getReturnDTO();
 				List<Object> list = page.getItems();
 				for(int i=0;i<list.size();i++){
 					CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(i);
 					addArea2Names(cDTO.getCustomer_area(), cDTO.getCustomer_name());
 				}
-			} catch (Exception e) {
-				System.out.println("get customer areas in deliver page failed");
-			}	
+			}
+		} catch (Exception e) {
+			conn.rollback();
+			throw new Exception("查询客户表信息失败");
+		}finally{
+			conn.close();
 		}
+	}
+	
+	
+	public static void cacheCustomerInfo2(ArrayList<DataInTable> customerlist) throws Exception{
+		BaseAction ba = new BaseAction();
+		Connection conn = ba.getConnection();
+		
+		conn.setAutoCommit(false);
+		try {
+			CustomerInfoService cusinfo = new CustomerInfoService();
+			ReturnObject ret = cusinfo.queryCustomerInfoAll(conn);
+			conn.commit();
+			Pagination page = (Pagination) ret.getReturnDTO();
+			List<Object> list = page.getItems();
+			for(int i=0;i<list.size();i++){
+				CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(i);
+				Customer cus = new Customer();
+				cus.setID(cDTO.getId());
+				cus.setName(cDTO.getCustomer_name());
+				cus.setArea(cDTO.getCustomer_area());
+				cus.setPhone(cDTO.getTelephone());
+				cus.setAddress(cDTO.getCustomer_addr());
+				//cache the data
+				DataCachePool.addArea2Names(cDTO.getCustomer_area(), cDTO.getCustomer_name());
+				customerlist.add(cus);
+			}
+		} catch (Exception e) {
+			conn.rollback();
+			throw new Exception("查询客户表信息失败");
+		}finally{
+			conn.close();
+		}
+	}
+	
+	public static void reCacheCustomerInfo(Connection conn) throws Exception{
+		area2names.clear();
+		CustomerInfoService cusinfo = new CustomerInfoService();			
+		ReturnObject ret = cusinfo.queryCustomerInfoAll(conn);
+		Pagination page = (Pagination) ret.getReturnDTO();
+		List<Object> list = page.getItems();
+		for(int i=0;i<list.size();i++){
+			CustomerInfoDTO cDTO = (CustomerInfoDTO) list.get(i);
+			addArea2Names(cDTO.getCustomer_area(), cDTO.getCustomer_name());
+		}
+		
 	}
 	
 	/**
@@ -191,7 +338,13 @@ public class DataCachePool {
 	 */
 	public static String[] getCustomerAreas(){
 		//cache the data if haven't yet
-		cacheCustomerInfo();
+		try {
+			cacheCustomerInfo();
+		} catch (Exception e) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("数据库连接异常");
+			mbox.open();
+		}
 		//if not cached, cache the customer data
 		//after cached, directly get the data
 		//if() need to check the area2names??
@@ -206,7 +359,13 @@ public class DataCachePool {
 	 * @return
 	 */
 	public static String[] getCustomerNames(String area){
-		cacheCustomerInfo();
+		try {
+			cacheCustomerInfo();
+		} catch (Exception e) {
+			MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+			mbox.setMessage("数据库连接异常");
+			mbox.open();
+		}
 		
 		HashSet<String> names = new HashSet<String>();
 		if(!area.equals("")){

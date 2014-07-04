@@ -4,8 +4,11 @@ import java.text.DecimalFormat;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
 /**
@@ -18,12 +21,24 @@ public class StockCellModifier implements ICellModifier {
 	private static StockList stocklist;	
 	private static Stock stock_backup = new Stock();
 	private static DecimalFormat df = new DecimalFormat("0.00");
+	private static StockCellModifier smodifier = null;
 	
 	public StockCellModifier(TableViewer tv_tmp, StockList stocklist_tmp) {
 		tv = tv_tmp;
-		stocklist = stocklist_tmp;
+		stocklist = stocklist_tmp;		
 	}
 
+	private static StockCellModifier getInstance(){
+		if(smodifier == null){
+			smodifier = new StockCellModifier(tv, stocklist);
+			return smodifier;
+		}else{
+			//nothing
+			return smodifier;
+		}
+	}
+	
+	
 	public boolean canModify(Object element, String property) {
 		return true;
 	}
@@ -52,12 +67,19 @@ public class StockCellModifier implements ICellModifier {
 	/**
 	 * add a new row in table UI
 	 * @param stock
+	 * @throws Exception 
 	 */
-	public static void addNewTableRow(Stock stock) {
+	public static void addNewTableRow(Stock stock) throws Exception {
 		int new_id = Integer.valueOf(stock.getID()) + 1;
 		StockUtils.setNewLineID(String.valueOf(new_id));
 		Stock stock_new = new Stock(String.valueOf(new_id));
-		stocklist.addStock(stock_new);
+		try {
+			stocklist.addStock(stock_new);
+		} catch (Exception e) {
+			System.out.println("add new table row failed");
+			throw e;
+		}
+		
 		Utils.refreshTable(tv.getTable());
 	}
 		
@@ -107,10 +129,16 @@ public class StockCellModifier implements ICellModifier {
 		return null;
 	}
 
+	public static void staticModify(Object element, String property, Object value){
+		getInstance().modify(element, property, value);
+	}
+
 	/**
 	 * when modify the table value
 	 */
 	public void modify(Object element, String property, Object value) {
+		
+		StockUtils.setSizeUnitChanged(false);//initial
 		TableItem item = (TableItem) element;		
 		Stock s = (Stock) item.getData();
 		String brandlast = "";
@@ -233,13 +261,15 @@ public class StockCellModifier implements ICellModifier {
 				if (!valid) {
 					s.setSubBrand(sub_brandlast);
 				}
-
+				
 			} else if (property.equals("size")) {
+				StockUtils.setSizeUnitChanged(true);
 				valid = StockValidator.validateSize(s.getSize()); 
 				if (!valid) {
 					s.setSize(sizelast);
 				}
 			} else if (property.equals("unit")) {
+				StockUtils.setSizeUnitChanged(true);
 				valid = StockValidator.validateUnit(s.getUnit()); 
 				if (!valid) {
 					s.setUnit(unitlast);
@@ -257,7 +287,28 @@ public class StockCellModifier implements ICellModifier {
 			}
 			if (valid) {
 				//if the change of the table item is valid, we make the change valid in UI and database
-				stocklist.stockChanged(s);
+				try {
+					stocklist.stockChanged(s);
+				} catch (Exception e) {
+					//set back the value
+					if (property.equals("brand")) {
+						s.setBrand(brandlast);
+					} else if (property.equals("sub_brand")) {						
+						s.setSubBrand(sub_brandlast);						
+					} else if (property.equals("size")) {						
+						s.setSize(sizelast);						
+					} else if (property.equals("unit")) {						
+						s.setUnit(unitlast);									
+					} else if (property.equals("price")) {						
+						s.setPrice(pricelast);									
+					} else if (property.equals("number")) {						
+						s.setNumber(numberlast);									
+					}
+					
+					MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+					mbox.setMessage("更新进货信息表失败");
+					mbox.open();
+				}
 				
 			}
 		}

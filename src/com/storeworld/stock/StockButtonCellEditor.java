@@ -8,9 +8,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.storeworld.mainui.MainUI;
 import com.storeworld.utils.Utils;
 
 /**
@@ -21,9 +24,9 @@ import com.storeworld.utils.Utils;
  */
 public class StockButtonCellEditor extends CellEditor {
 
-    protected Button button = null; //the remove button
-    protected Table table = null; //the parent table
-    protected StockList stocklist = null; //the data set in the parent table
+    protected Button button; //the remove button
+    protected Table table; //the parent table
+    protected StockList stocklist; //the data set in the parent table
     protected int rowHeight = 0; //the row height of the row, no use now
 
     public StockButtonCellEditor() {
@@ -36,6 +39,7 @@ public class StockButtonCellEditor extends CellEditor {
         this.table = (Table)parent;
         this.stocklist = productlist;
         this.rowHeight = rowHeight;//not been used now
+//        button = new Button(parent, 0);
     }
 
     public StockButtonCellEditor(Composite parent, int style) {
@@ -48,7 +52,8 @@ public class StockButtonCellEditor extends CellEditor {
                 
         button.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
-            	button.setVisible(false);
+            	if(button!=null)
+            		button.setVisible(false);
             	StockButtonCellEditor.this.focusLost();
             }
         });
@@ -64,7 +69,16 @@ public class StockButtonCellEditor extends CellEditor {
 					if (rowY <= ptY && ptY <= (rowY+rowHeight)) {//ptY <= (rowY+rowHeight) no use now
 						Stock c = (Stock)(table.getItem(index).getData());		
 						//remove the stock item
-						stocklist.removeStock(c);						
+						try {
+							stocklist.removeStock(c);
+						} catch (Exception e1) {
+							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+							mbox.setMessage("删除该条进货记录失败，请重试");
+							mbox.open();
+							return;
+						}	
+						
+						//only when delete succeed
 						button.setVisible(false);
 						//refresh the stock table
 						Utils.refreshTable(table);												

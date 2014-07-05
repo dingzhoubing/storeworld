@@ -20,8 +20,8 @@ public class Login {
 	public static void login() {
 		try {
 			
-			Thread thread = new Thread(new DataBaseService());
-			thread.start();
+//			Thread thread = new Thread(new DataBaseService());
+//			thread.start();
 			
 			int screenH =Constants.LOGIN_HEIGHT+50;
 			int screenW =Constants.LOGIN_WIDTH;

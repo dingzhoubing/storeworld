@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.EastPart;
+import com.storeworld.mainui.MainUI;
 import com.storeworld.mainui.NorthEastPart;
 import com.storeworld.mainui.NorthPart;
 import com.storeworld.mainui.NorthWestPart;
@@ -518,24 +519,28 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 	@Override
 	public void dispose() {
 		try {
+			if(Utils.getStatus()){//unlock status
+				//have to dispose the main first
+				MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+			}
 			
 			//kill the process
-			if(DataBaseService.getProc() != null){
-				try {
-					Process process = Runtime.getRuntime().exec("taskList");
-					Scanner in = new Scanner(process.getInputStream());
-					while (in.hasNextLine()) {
-					    String temp = in.nextLine();
-					    if (temp.contains("mysqld.exe")) {
-					        temp = temp.replaceAll(" ", "");
-					        String pid = temp.substring(10, temp.indexOf("Console"));
-					        Runtime.getRuntime().exec("tskill " + pid);
-					    }
-					}
-				} catch (IOException e) {
-					System.out.println("kill the database pid failed");
-				}		
-			}
+//			if(DataBaseService.getProc() != null){
+//				try {
+//					Process process = Runtime.getRuntime().exec("taskList");
+//					Scanner in = new Scanner(process.getInputStream());
+//					while (in.hasNextLine()) {
+//					    String temp = in.nextLine();
+//					    if (temp.contains("mysqld.exe")) {
+//					        temp = temp.replaceAll(" ", "");
+//					        String pid = temp.substring(10, temp.indexOf("Console"));
+//					        Runtime.getRuntime().exec("tskill " + pid);
+//					    }
+//					}
+//				} catch (IOException e) {
+//					System.out.println("kill the database pid failed");
+//				}		
+//			}
 			
 			northwestpart.dispose();
 			northeastpart.dispose();			

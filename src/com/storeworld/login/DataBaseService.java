@@ -29,18 +29,18 @@ public class DataBaseService implements Runnable{
 	
 	            if (temp.contains("mysqld.exe")) {
 	                foundProc = true;
-//	                break;
-	                continue;
+	                break;
+//	                continue;
 	            }
-	            if(temp.contains("storeworld.exe")){
-	            	throw new Exception("程序已经在运行");
-	            }
+//	            if(temp.contains("storeworld.exe")){
+//	            	throw new Exception("程序已经在运行");
+//	            }
 	        }
 			//if the proc is there, do not create a new one
 	        if (!foundProc) {
 				File mysqld = new File("../");
 				String path = mysqld.getCanonicalPath();
-				String mysqlexe = path + "/mysql-5.5.37-winx64/bin/";
+				String mysqlexe = path + "/mysql-5.1.73-win32/bin/";
 
 				ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c",
 						"cd " + mysqlexe + " && mysqld.exe --skip-grant-tables");
@@ -57,13 +57,25 @@ public class DataBaseService implements Runnable{
 		} catch (InterruptedException e) {
 			//do something
 		}catch (Exception e){
-			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
-	    	messageBox.setMessage("初始化软件失败，请重新启动"); 	
-	    	if (messageBox.open() == SWT.OK){	    			    	
-	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
-	    		System.exit(0);
-	    		return;
-	    	}
+			Display.getDefault().syncExec(new Runnable() {
+			    public void run() {
+					MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+			    	messageBox.setMessage("初始化软件失败，请重新启动"); 	
+			    	if (messageBox.open() == SWT.OK){	    			    	
+			    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+			    		System.exit(0);
+			    		return;
+			    	}
+			    }
+			    });
+//			
+//			MessageBox messageBox =  new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.OK);						
+//	    	messageBox.setMessage("初始化软件失败，请重新启动"); 	
+//	    	if (messageBox.open() == SWT.OK){	    			    	
+//	    		MainUI.getMainUI_Instance(Display.getDefault()).dispose();
+//	    		System.exit(0);
+//	    		return;
+//	    	}
 		}
 		
 	}

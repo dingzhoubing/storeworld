@@ -1,5 +1,6 @@
 package com.storeworld.utils;
 
+import java.awt.MouseInfo;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -171,6 +172,9 @@ public class ItemComposite extends Composite {
 		this.addListener(SWT.MouseEnter, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
+				 int x = MouseInfo.getPointerInfo().getLocation().x + 3;
+				 int y = MouseInfo.getPointerInfo().getLocation().y + 3;
+				 tip.setLocation(x, y);
 				 self.setBackgroundColor(color1);
 				 tip.setVisible(true);
 			}

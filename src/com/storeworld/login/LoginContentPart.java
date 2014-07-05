@@ -156,7 +156,7 @@ public class LoginContentPart extends ContentPart{
 		if(!first){//test if the first time to login, if not the first time, should already exist an pw
 			if(pwFirst.equals(PasswordHandler.getPassword())){//by default, it should be password
 				counter = 1;
-				lbl_tips.setText("正在登陆系统。。。");
+				lbl_tips.setText("正在登陆系统......");
 				pwFirst = "";
 				LoginMainUI.setInstanceNull();
 				progressBar.setVisible(true);

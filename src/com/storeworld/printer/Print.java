@@ -248,59 +248,63 @@ public class Print implements Printable, Runnable{
 				}
 			}
 
-          prnJob.print();//启动打印工作
-          
-            if(DeliverUtils.getReturnMode()){
-            	Display.getDefault().syncExec(new Runnable() {
-        		    public void run() {
-        	           	DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
-        				//after return, show this
-        				dh.setIndeed(historyIndeed);//this is needed
-        				DeliverUtils.getItemCompositeRecord().setDownRight(historyIndeed);
-        				//change the product table ui side
-        				DeliverList.relatedProductChange(products, true);		
-        				
-                    	DeliverUtils.leaveReturnMode();
-                    	
-        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-    					mbox.setMessage("退货打单成功， 请重试");
-    					mbox.open();
-        		    }
-            	});
-            	
- 
-            	
-            }else{
-            	Display.getDefault().syncExec(new Runnable() {
-        		    public void run() {
-        		    	//update the customer table
-        				CustomerList.relatedCustomerChange(customers);
-        				
-        				if(DeliverUtils.getStatus().equals("NEW")){
-        					DeliverUtils.addToHistory();
-        				}
-        				
-        				//status: NEW, HISTORY, EMPTY, empty mode is necessary?
-        				DeliverUtils.setStatus("EMPTY");
-        				
-        				//step 2: initial the deliver page
-        				//clear table
-        				//and add a new line					
-        				DeliverContentPart.afterPrintFinished();
-        				
-        		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
-        		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
-        		    	if(!dh.getTitleShow().contains("已打单"))
-        		    		ic.setValue(dh.getTitle()+"(已打单)");
-        		    	
-        		    	}
-            	});
-            	
-            }
+
+//          prnJob.
+//            if(DeliverUtils.getReturnMode()){
+//            	Display.getDefault().syncExec(new Runnable() {
+//        		    public void run() {
+//        	           	DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
+//        				//after return, show this
+//        				dh.setIndeed(historyIndeed);//this is needed
+//        				DeliverUtils.getItemCompositeRecord().setDownRight(historyIndeed);
+//        				//change the product table ui side
+//        				DeliverList.relatedProductChange(products, true);		
+//        				
+//                    	DeliverUtils.leaveReturnMode();
+//                    	
+//        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+//    					mbox.setMessage("退货打单发送成功，请等待出单");
+//    					mbox.open();
+//        		    }
+//            	});
+//            	
+// 
+//            	
+//            }else{
+//            	Display.getDefault().syncExec(new Runnable() {
+//        		    public void run() {
+//        		    	//update the customer table
+//        				CustomerList.relatedCustomerChange(customers);
+//        				
+//        				if(DeliverUtils.getStatus().equals("NEW")){
+//        					DeliverUtils.addToHistory();
+//        				}
+//        				
+//        				//status: NEW, HISTORY, EMPTY, empty mode is necessary?
+//        				DeliverUtils.setStatus("EMPTY");
+//        				
+//        				//step 2: initial the deliver page
+//        				//clear table
+//        				//and add a new line					
+//        				DeliverContentPart.afterPrintFinished();
+//        				
+//        		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
+//        		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
+//        		    	if(!dh.getTitleShow().contains("已打单"))
+//        		    		ic.setValue(dh.getTitle()+"(已打单)");
+//        		    	
+//            		    
+//        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
+//        		    	mbox.setMessage("送货单打印请求发送成功，请等待出单");
+//        		    	mbox.open();
+//        		    	}
+//            	});
+//            	
+//            }
 
         }
         
-
+        prnJob.print();//启动打印工作
         
       } catch (PrinterException ex) {
     	//!!

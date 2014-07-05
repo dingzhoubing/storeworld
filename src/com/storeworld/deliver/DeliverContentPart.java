@@ -1375,7 +1375,7 @@ public class DeliverContentPart extends ContentPart{
 					
 					ph.doPrint();
 					
-					
+					DeliverList.doAfterPrint(indeed_u, products, null);
 					} catch (Exception e1) {
 						System.out.println("remove the deliver failed");
 						try {
@@ -1472,12 +1472,14 @@ public class DeliverContentPart extends ContentPart{
 						PrintHandler ph = new PrintHandler(conn, ds, false, indeed_val.getText(), DeliverUtils.getOrderNumber());
 						ph.setCustomersChanged(customers);
 						ph.doPrint();
-												
+						
+						DeliverList.doAfterPrint("", null, customers);
 //						conn.commit();
 						} catch (Exception e1) {
 							System.out.println("update common info failed");
 							try {
-								conn.rollback();
+								if(conn!=null)
+									conn.rollback();
 							} catch (SQLException e2) {
 								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 								mbox.setMessage("数据库异常");
@@ -1489,7 +1491,8 @@ public class DeliverContentPart extends ContentPart{
 							return;
 						}finally{
 							try {
-								conn.close();
+								if(conn!=null)
+									conn.close();
 							} catch (SQLException e1) {
 								MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 								mbox.setMessage("数据库异常");

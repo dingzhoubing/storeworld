@@ -20,7 +20,14 @@ public class PasswordHandler extends BaseAction {
 
 	private static String password="";
 	private static final String MARK = "login:"; 
+	private static boolean pass = false;
 	
+	public static boolean getPassed(){
+		return pass;
+	}
+	public static void setPassed(boolean p){
+		pass = p;
+	}
 	public static String getPassword(){
 		return password;
 	}

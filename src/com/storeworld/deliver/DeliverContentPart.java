@@ -1379,7 +1379,8 @@ public class DeliverContentPart extends ContentPart{
 					} catch (Exception e1) {
 						System.out.println("remove the deliver failed");
 						try {
-							conn.rollback();
+							if(conn!=null)
+								conn.rollback();
 						} catch (SQLException e2) {
 							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 							mbox.setMessage("数据库异常");
@@ -1391,7 +1392,8 @@ public class DeliverContentPart extends ContentPart{
 						return;
 					}finally{
 						try {
-							conn.close();
+							if(conn!=null)
+								conn.close();
 						} catch (SQLException e1) {
 							MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
 							mbox.setMessage("数据库异常");
@@ -1454,6 +1456,7 @@ public class DeliverContentPart extends ContentPart{
 						commonMap.put("telephone", text_phone.getText());
 						ArrayList<Customer> customers = new ArrayList<Customer>();
 						try{
+							conn.setAutoCommit(false);
 						if(DeliverUtils.getStatus().equals("NEW")){
 							deliverinfo.printSaveCommonInfo(conn, commonMap, customers);
 						}else{//update

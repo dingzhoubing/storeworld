@@ -185,7 +185,7 @@ public class Print implements Printable, Runnable{
 //        paperH=prnJob.getPageFormat(null).getPaper().getHeight();
 //        System.out.println("paperW:"+paperW+";paperH:"+paperH);         
          
-        prnJob.print();//启动打印工作
+//        prnJob.print();//启动打印工作
         
 //        //here we update the database
         if(!ordernum.equals("") && this.part == this.total_part){
@@ -212,7 +212,8 @@ public class Print implements Printable, Runnable{
 			} catch (Exception e) {
 				System.out.println("update is_print failed");
 				try {
-					conn.rollback();
+					if(conn!=null)
+						conn.rollback();
 				} catch (SQLException e1) {
 					Display.getDefault().syncExec(new Runnable() {
 					    public void run() {
@@ -223,9 +224,19 @@ public class Print implements Printable, Runnable{
 					    }
 					    });
 				}
+				Display.getDefault().syncExec(new Runnable() {
+				    public void run() {
+				    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+						mbox.setMessage("数据库异常");
+						mbox.open();	
+
+				    }
+				    });
+				return;
 			}finally{
 				try {
-					conn.close();
+					if(conn!=null)
+						conn.close();
 				} catch (SQLException e) {
 					Display.getDefault().syncExec(new Runnable() {
 					    public void run() {
@@ -237,7 +248,8 @@ public class Print implements Printable, Runnable{
 				}
 			}
 
-        	
+          prnJob.print();//启动打印工作
+          
             if(DeliverUtils.getReturnMode()){
             	Display.getDefault().syncExec(new Runnable() {
         		    public void run() {

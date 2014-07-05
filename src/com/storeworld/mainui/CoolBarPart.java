@@ -13,6 +13,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.storeworld.analyze.AnalyzeContentPart;
 import com.storeworld.customer.CustomerContentPart;
+import com.storeworld.database.PasswordHandler;
 import com.storeworld.deliver.DeliverContentPart;
 import com.storeworld.login.Login;
 import com.storeworld.product.ProductContentPart;
@@ -180,7 +181,8 @@ public class CoolBarPart extends NorthPart{
 		button_lock.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Utils.changeStatus();//be true, make it unlock				
+				Utils.changeStatus();//be true, make it unlock	
+				PasswordHandler.setPassed(false);
 				MainUI shell = MainUI.getMainUI_Instance(Display.getDefault());
 				shell.setVisible(false);
 				Login.login();

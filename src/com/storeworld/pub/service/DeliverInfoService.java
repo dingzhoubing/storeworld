@@ -45,6 +45,11 @@ public class DeliverInfoService extends BaseAction{
 		}else{
 			deliverInfoDto.setCustomer_name("");
 		}
+		if(retMap.get("is_print")!=null){
+			deliverInfoDto.setIs_print(String.valueOf(retMap.get("is_print")));
+		}else{
+			deliverInfoDto.setIs_print("");
+		}
 		if(retMap.get("deliver_addr")!=null){
 			deliverInfoDto.setDeliver_addr(String.valueOf(retMap.get("deliver_addr")));
 		}else{
@@ -339,8 +344,10 @@ public class DeliverInfoService extends BaseAction{
 	public boolean updateIsPrintByOrderNumber(Connection conn, String ordernum) throws Exception{
 		boolean ret = false;
 		//update this table, so we only need to update one row
-		String sql_update="update deliver_common_info di set di.is_print=? where di.order_num=?";
-		Object[] params_update={"y",ordernum};
+		String sql_update="update deliver_common_info di set di.is_print=? where di.id=?";
+		String is_print = "x";
+//		char is_print = 'y';
+		Object[] params_update={is_print,ordernum};
 		List<Object> params_do=objectArray2ObjectList(params_update);
 		
 		executeUpdate(conn, sql_update,params_do);

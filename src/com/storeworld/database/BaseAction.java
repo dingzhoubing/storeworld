@@ -204,6 +204,7 @@ public class BaseAction {
 				preparedStatement.executeUpdate();
 			}
         }catch(SQLException e){
+        	e.printStackTrace();
         	throw new Exception(DataBaseCommonInfo.EXE_UPDATE_FAILED);
         }finally{
         	this.closeAll(null, preparedStatement, null);

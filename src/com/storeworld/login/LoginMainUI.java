@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import com.storeworld.database.PasswordHandler;
 import com.storeworld.mainui.ContentPart;
 import com.storeworld.mainui.EastPart;
 import com.storeworld.mainui.MainUI;
@@ -519,7 +520,7 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 	@Override
 	public void dispose() {
 		try {
-			if(Utils.getStatus()){//unlock status
+			if(Utils.getStatus() && !PasswordHandler.getPassed()){//unlock status
 				//have to dispose the main first
 				MainUI.getMainUI_Instance(Display.getDefault()).dispose();
 			}

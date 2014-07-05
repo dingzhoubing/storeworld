@@ -43,7 +43,7 @@ public class PrintHandler {
 		this.customers = customers;
 	}
 	
-	public void doPrint(){
+	public void doPrint() throws Exception{
 		double t = 0.00;//total
 		int size = dataset.size();
 		int part = (int) Math.ceil(size/7);
@@ -74,6 +74,7 @@ public class PrintHandler {
 				p.setCustomersChanged(customers);
 				Thread td = new Thread(p);
 				td.start();
+				td.join();
 				temp.clear();
 			}
 		}
@@ -84,7 +85,8 @@ public class PrintHandler {
 			p.setProductsChanged(products);
 			p.setCustomersChanged(customers);
 			Thread td = new Thread(p);
-			td.start();			
+			td.start();	
+			td.join();
 		}
 
 	}

@@ -67,6 +67,7 @@ public class LoginContentPart extends ContentPart{
 	private boolean whileChanging = false;
 	
 	private boolean wrongcase = false;
+
 	public LoginContentPart(Composite parent, int style, Image image, Color color) {
 		super(parent, style, image);
 		current = parent;
@@ -95,14 +96,14 @@ public class LoginContentPart extends ContentPart{
 		this.whileChanging = swc;
 	}
 	
-	class PasswordSelectionAdapter extends SelectionAdapter{
-		
+	class PasswordSelectionAdapter extends SelectionAdapter{		
 		String val = "";
 		PasswordSelectionAdapter(String val){
 			this.val = val;
 		}
 		@Override
 		public void widgetSelected(SelectionEvent e) {
+			PasswordHandler.setPassed(false);//every time we click pass, we initial
 			if(!wrongcase)
 				setValue(this.val);
 			else{
@@ -155,15 +156,18 @@ public class LoginContentPart extends ContentPart{
 		//not the first time
 		if(!first){//test if the first time to login, if not the first time, should already exist an pw
 			if(pwFirst.equals(PasswordHandler.getPassword())){//by default, it should be password
+				
 				counter = 1;
 				lbl_tips.setText("正在登陆系统......");
 				pwFirst = "";
 				LoginMainUI.setInstanceNull();
+				
 				progressBar.setVisible(true);
 				
 				EntryPoint.entry(progressBar, current.getParent());									
 //				shell.open();				
 //				current.getParent().dispose();
+//				PasswordHandler.setPassed(true);//set passed
 			}else{
 				lbl_tips.setText("您输入的密码不正确，请重试");
 				text1.setText("");
@@ -220,7 +224,7 @@ public class LoginContentPart extends ContentPart{
 					pwFirst = "";
 					pwSecond = "";
 				}else{
-					
+
 					counter = 1;
 					lbl_tips.setText("正在登陆系统。。。");
 					setPasswordStored(pwFirst);
@@ -235,7 +239,8 @@ public class LoginContentPart extends ContentPart{
 					if(!Utils.getStatus() && getWhileChanging()){//in login ui, we reset pw
 						progressBar.setVisible(true);					
 						EntryPoint.entry(progressBar, current.getParent());
-					}else{//in unlock ui, we reset ow
+					}else{//in unlock ui, we reset pw
+						PasswordHandler.setPassed(true);//set passed
 						current.getParent().dispose();		
 						Utils.changeStatus();//be false again
 						//show the progress bar here to identify the progress 
@@ -258,6 +263,7 @@ public class LoginContentPart extends ContentPart{
 			counter = 1;
 			pwFirst = "";
 			LoginMainUI.setInstanceNull();
+			PasswordHandler.setPassed(true);//set passed
 			current.getParent().dispose();		
 			Utils.changeStatus();//be false again
 			//show the progress bar here to identify the progress 
@@ -268,6 +274,7 @@ public class LoginContentPart extends ContentPart{
 			shell.setActive();
 //			System.out.println("shell is null: " + (shell==null));
 			shell.setVisible(true);
+			
 		}else{
 			lbl_tips.setText("您输入的密码不正确，请重试");
 			text1.setText("");

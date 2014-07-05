@@ -98,7 +98,7 @@ public class EntryPoint {
 			if(parent!=null)
 				parent.dispose();
 			shell.open();
-			
+			shell.pack();
 			shell.layout();
 			while (!shell.isDisposed()) {
 				if (!display.readAndDispatch())

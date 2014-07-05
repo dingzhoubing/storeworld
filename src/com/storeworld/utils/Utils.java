@@ -36,6 +36,9 @@ import com.storeworld.utils.Constants.NORTH_TYPE;
  */
 public class Utils {
 	
+	//print success
+	private static boolean print_success = true;
+	
 	//soft key board
 	private static String inputRecord = "";
 	private static boolean inputNeedChange = false;
@@ -474,4 +477,10 @@ public class Utils {
         return convert;
     }
 	
+    public static boolean getPrintSuccess(){
+    	return print_success;
+    }
+    public static void setPrintSuccess(boolean ps){
+    	print_success = ps;
+    }
 }

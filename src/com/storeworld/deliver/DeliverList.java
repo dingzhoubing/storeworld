@@ -140,6 +140,12 @@ public class DeliverList {
     		    	
         }
 	}
+	
+	public static void showPrintFailed(){
+		MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
+		mbox.setMessage("打印请求发送失败，请检查打印机连接");
+		mbox.open();
+	}
 	/**
 	 * add a deliver
 	 * @param deliver

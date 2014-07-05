@@ -8,6 +8,7 @@ import com.storeworld.common.DataInTable;
 import com.storeworld.customer.Customer;
 import com.storeworld.deliver.Deliver;
 import com.storeworld.product.Product;
+import com.storeworld.utils.Utils;
 
 public class PrintHandler {
 	
@@ -44,6 +45,7 @@ public class PrintHandler {
 	}
 	
 	public void doPrint() throws Exception{
+		Utils.setPrintSuccess(true);
 		double t = 0.00;//total
 		int size = dataset.size();
 		int part = (int) Math.ceil(size/7);

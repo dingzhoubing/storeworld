@@ -1375,7 +1375,12 @@ public class DeliverContentPart extends ContentPart{
 					
 					ph.doPrint();
 					
-					DeliverList.doAfterPrint(indeed_u, products, null);
+					if(Utils.getPrintSuccess())
+						DeliverList.doAfterPrint(indeed_u, products, null);
+					else{
+						DeliverList.showPrintFailed();
+					}
+					
 					} catch (Exception e1) {
 						System.out.println("remove the deliver failed");
 						try {
@@ -1473,7 +1478,12 @@ public class DeliverContentPart extends ContentPart{
 						ph.setCustomersChanged(customers);
 						ph.doPrint();
 						
-						DeliverList.doAfterPrint("", null, customers);
+						//only when succeed send the print request, do the change
+						if(Utils.getPrintSuccess())
+							DeliverList.doAfterPrint("", null, customers);
+						else{
+							DeliverList.showPrintFailed();
+						}
 //						conn.commit();
 						} catch (Exception e1) {
 							System.out.println("update common info failed");

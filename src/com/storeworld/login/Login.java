@@ -34,7 +34,7 @@ public class Login {
 
 			Utils.center(shell);
 			shell.open();
-			
+			shell.pack();
 			shell.layout();
 			while (!shell.isDisposed()) {
 				if (!display.readAndDispatch())

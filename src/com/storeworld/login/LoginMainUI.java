@@ -520,6 +520,7 @@ public class LoginMainUI extends Shell implements ControlListener, PaintListener
 	@Override
 	public void dispose() {
 		try {
+			//unlock page, and passed = false, which means not input right password
 			if(Utils.getStatus() && !PasswordHandler.getPassed()){//unlock status
 				//have to dispose the main first
 				MainUI.getMainUI_Instance(Display.getDefault()).dispose();

@@ -30,6 +30,7 @@ import com.storeworld.mainui.MainUI;
 import com.storeworld.product.Product;
 import com.storeworld.pub.service.DeliverInfoService;
 import com.storeworld.utils.ItemComposite;
+import com.storeworld.utils.Utils;
  
 public class Print implements Printable, Runnable{
    private int pageSize;//打印的总页数
@@ -167,7 +168,7 @@ public class Print implements Printable, Runnable{
     
    }
    //连接打印机，弹出打印对话框
-   public void starPrint() {
+   public void starPrint() throws Exception {
       try {
   		
         PrinterJob prnJob = PrinterJob.getPrinterJob();
@@ -189,140 +190,41 @@ public class Print implements Printable, Runnable{
         
 //        //here we update the database
         if(!ordernum.equals("") && this.part == this.total_part){
-//        	Connection conn=null;
-//			try {
-//				conn = baseAction.getConnection();
-//			} catch (Exception e1) {
-//				Display.getDefault().syncExec(new Runnable() {
-//				    public void run() {
-//				    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
-//						mbox.setMessage("更新送货表为已打印失败");
-//						mbox.open();	
-//
-//				    }
-//				    });
-//				return;
-//			}
-//        	
+
         	DeliverInfoService deliverInfo = new DeliverInfoService();
         	try {
 //        		conn.setAutoCommit(false);
 				deliverInfo.updateIsPrintByOrderNumber(conn, ordernum);
 				conn.commit();
 			} catch (Exception e) {
+				Utils.setPrintSuccess(false);
 				System.out.println("update is_print failed");
-				try {
-					if(conn!=null)
-						conn.rollback();
-				} catch (SQLException e1) {
-					Display.getDefault().syncExec(new Runnable() {
-					    public void run() {
-					    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
-							mbox.setMessage("数据库异常");
-							mbox.open();	
-
-					    }
-					    });
-				}
-				Display.getDefault().syncExec(new Runnable() {
-				    public void run() {
-				    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
-						mbox.setMessage("数据库异常");
-						mbox.open();	
-
-				    }
-				    });
-				return;
+				if(conn!=null)
+					conn.rollback();
+				throw e;
 			}finally{
-				try {
-					if(conn!=null)
-						conn.close();
-				} catch (SQLException e) {
-					Display.getDefault().syncExec(new Runnable() {
-					    public void run() {
-					    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
-							mbox.setMessage("数据库异常");
-							mbox.open();	
-					    }
-					    });
-				}
+				if(conn!=null)
+					conn.close();
 			}
-
-
-//          prnJob.
-//            if(DeliverUtils.getReturnMode()){
-//            	Display.getDefault().syncExec(new Runnable() {
-//        		    public void run() {
-//        	           	DeliverHistory dh = (DeliverHistory)DeliverUtils.getItemCompositeRecord().getHistory();
-//        				//after return, show this
-//        				dh.setIndeed(historyIndeed);//this is needed
-//        				DeliverUtils.getItemCompositeRecord().setDownRight(historyIndeed);
-//        				//change the product table ui side
-//        				DeliverList.relatedProductChange(products, true);		
-//        				
-//                    	DeliverUtils.leaveReturnMode();
-//                    	
-//        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-//    					mbox.setMessage("退货打单发送成功，请等待出单");
-//    					mbox.open();
-//        		    }
-//            	});
-//            	
-// 
-//            	
-//            }else{
-//            	Display.getDefault().syncExec(new Runnable() {
-//        		    public void run() {
-//        		    	//update the customer table
-//        				CustomerList.relatedCustomerChange(customers);
-//        				
-//        				if(DeliverUtils.getStatus().equals("NEW")){
-//        					DeliverUtils.addToHistory();
-//        				}
-//        				
-//        				//status: NEW, HISTORY, EMPTY, empty mode is necessary?
-//        				DeliverUtils.setStatus("EMPTY");
-//        				
-//        				//step 2: initial the deliver page
-//        				//clear table
-//        				//and add a new line					
-//        				DeliverContentPart.afterPrintFinished();
-//        				
-//        		    	ItemComposite ic = DeliverUtils.getItemCompositeRecord();
-//        		    	DeliverHistory dh = (DeliverHistory)ic.getHistory();
-//        		    	if(!dh.getTitleShow().contains("已打单"))
-//        		    		ic.setValue(dh.getTitle()+"(已打单)");
-//        		    	
-//            		    
-//        		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()));
-//        		    	mbox.setMessage("送货单打印请求发送成功，请等待出单");
-//        		    	mbox.open();
-//        		    	}
-//            	});
-//            	
-//            }
-
         }
         
         prnJob.print();//启动打印工作
         
       } catch (PrinterException ex) {
-    	//!!
-    	//在非SWT线程的线程里想要修改SWT界面,need to do this
-		Display.getDefault().syncExec(new Runnable() {
-		    public void run() {
-		    	MessageBox mbox = new MessageBox(MainUI.getMainUI_Instance(Display.getDefault()), SWT.ERROR);
-				mbox.setMessage("打印机配置错误，请检查打印机配置或联系客服");
-				mbox.open();	
-		    }
-		    }); 
+    	  Utils.setPrintSuccess(false);
+    	  throw ex;
 		
       }
    }
    
    @Override
    public void run() {
-	   starPrint();	
+	   try {
+		starPrint();
+	} catch (Exception e) {
+		System.out.println("print failed");
+		return;
+	}	
    }
 
 ////入口方法

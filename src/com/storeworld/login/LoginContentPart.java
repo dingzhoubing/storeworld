@@ -235,11 +235,12 @@ public class LoginContentPart extends ContentPart{
 					LoginMainUI.setInstanceNull();
 //					current.getParent().dispose();			
 //					EntryPoint.entry(progressBar);
-					
-					if(!Utils.getStatus() && getWhileChanging()){//in login ui, we reset pw
+					//login page and changing
+					//login page and first in
+					if((!Utils.getStatus() && getWhileChanging()) || (first && !Utils.getStatus() )){//in login ui, we reset pw
 						progressBar.setVisible(true);					
 						EntryPoint.entry(progressBar, current.getParent());
-					}else{//in unlock ui, we reset pw
+					}else{//unlock page and changing
 						PasswordHandler.setPassed(true);//set passed
 						current.getParent().dispose();		
 						Utils.changeStatus();//be false again
